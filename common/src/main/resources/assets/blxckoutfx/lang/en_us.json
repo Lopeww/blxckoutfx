@@ -1,0 +1,24 @@
+{
+  "key.blxckoutfx.cycle_preset": "Change Theme",
+  "preset.blxckoutfx.off": "Off",
+  "preset.blxckoutfx.soft": "Soft",
+  "preset.blxckoutfx.balanced": "Balanced",
+  "preset.blxckoutfx.dark": "Dark",
+  "preset.blxckoutfx.blxckout": "Blxckout",
+
+  "ui.blxckoutfx.config.title": "BlxckoutFX Config",
+  "ui.blxckoutfx.config.save": "Save",
+  "ui.blxckoutfx.config.cancel": "Cancel",
+  "ui.blxckoutfx.config.x_minus": "X -",
+  "ui.blxckoutfx.config.x_plus": "X +",
+  "ui.blxckoutfx.config.y_minus": "Y -",
+  "ui.blxckoutfx.config.y_plus": "Y +",
+  "ui.blxckoutfx.config.enabled": "Enabled",
+  "ui.blxckoutfx.config.disabled": "Disabled",
+  "ui.blxckoutfx.config.inventory_button_state": "Inventory Button: %s",
+  "ui.blxckoutfx.config.x_value": "X: %s",
+  "ui.blxckoutfx.config.y_value": "Y: %s",
+
+  "tooltip.blxckoutfx.cycle_button": "Click to change theme\nYou can also use the X key",
+  "tooltip.blxckoutfx.cycle_button.blxckout": "Click to change theme\nYou can also use the X key.\n\u00A77\u00A7oThis theme is still being tuned"
+}

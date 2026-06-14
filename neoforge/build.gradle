@@ -1,0 +1,47 @@
+plugins {
+    id 'multiloader-loader'
+    id 'net.neoforged.moddev'
+}
+
+neoForge {
+    version = neoforge_version
+    def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        accessTransformers.from(at.absolutePath)
+    }
+    runs {
+        configureEach {
+            systemProperty('neoforge.enabledGameTestNamespaces', mod_id)
+            ideName = "NeoForge ${it.name.capitalize()} (${project.path})"
+        }
+        client {
+            client()
+        }
+        clientData {
+            clientData()
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+        server {
+            server()
+        }
+    }
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+tasks.matching { it.name ==~ /prepare.*Run/ }.configureEach {
+    doLast {
+        ['clientRunVmArgs.txt', 'clientDataRunVmArgs.txt', 'serverRunVmArgs.txt'].each { name ->
+            def vmArgsFile = file("$buildDir/moddev/$name")
+            if (vmArgsFile.exists()) {
+                def filtered = vmArgsFile.readLines('UTF-8').findAll { it.trim() != '--sun-misc-unsafe-memory-access=allow' }
+                vmArgsFile.text = filtered.join(System.lineSeparator()) + System.lineSeparator()
+            }
+        }
+    }
+}
