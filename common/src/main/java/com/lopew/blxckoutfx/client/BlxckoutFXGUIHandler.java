@@ -4,10 +4,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 
 public final class BlxckoutFXGUIHandler {
+    private static final int INVENTORY_BUTTON_WIDTH = 80;
+    private static final int INVENTORY_BUTTON_HEIGHT = 20;
+
     private static BlxckoutFXClientConfig config = BlxckoutFXClientConfig.load();
 
     private static void reloadConfig() {
@@ -23,13 +27,11 @@ public final class BlxckoutFXGUIHandler {
             return;
         }
 
-        int x = config.getInventoryButtonX() == -1 ? 10 : config.getInventoryButtonX();
-        int y = config.getInventoryButtonY() == -1
-                ? Minecraft.getInstance().getWindow().getGuiScaledHeight() - 30
-                : config.getInventoryButtonY();
+        int x = config.getInventoryButtonScreenX(screen.width, INVENTORY_BUTTON_WIDTH);
+        int y = config.getInventoryButtonScreenY(screen.height, INVENTORY_BUTTON_HEIGHT);
 
         InventoryButton button = new InventoryButton(
-                x, y, 80, 20,
+                x, y, INVENTORY_BUTTON_WIDTH, INVENTORY_BUTTON_HEIGHT,
                 createCycleButtonLabel(),
                 btn -> {
                     BlxckoutFXShaders.cyclePreset();
@@ -42,15 +44,21 @@ public final class BlxckoutFXGUIHandler {
                                 createPresetChangedMessage()
                         );
                     }
-                }
+                },
+                movedButton -> config.setInventoryButtonScreenPosition(
+                        movedButton.getX(),
+                        movedButton.getY(),
+                        screen.width,
+                        screen.height,
+                        movedButton.getWidth(),
+                        movedButton.getHeight()
+                ),
+                screen.width,
+                screen.height
         );
         updateCycleButtonPresentation(button);
 
         button.clampToScreen(screen.width, screen.height);
-
-        if (button.getX() != x || button.getY() != y) {
-            config.setInventoryButtonPosition(button.getX(), button.getY());
-        }
 
         buttonSink.add(button);
     }
@@ -62,6 +70,10 @@ public final class BlxckoutFXGUIHandler {
     }
 
     private static boolean isSupportedScreen(Screen screen) {
+        if (screen instanceof TitleScreen) {
+            return true;
+        }
+
         if (screen instanceof AbstractContainerScreen<?>) {
             return true;
         }

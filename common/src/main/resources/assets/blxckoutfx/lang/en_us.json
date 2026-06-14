@@ -1,5 +1,8 @@
 {
   "key.blxckoutfx.cycle_preset": "Change Theme",
+  "key.blxckoutfx.open_config": "Open Config",
+  "key.category.blxckoutfx.blxckoutfx": "BlxckoutFX",
+  "key.categories.blxckoutfx": "BlxckoutFX",
   "preset.blxckoutfx.off": "Off",
   "preset.blxckoutfx.soft": "Soft",
   "preset.blxckoutfx.balanced": "Balanced",
@@ -16,8 +19,12 @@
   "ui.blxckoutfx.config.enabled": "Enabled",
   "ui.blxckoutfx.config.disabled": "Disabled",
   "ui.blxckoutfx.config.inventory_button_state": "Inventory Button: %s",
+  "ui.blxckoutfx.config.move_button": "Move Inventory Button",
+  "ui.blxckoutfx.config.move_done": "Done Moving",
+  "ui.blxckoutfx.config.move_help": "WASD/Arrows: Move  Enter: Done  Shift: Faster",
   "ui.blxckoutfx.config.x_value": "X: %s",
   "ui.blxckoutfx.config.y_value": "Y: %s",
+  "ui.blxckoutfx.config.bottom_value": "Bottom: %s",
 
   "tooltip.blxckoutfx.cycle_button": "Click to change theme\nYou can also use the X key",
   "tooltip.blxckoutfx.cycle_button.blxckout": "Click to change theme\nYou can also use the X key.\n\u00A77\u00A7oThis theme is still being tuned"

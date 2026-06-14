@@ -7,6 +7,7 @@ import com.lopew.blxckoutfx.client.BlxckoutFXGUIHandler;
 import com.lopew.blxckoutfx.client.BlxckoutFXShaders;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
 
@@ -21,7 +22,8 @@ public final class BlxckoutFXFabric implements ClientModInitializer {
     }
 
     private static void registerClientEvents() {
-        BlackoutFXKeybinds.getCyclePresetKey();
+        KeyMappingHelper.registerKeyMapping(BlackoutFXKeybinds.getCyclePresetKey());
+        KeyMappingHelper.registerKeyMapping(BlackoutFXKeybinds.getOpenConfigKey());
         ClientTickEvents.END_CLIENT_TICK.register(BlackoutFXKeybinds::handleClientTick);
 
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) ->
