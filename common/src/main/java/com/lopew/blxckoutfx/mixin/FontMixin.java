@@ -1,8 +1,10 @@
 package com.lopew.blxckoutfx.mixin;
 
 import com.lopew.blxckoutfx.client.BlxckoutFXShaders;
+import com.lopew.blxckoutfx.client.BlxckoutFXRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.FastColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,14 +37,14 @@ public class FontMixin {
             return color;
         }
 
-        boolean balancedActive = BlxckoutFXShaders.isBalancedPresetActive();
-        boolean darkActive = BlxckoutFXShaders.isDarkPresetActive();
-
-        if (!BlxckoutFXShaders.isEnabled() || (!balancedActive && !darkActive)) {
+        if (!BlxckoutFXShaders.isEnabled() || BlxckoutFXShaders.isBlxckoutPresetActive()) {
             return color;
         }
 
-        if (Minecraft.getInstance().screen == null) {
+        Minecraft minecraft = Minecraft.getInstance();
+        Screen screen = minecraft.screen;
+
+        if (screen == null || (minecraft.level == null && !BlxckoutFXRenderContext.isRenderingButton())) {
             return color;
         }
 
@@ -55,16 +57,16 @@ public class FontMixin {
         int min = Math.min(red, Math.min(green, blue));
         int saturation = max - min;
 
-        int maxThreshold = darkActive ? 165 : 120;
-        int saturationThreshold = darkActive ? 44 : 28;
+        int maxThreshold = 120;
+        int saturationThreshold = 28;
 
         // Lift only dark grayscale-ish text so layered panels keep readable labels.
         if (max > maxThreshold || saturation > saturationThreshold) {
             return color;
         }
 
-        int liftFloor = darkActive ? 210 : 170;
-        int liftBonus = darkActive ? 120 : 90;
+        int liftFloor = 170;
+        int liftBonus = 90;
         int lifted = Math.min(255, Math.max(liftFloor, max + liftBonus));
         return FastColor.ARGB32.color(alpha, lifted, lifted, lifted);
     }

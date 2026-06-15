@@ -1,5 +1,4 @@
 {
-  "key.blxckoutfx.cycle_preset": "Change Theme",
   "key.blxckoutfx.open_config": "Open Config",
   "key.categories.blxckoutfx": "BlxckoutFX",
 
@@ -26,6 +25,6 @@
   "ui.blxckoutfx.config.y_value": "Y: %s",
   "ui.blxckoutfx.config.bottom_value": "Bottom: %s",
 
-  "tooltip.blxckoutfx.cycle_button": "Click to change theme\nYou can also use the X key",
-  "tooltip.blxckoutfx.cycle_button.blxckout": "Click to change theme\nYou can also use the X key.\n\u00A77\u00A7oThis theme is still being tuned"
+  "tooltip.blxckoutfx.cycle_button.title": "Left-click to change theme\nHold and drag to move me",
+  "tooltip.blxckoutfx.cycle_button.inventory": "Left-click to change theme\nHold and drag to move this button"
 }

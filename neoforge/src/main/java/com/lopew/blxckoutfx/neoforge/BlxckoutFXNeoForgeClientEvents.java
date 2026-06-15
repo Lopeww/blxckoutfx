@@ -23,6 +23,33 @@ public final class BlxckoutFXNeoForgeClientEvents {
     }
 
     @SubscribeEvent
+    public static void onMousePressed(ScreenEvent.MouseButtonPressed.Pre event) {
+        boolean handled = BlxckoutFXGUIHandler.onMouseClicked(event.getScreen(), event.getMouseX(), event.getMouseY(), event.getButton());
+
+        if (handled) {
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onMouseDragged(ScreenEvent.MouseDragged.Pre event) {
+        boolean handled = BlxckoutFXGUIHandler.onMouseDragged(event.getScreen(), event.getMouseX(), event.getMouseY(), event.getMouseButton(), event.getDragX(), event.getDragY());
+
+        if (handled) {
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onMouseReleased(ScreenEvent.MouseButtonReleased.Pre event) {
+        boolean handled = BlxckoutFXGUIHandler.onMouseReleased(event.getScreen(), event.getMouseX(), event.getMouseY(), event.getButton());
+
+        if (handled) {
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
     public static void onScreenClose(ScreenEvent.Closing event) {
         BlxckoutFXGUIHandler.onScreenClose(event.getScreen());
     }

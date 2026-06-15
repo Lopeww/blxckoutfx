@@ -23,7 +23,6 @@ public final class BlxckoutFXFabric implements ClientModInitializer {
     }
 
     private static void registerClientEvents() {
-        KeyBindingHelper.registerKeyBinding(BlackoutFXKeybinds.getCyclePresetKey());
         KeyBindingHelper.registerKeyBinding(BlackoutFXKeybinds.getOpenConfigKey());
         ClientTickEvents.END_CLIENT_TICK.register(BlackoutFXKeybinds::handleClientTick);
 

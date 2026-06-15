@@ -5,7 +5,9 @@
   "refmap": "blxckoutfx.refmap.json",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "AbstractButtonMixin",
     "GameRendererMixin",
+    "GuiGraphicsMixin",
     "FontMixin"
   ],
   "injectors": {

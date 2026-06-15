@@ -16,8 +16,6 @@ public final class BlxckoutFXShaders {
     private static ShaderInstance positionTexColorShader;
     private static ShaderInstance positionColorShader;
     private static final String BLXCKOUT_PRESET_KEY = "preset.blxckoutfx.blxckout";
-    private static final String BALANCED_PRESET_KEY = "preset.blxckoutfx.balanced";
-    private static final String DARK_PRESET_KEY = "preset.blxckoutfx.dark";
     private static final float PERCEPTION_R = 0.299F;
     private static final float PERCEPTION_G = 0.587F;
     private static final float PERCEPTION_B = 0.114F;
@@ -77,24 +75,12 @@ public final class BlxckoutFXShaders {
         BlxckoutFXClientConfig.load().setPresetIndex(presetIndex);
     }
 
-    public static String getCurrentPresetName() {
-        return getCurrentPresetComponent().getString();
-    }
-
     public static Component getCurrentPresetComponent() {
         return Component.translatable(PRESETS[presetIndex].translationKey());
     }
 
     public static boolean isBlxckoutPresetActive() {
         return BLXCKOUT_PRESET_KEY.equals(PRESETS[presetIndex].translationKey());
-    }
-
-    public static boolean isBalancedPresetActive() {
-        return BALANCED_PRESET_KEY.equals(PRESETS[presetIndex].translationKey());
-    }
-
-    public static boolean isDarkPresetActive() {
-        return DARK_PRESET_KEY.equals(PRESETS[presetIndex].translationKey());
     }
 
     public static boolean isEnabled() {

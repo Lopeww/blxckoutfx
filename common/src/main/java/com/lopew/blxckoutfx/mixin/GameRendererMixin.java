@@ -1,7 +1,9 @@
 package com.lopew.blxckoutfx.mixin;
 
 import com.lopew.blxckoutfx.client.BlxckoutFXShaders;
+import com.lopew.blxckoutfx.client.BlxckoutFXRenderContext;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,6 +44,12 @@ public class GameRendererMixin {
     }
 
     private static boolean shouldApply() {
-        return Minecraft.getInstance().screen != null && BlxckoutFXShaders.isEnabled();
+        Minecraft minecraft = Minecraft.getInstance();
+        Screen screen = minecraft.screen;
+
+        return screen != null
+                && BlxckoutFXShaders.isEnabled()
+                && !BlxckoutFXRenderContext.isTextureDarkeningSuppressed()
+                && (minecraft.level != null || BlxckoutFXRenderContext.isRenderingButton());
     }
 }
