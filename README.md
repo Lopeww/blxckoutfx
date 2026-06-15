@@ -51,8 +51,8 @@ BlxckoutFX is intentionally focused: it changes GUI rendering, not the world its
 
 | Minecraft Version | Loader              | Mod Version | Status        |
 |------------------|---------------------|-------------|---------------|
-| 26.1.2           | NeoForge + Fabric   | 1.0.0       | Main Release  |
-| 1.21.1           | NeoForge + Fabric   | 1.0.0       | Legacy Branch |
+| 26.1.2           | NeoForge + Fabric   | 1.0.1       | Main Release  |
+| 1.21.1           | NeoForge + Fabric   | 1.0.1       | Legacy Branch |
 
 > v1.0.0 is the first main release of BlxckoutFX.
 
