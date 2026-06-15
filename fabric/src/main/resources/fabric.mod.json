@@ -4,6 +4,7 @@
     "version": "${version}",
     "name": "${mod_name}",
     "description": "${description}",
+    "icon": "${mod_icon}",
     "authors": [
         "${mod_author}"
     ],
