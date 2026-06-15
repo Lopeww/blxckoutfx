@@ -1,6 +1,6 @@
-<p align="center">
-  <img src="./blxckoutfx.png" width="128" height="128" alt="BlxckoutFX Logo" style="border-radius: 14px;">
-</p>
+<div align="center">
+  <img src="./blxckoutfx.png" width="128" height="128" alt="BlxckoutFX Logo">
+</div>
 
 # BlxckoutFX
 
