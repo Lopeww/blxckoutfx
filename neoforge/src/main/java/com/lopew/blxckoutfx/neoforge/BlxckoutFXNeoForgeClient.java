@@ -24,7 +24,6 @@ public final class BlxckoutFXNeoForgeClient {
     }
 
     private static void registerKeys(RegisterKeyMappingsEvent event) {
-        event.register(BlackoutFXKeybinds.getCyclePresetKey());
         event.register(BlackoutFXKeybinds.getOpenConfigKey());
     }
 }

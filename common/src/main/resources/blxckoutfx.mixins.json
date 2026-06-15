@@ -5,6 +5,7 @@
   "refmap": "blxckoutfx.refmap.json",
   "compatibilityLevel": "JAVA_25",
   "client": [
+    "AbstractButtonMixin",
     "FontMixin",
     "ScreenBackgroundMixin",
     "GlRenderPassAccessor",

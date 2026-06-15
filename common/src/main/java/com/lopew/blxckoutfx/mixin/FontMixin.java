@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(targets = "net.minecraft.client.gui.Font$PreparedTextBuilder")
 public class FontMixin {
-    private static final int READABLE_TEXT_BRIGHTNESS = 235;
+    private static final int READABLE_TEXT_BRIGHTNESS = 184;
 
     @ModifyVariable(method = "<init>(FFIZZ)V", at = @At("HEAD"), argsOnly = true, ordinal = 0, require = 0)
     private int blxckoutfx$adjustSimpleConstructorColor(int color) {
@@ -36,8 +36,9 @@ public class FontMixin {
 
         boolean balancedActive = BlxckoutFXShaders.isBalancedPresetActive();
         boolean darkActive = BlxckoutFXShaders.isDarkPresetActive();
+        boolean softActive = BlxckoutFXShaders.isSoftPresetActive();
 
-        if (!BlxckoutFXShaders.isEnabled() || (!balancedActive && !darkActive)) {
+        if (!BlxckoutFXShaders.isEnabled() || (!softActive && !balancedActive && !darkActive)) {
             return color;
         }
 

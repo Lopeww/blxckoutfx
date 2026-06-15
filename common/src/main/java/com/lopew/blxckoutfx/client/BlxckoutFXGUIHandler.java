@@ -1,18 +1,25 @@
 package com.lopew.blxckoutfx.client;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
+
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 public final class BlxckoutFXGUIHandler {
     private static final int INVENTORY_BUTTON_WIDTH = 80;
     private static final int INVENTORY_BUTTON_HEIGHT = 20;
 
     private static BlxckoutFXClientConfig config = BlxckoutFXClientConfig.load();
+    private static final Map<Screen, InventoryButton> inventoryButtons = new IdentityHashMap<>();
+    private static boolean wasLeftMousePressed;
 
     private static void reloadConfig() {
         config = BlxckoutFXClientConfig.load();
@@ -20,6 +27,8 @@ public final class BlxckoutFXGUIHandler {
 
     public static void onScreenInit(Screen screen, ButtonSink buttonSink) {
         reloadConfig();
+        wasLeftMousePressed = false;
+        inventoryButtons.remove(screen);
 
         if (!config.isInventoryButtonEnabled()) return;
 
@@ -56,6 +65,7 @@ public final class BlxckoutFXGUIHandler {
                 screen.width,
                 screen.height
         );
+        inventoryButtons.put(screen, button);
         updateCycleButtonPresentation(button);
 
         button.clampToScreen(screen.width, screen.height);
@@ -65,8 +75,79 @@ public final class BlxckoutFXGUIHandler {
 
     public static void onScreenClose(Screen screen) {
         if (isSupportedScreen(screen)) {
+            inventoryButtons.remove(screen);
+            wasLeftMousePressed = false;
             reloadConfig();
         }
+    }
+
+    public static void handleClientTick(Minecraft minecraft) {
+        Screen screen = minecraft == null ? null : minecraft.screen;
+        InventoryButton inventoryButton = getButton(screen);
+
+        if (minecraft == null || !(screen instanceof AbstractContainerScreen<?>) || inventoryButton == null) {
+            wasLeftMousePressed = false;
+            return;
+        }
+
+        MouseHandler mouseHandler = minecraft.mouseHandler;
+        boolean leftMousePressed = GLFW.glfwGetMouseButton(minecraft.getWindow().handle(), GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
+        double mouseX = mouseHandler.xpos() * minecraft.getWindow().getGuiScaledWidth() / minecraft.getWindow().getScreenWidth();
+        double mouseY = mouseHandler.ypos() * minecraft.getWindow().getGuiScaledHeight() / minecraft.getWindow().getScreenHeight();
+        boolean overButton = inventoryButton.isMouseOver(mouseX, mouseY);
+
+        if (leftMousePressed && !wasLeftMousePressed && overButton) {
+            inventoryButton.beginDrag(mouseX, mouseY);
+        }
+
+        if (leftMousePressed && inventoryButton.isDraggingButton()) {
+            inventoryButton.updateDrag(mouseX, mouseY);
+        }
+
+        if (!leftMousePressed && wasLeftMousePressed && inventoryButton.isDraggingButton()) {
+            inventoryButton.finishDrag(mouseX, mouseY);
+        }
+
+        wasLeftMousePressed = leftMousePressed;
+    }
+
+    public static boolean onMouseClicked(Screen screen, double mouseX, double mouseY, int button) {
+        InventoryButton inventoryButton = getButton(screen);
+
+        if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT || inventoryButton == null || !inventoryButton.isMouseOver(mouseX, mouseY)) {
+            return false;
+        }
+
+        inventoryButton.beginDrag(mouseX, mouseY);
+        wasLeftMousePressed = true;
+        return true;
+    }
+
+    public static boolean onMouseDragged(Screen screen, double mouseX, double mouseY, int button, double dragX, double dragY) {
+        InventoryButton inventoryButton = getButton(screen);
+
+        if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT || inventoryButton == null || !inventoryButton.isDraggingButton()) {
+            return false;
+        }
+
+        inventoryButton.updateDrag(mouseX, mouseY);
+        return true;
+    }
+
+    public static boolean onMouseReleased(Screen screen, double mouseX, double mouseY, int button) {
+        InventoryButton inventoryButton = getButton(screen);
+
+        if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT || inventoryButton == null || !inventoryButton.isDraggingButton()) {
+            return false;
+        }
+
+        inventoryButton.finishDrag(mouseX, mouseY);
+        wasLeftMousePressed = false;
+        return true;
+    }
+
+    private static InventoryButton getButton(Screen screen) {
+        return screen == null ? null : inventoryButtons.get(screen);
     }
 
     private static boolean isSupportedScreen(Screen screen) {

@@ -4,7 +4,7 @@
 
 # BlxckoutFX
 
-A lightweight Minecraft mod that applies a consistent dark theme across in-game interfaces, menus, and configuration screens using shader-based rendering.
+A lightweight Minecraft mod that applies a consistent dark theme to buttons and in-game GUI surfaces using shader-based rendering.
 
 *Let darkness fall everywhere for your eyes.*
 
@@ -12,52 +12,60 @@ A lightweight Minecraft mod that applies a consistent dark theme across in-game 
 
 ## 📖 About
 
-This is my very first Minecraft mod. I initially created it out of personal necessity because my eyes are not well-suited for bright, white themes. After developing it for myself, I decided to share it with other players who might experience the same issue. Please note that I am quite new to this field, and Java is not my primary programming language.
+This is my very first Minecraft mod. I originally created it because bright and white Minecraft interfaces were uncomfortable for my eyes. After building it for myself, I decided to share it with other players who might want the same kind of darker GUI experience.
+
+BlxckoutFX is intentionally focused: it changes GUI rendering, not the world itself. Menu backgrounds, the Minecraft logo, and mod images are kept intact, while buttons and in-game GUI panels receive the darkening effect.
 
 ---
 
 ## ✨ Features
 
 ### ⚙️ Core Principles
-- **Shader-Based:** It works entirely using shaders.
-- **GUI Focused:** It focuses solely on game interfaces (GUIs).
-- **Lightweight:** It does not do anything extra or unnecessary, keeping it clean and fast.
+
+- **Shader-Based:** The effect is handled through shader rendering instead of replacing vanilla textures.
+- **GUI Focused:** The mod targets interface elements only.
+- **Lightweight:** It avoids extra systems and keeps the feature set focused.
+- **Menu-Safe:** Main menu backgrounds, logos, and mod list images are not darkened.
 
 ### 🎮 Mod Details
-- **GUI Dark Theme:** Tries to apply a dark theme to all in-game GUIs. If you encounter an interface where the theme is not applied, it should be considered a bug.
-- **Shader-Based Visual Styling:** Shader-based visual styling with automatic handling (no manual setup required).
-- **Lightweight & Optimized:** Lightweight and performance optimized.
+
+- **Button Darkening in Menus:** Menu screens darken buttons only.
+- **In-Game GUI Dark Theme:** In-game screens can darken both buttons and GUI panels.
+- **Shader-Based Visual Styling:** No manual shader setup is required.
 - **Loader Support:** Supports NeoForge and Fabric Loader.
-- **Available Themes/Modes:** Features 4 different modes, with 3 main variations currently available for testing:
-    - **Balanced:** Currently in testing, but very close to its final state with minimal changes expected.
-    - **Soft Dark:** Also in the testing phase and very close to its definitive version.
-    - **Blxckout:** True to its name, this mode attempts to heavily darken everything. It is highly experimental, currently being tested in this version for long-term playability, and intended for enthusiasts.
-      *(Note: Certain issues or specific bugs might occur within some of these modes.)*
-- **Button Controls & Configuration:**
-    - **Minecraft 26.1.2:** The button functions as a drag button and can be manually controlled on the screen.
-    - **Minecraft 1.21.1:** Drag button support is currently missing but is actively being worked on. Controls can be configured via the configuration file using the `W`, `A`, `S`, and `D` keys.
+- **Draggable FX Button:** The on-screen `FX` button cycles themes on left click and can be moved by holding and dragging.
+- **Config Screen:** Toggle the inventory button and adjust its saved position.
+- **Readable Text Handling:** Soft, Balanced, and Dark modes use fixed readable text colors for better consistency.
+
+### 🌑 Available Themes / Modes
+
+- **Off:** Disables the visual effect.
+- **Soft:** A lighter darkening mode for subtle interface dimming.
+- **Balanced:** The default mode, designed for regular use.
+- **Dark:** A stronger darkening mode for brighter interfaces.
+- **Blxckout:** The strongest preset for users who want the darkest look.
 
 ---
 
 ## 📥 Versions
 
-| Minecraft Version | Loader              | Mod Version       | Status          |
-|------------------|---------------------|------------------|-----------------|
-| 26.1.2           | NeoForge + Fabric   | 0.1.0-alpha      | Main (Latest)   |
-| 1.21.1           | NeoForge + Fabric   | 0.1.0-alpha      | Supported       |
+| Minecraft Version | Loader              | Mod Version | Status        |
+|------------------|---------------------|-------------|---------------|
+| 26.1.2           | NeoForge + Fabric   | 1.0.0       | Main Release  |
+| 1.21.1           | NeoForge + Fabric   | 1.0.0       | Legacy Branch |
 
-> v0.1.0 Alpha is an early development build. Bugs and instability may occur.
+> v1.0.0 is the first main release of BlxckoutFX.
 
 ---
 
 ## 🚀 Installation
 
-1. Install Minecraft 26.1.2 or 1.21.1 via the Minecraft Launcher.
+1. Install Minecraft 26.1.2 via the Minecraft Launcher.
 2. Install NeoForge or Fabric Loader.
-3. Place the mod file (`BlxckoutFX-0.1.0-alpha.jar`) into the `mods` folder.
+3. Place the matching BlxckoutFX jar file into the `mods` folder.
 4. Launch the game.
 
-> 💡 **Important Version Notice:** The mod will always prioritize supporting the latest versions of NeoForge and Fabric. As the mod progresses, older versions will be maintained as much as possible. However, if any critical compatibility issues arise, a notice will be posted indicating the minimum required version you must update to.
+> 💡 **Important Version Notice:** The mod prioritizes support for the latest NeoForge and Fabric versions available for its target Minecraft version. If a compatibility issue appears, update to the minimum loader version listed on the release page.
 
 ---
 
@@ -70,20 +78,25 @@ This is my very first Minecraft mod. I initially created it out of personal nece
 
 ## 🛠️ Support
 
-If you encounter any bugs, issues, or have suggestions, you can report them through either of the following channels:
+If you encounter bugs, issues, or have suggestions, you can report them through either of the following channels:
 
 - **GitHub Issues:** Open an issue directly in this repository.
-- **Discord Server:** Join our official community via [Discord](https://discord.gg/rUD6tynDaK).
+- **Discord Server:** Join the community via [Discord](https://discord.gg/rUD6tynDaK).
 
-As long as you briefly explain the issues you face, I will do my absolute best to resolve them as quickly as possible.
+When reporting an issue, please include:
+
+- Minecraft version
+- Loader and loader version
+- BlxckoutFX version
+- A short description of what happened
+- Screenshots if the issue is visual
 
 ---
 
 ## 💖 Support Me
 
-Right now, I cannot fully focus or dedicate myself to this section, but I definitely plan to expand on this in the future.
+If you would like to support the project, you can visit my Patreon page:
 
-If you would like to support the project during its alpha phase, you can visit my Patreon page:
 👉 [Patreon](https://patreon.com/Lopew)
 
 ---

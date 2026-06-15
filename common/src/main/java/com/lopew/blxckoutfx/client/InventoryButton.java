@@ -6,14 +6,19 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
 public class InventoryButton extends Button {
+    private static final double DRAG_THRESHOLD = 3.0D;
+
+    private final OnPress onPress;
     private final PositionChanged positionChanged;
     private final int screenWidth;
     private final int screenHeight;
 
-    private boolean pressed;
-    private boolean dragged;
-    private double dragRemainderX;
-    private double dragRemainderY;
+    private boolean draggingButton;
+    private boolean movedWhileDragging;
+    private double dragStartMouseX;
+    private double dragStartMouseY;
+    private int dragStartX;
+    private int dragStartY;
 
     public InventoryButton(int x,
                            int y,
@@ -25,6 +30,7 @@ public class InventoryButton extends Button {
                            int screenWidth,
                            int screenHeight) {
         super(x, y, width, height, message, onPress, DEFAULT_NARRATION);
+        this.onPress = onPress;
         this.positionChanged = positionChanged;
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
@@ -38,61 +44,76 @@ public class InventoryButton extends Button {
 
     @Override
     public void onClick(MouseButtonEvent event, boolean doubleClick) {
-        this.pressed = true;
-        this.dragged = false;
-        this.dragRemainderX = 0.0D;
-        this.dragRemainderY = 0.0D;
+        beginDrag(event.x(), event.y());
     }
 
     @Override
     protected void onDrag(MouseButtonEvent event, double dx, double dy) {
-        if (!this.pressed) {
+        if (!this.draggingButton) {
             return;
         }
 
-        this.dragRemainderX += dx;
-        this.dragRemainderY += dy;
-
-        int moveX = wholePixels(this.dragRemainderX);
-        int moveY = wholePixels(this.dragRemainderY);
-        if (moveX == 0 && moveY == 0) {
-            return;
-        }
-
-        this.dragRemainderX -= moveX;
-        this.dragRemainderY -= moveY;
-
-        int previousX = this.getX();
-        int previousY = this.getY();
-
-        this.setX(previousX + moveX);
-        this.setY(previousY + moveY);
-        this.clampToScreen(this.screenWidth, this.screenHeight);
-
-        this.dragged = this.dragged || this.getX() != previousX || this.getY() != previousY;
+        updateDrag(event.x(), event.y());
     }
 
     @Override
     public void onRelease(MouseButtonEvent event) {
-        boolean wasPressed = this.pressed;
-        boolean wasDragged = this.dragged;
-        this.pressed = false;
-        this.dragged = false;
-        this.dragRemainderX = 0.0D;
-        this.dragRemainderY = 0.0D;
+        finishDrag(event.x(), event.y());
+    }
 
-        if (!wasPressed) {
+    public void beginDrag(double mouseX, double mouseY) {
+        if (!this.active || !this.visible || !this.isMouseOver(mouseX, mouseY)) {
             return;
         }
 
-        if (wasDragged) {
+        this.draggingButton = true;
+        this.movedWhileDragging = false;
+        this.dragStartMouseX = mouseX;
+        this.dragStartMouseY = mouseY;
+        this.dragStartX = this.getX();
+        this.dragStartY = this.getY();
+        this.setFocused(true);
+    }
+
+    public void updateDrag(double mouseX, double mouseY) {
+        if (!this.draggingButton) {
+            return;
+        }
+
+        double totalDragX = mouseX - this.dragStartMouseX;
+        double totalDragY = mouseY - this.dragStartMouseY;
+
+        if (Math.abs(totalDragX) >= DRAG_THRESHOLD || Math.abs(totalDragY) >= DRAG_THRESHOLD) {
+            this.movedWhileDragging = true;
+        }
+
+        if (!this.movedWhileDragging) {
+            return;
+        }
+
+        this.setX(this.dragStartX + (int) Math.round(totalDragX));
+        this.setY(this.dragStartY + (int) Math.round(totalDragY));
+        this.clampToScreen(this.screenWidth, this.screenHeight);
+    }
+
+    public void finishDrag(double mouseX, double mouseY) {
+        if (!this.draggingButton) {
+            return;
+        }
+
+        boolean moved = this.movedWhileDragging;
+        this.draggingButton = false;
+        this.movedWhileDragging = false;
+
+        if (moved) {
             this.positionChanged.positionChanged(this);
-            return;
+        } else if (this.isMouseOver(mouseX, mouseY)) {
+            this.onPress.onPress(this);
         }
+    }
 
-        if (this.isMouseOver(event.x(), event.y())) {
-            this.onPress(event);
-        }
+    public boolean isDraggingButton() {
+        return this.draggingButton;
     }
 
     public void clampToScreen(int screenWidth, int screenHeight) {
@@ -103,10 +124,6 @@ public class InventoryButton extends Button {
 
         this.setX(x);
         this.setY(y);
-    }
-
-    private static int wholePixels(double value) {
-        return value > 0.0D ? (int) Math.floor(value) : (int) Math.ceil(value);
     }
 
     @FunctionalInterface

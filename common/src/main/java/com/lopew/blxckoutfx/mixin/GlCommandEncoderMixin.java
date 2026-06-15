@@ -1,6 +1,7 @@
 package com.lopew.blxckoutfx.mixin;
 
 import com.lopew.blxckoutfx.client.BlxckoutFXShaders;
+import com.lopew.blxckoutfx.client.BlxckoutFXRenderPipelines;
 import com.mojang.blaze3d.opengl.GlProgram;
 import com.mojang.blaze3d.opengl.GlRenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
@@ -59,11 +60,23 @@ public class GlCommandEncoderMixin {
             return false;
         }
 
-        if (!"pipeline/gui_textured".equals(pipeline.getLocation().getPath())) {
-            return false;
+        if (BlxckoutFXRenderPipelines.BUTTON_TEXTURED_LOCATION.equals(pipeline.getLocation())) {
+            return true;
         }
 
-        Screen screen = Minecraft.getInstance().screen;
-        return screen != null;
+        Minecraft minecraft = Minecraft.getInstance();
+        Screen screen = minecraft.screen;
+        return screen != null
+                && minecraft.level != null
+                && !isModListScreen(screen)
+                && "pipeline/gui_textured".equals(pipeline.getLocation().getPath());
+    }
+
+    private static boolean isModListScreen(Screen screen) {
+        String className = screen.getClass().getName().toLowerCase();
+        return className.contains("modlist")
+                || className.equals("com.terraformersmc.modmenu.gui.modsscreen")
+                || className.startsWith("com.terraformersmc.modmenu.")
+                || className.startsWith("net.neoforged.neoforge.client.gui.mod");
     }
 }

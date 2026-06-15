@@ -19,14 +19,12 @@ loom {
             setConfigName('Fabric Client')
             ideConfigGenerated(true)
             runDir('runs/client')
-            vmArgs('-Dfabric.dli.config=E:\\Proje\\Minecraft\\26.1.2\\Multiloader\\BlxckoutFX\\fabric\\.gradle\\loom-cache\\launch.cfg', '-Dfabric.dli.env=client', '-Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient', '--enable-native-access=ALL-UNNAMED')
         }
         server {
             server()
             setConfigName('Fabric Server')
             ideConfigGenerated(true)
             runDir('runs/server')
-            vmArgs('-Dfabric.dli.config=E:\\Proje\\Minecraft\\26.1.2\\Multiloader\\BlxckoutFX\\fabric\\.gradle\\loom-cache\\launch.cfg', '-Dfabric.dli.env=server', '-Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotServer', '--enable-native-access=ALL-UNNAMED')
         }
     }
 }
