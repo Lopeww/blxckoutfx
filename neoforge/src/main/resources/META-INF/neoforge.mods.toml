@@ -8,7 +8,7 @@ version = "${version}"
 displayName = "${mod_name}"
 authors = "${mod_author}"
 description = '''${description}'''
-logoFile="blxckoutfx.png"
+logoFile="${mod_icon}"
 logoBlur=false
 
 [[mixins]]
