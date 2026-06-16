@@ -49,18 +49,17 @@ BlxckoutFX is intentionally focused: it changes GUI rendering, not the world its
 
 ## 📥 Versions
 
-| Minecraft Version | Loader              | Mod Version | Status        |
-|------------------|---------------------|-------------|---------------|
-| 26.1.2           | NeoForge + Fabric   | 1.0.0       | Main Release  |
-| 1.21.1           | NeoForge + Fabric   | 1.0.0       | Legacy Branch |
-
-> v1.0.0 is the first main release of BlxckoutFX.
+| Minecraft Version | Loader              | Mod Version | Status           |
+|------------------|---------------------|-------------|------------------|
+| 26.1.2           | NeoForge + Fabric   | 1.0.1       | Main Release     |
+| 1.21.1           | NeoForge + Fabric   | 1.0.1       | Legacy Branch    |
+| 1.20.1           | NeoForge + Fabric   | 1.0.1       | Unsupported Port |
 
 ---
 
 ## 🚀 Installation
 
-1. Install Minecraft 26.1.2 via the Minecraft Launcher.
+1. Install your target Minecraft version via the Minecraft Launcher.
 2. Install NeoForge or Fabric Loader.
 3. Place the matching BlxckoutFX jar file into the `mods` folder.
 4. Launch the game.
@@ -73,10 +72,13 @@ BlxckoutFX is intentionally focused: it changes GUI rendering, not the world its
 
 - `main` → Minecraft 26.1.2 development
 - `1.21.1` → Minecraft 1.21.1 support branch
+- `1.20.1` → Minecraft 1.20.1 unsupport branch
 
 ---
 
-## 🛠️ Support
+## 🛠️ Support & Maintenance Policy
+
+> ⚠️ **Note for 1.20.1:** This specific version has no active support. Issues may be fixed in bulk batches or left as-is depending on necessity.
 
 If you encounter bugs, issues, or have suggestions, you can report them through either of the following channels:
 
@@ -84,7 +86,6 @@ If you encounter bugs, issues, or have suggestions, you can report them through 
 - **Discord Server:** Join the community via [Discord](https://discord.gg/rUD6tynDaK).
 
 When reporting an issue, please include:
-
 - Minecraft version
 - Loader and loader version
 - BlxckoutFX version
