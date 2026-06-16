@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.lopew.blxckoutfx.mixin",
+  "refmap": "blxckoutfx.refmap.json",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "AbstractButtonMixin",
+    "GameRendererMixin",
+    "GuiGraphicsMixin",
+    "FontMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
