@@ -2,10 +2,10 @@ package com.lopew.blxckoutfx.mixin;
 
 import com.lopew.blxckoutfx.client.BlxckoutFXShaders;
 import com.lopew.blxckoutfx.client.BlxckoutFXRenderContext;
+import com.lopew.blxckoutfx.client.BlxckoutFXTextColors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.util.FastColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -33,41 +33,42 @@ public class FontMixin {
     }
 
     private static int adjustDarkTextReadability(int color) {
-        if (color == 0) {
-            return color;
-        }
-
-        if (!BlxckoutFXShaders.isEnabled() || BlxckoutFXShaders.isBlxckoutPresetActive()) {
-            return color;
-        }
-
         Minecraft minecraft = Minecraft.getInstance();
         Screen screen = minecraft.screen;
+        boolean isPatchouliBookScreen = isPatchouliBookScreen(screen);
+
+        if (isPneumaticCraftScreen(screen)) {
+            return color;
+        }
+
+        if (color == 0 && !isPatchouliBookScreen) {
+            return color;
+        }
+
+        if (!BlxckoutFXShaders.isEnabled()) {
+            return color;
+        }
+
+        if (isPatchouliBookScreen && BlxckoutFXShaders.isSoftPresetActive()) {
+            return color;
+        }
+
+        if (BlxckoutFXShaders.isBlxckoutPresetActive() && !isPatchouliBookScreen) {
+            return color;
+        }
 
         if (screen == null || (minecraft.level == null && !BlxckoutFXRenderContext.isRenderingButton())) {
             return color;
         }
 
-        int alpha = FastColor.ARGB32.alpha(color);
-        int red = FastColor.ARGB32.red(color);
-        int green = FastColor.ARGB32.green(color);
-        int blue = FastColor.ARGB32.blue(color);
+        return BlxckoutFXTextColors.adjustGeneralTextColor(color, isPatchouliBookScreen, isPatchouliBookScreen);
+    }
 
-        int max = Math.max(red, Math.max(green, blue));
-        int min = Math.min(red, Math.min(green, blue));
-        int saturation = max - min;
+    private static boolean isPatchouliBookScreen(Screen screen) {
+        return screen != null && screen.getClass().getName().startsWith("vazkii.patchouli.client.book.gui.");
+    }
 
-        int maxThreshold = 120;
-        int saturationThreshold = 28;
-
-        // Lift only dark grayscale-ish text so layered panels keep readable labels.
-        if (max > maxThreshold || saturation > saturationThreshold) {
-            return color;
-        }
-
-        int liftFloor = 170;
-        int liftBonus = 90;
-        int lifted = Math.min(255, Math.max(liftFloor, max + liftBonus));
-        return FastColor.ARGB32.color(alpha, lifted, lifted, lifted);
+    private static boolean isPneumaticCraftScreen(Screen screen) {
+        return screen != null && screen.getClass().getName().startsWith("me.desht.pneumaticcraft.client.gui.");
     }
 }

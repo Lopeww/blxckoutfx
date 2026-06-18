@@ -49,6 +49,7 @@ public class GameRendererMixin {
 
         return screen != null
                 && BlxckoutFXShaders.isEnabled()
+                && BlxckoutFXShaders.shouldApplyToScreen(screen)
                 && !BlxckoutFXRenderContext.isTextureDarkeningSuppressed()
                 && (minecraft.level != null || BlxckoutFXRenderContext.isRenderingButton());
     }

@@ -19,6 +19,7 @@ public final class BlxckoutFXShaders {
     private static final float PERCEPTION_R = 0.299F;
     private static final float PERCEPTION_G = 0.587F;
     private static final float PERCEPTION_B = 0.114F;
+    private static final float JEI_WIDGET_MAX_DIVIDE_FACTOR = 2.35F;
 
     private static final ShaderPreset[] PRESETS = {
             new ShaderPreset("preset.blxckoutfx.off", 1.0F),
@@ -62,7 +63,7 @@ public final class BlxckoutFXShaders {
         ShaderPreset preset = PRESETS[presetIndex];
 
         setUniform(shader, "PerceptionScale", PERCEPTION_R, PERCEPTION_G, PERCEPTION_B);
-        setUniform(shader, "DivideFactor", preset.divideFactor());
+        setUniform(shader, "DivideFactor", getCurrentRenderDivideFactor(preset.divideFactor()));
     }
 
     public static void cyclePreset() {
@@ -83,8 +84,24 @@ public final class BlxckoutFXShaders {
         return BLXCKOUT_PRESET_KEY.equals(PRESETS[presetIndex].translationKey());
     }
 
+    public static boolean isSoftPresetActive() {
+        return "preset.blxckoutfx.soft".equals(PRESETS[presetIndex].translationKey());
+    }
+
     public static boolean isEnabled() {
         return presetIndex != 0;
+    }
+
+    public static boolean shouldApplyToScreen(net.minecraft.client.gui.screens.Screen screen) {
+        return !BlxckoutFXScreenExclusions.isExcludedScreen(screen);
+    }
+
+    private static float getCurrentRenderDivideFactor(float divideFactor) {
+        if (BlxckoutFXRenderContext.isRenderingJeiWidget()) {
+            return Math.min(divideFactor, JEI_WIDGET_MAX_DIVIDE_FACTOR);
+        }
+
+        return divideFactor;
     }
 
     private static void setUniform(ShaderInstance shader, String name, float value) {

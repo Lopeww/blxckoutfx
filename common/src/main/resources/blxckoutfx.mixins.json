@@ -6,9 +6,20 @@
   "compatibilityLevel": "JAVA_21",
   "client": [
     "AbstractButtonMixin",
-    "GameRendererMixin",
+    "FtbIconRendererMixin",
     "GuiGraphicsMixin",
-    "FontMixin"
+    "GameRendererMixin",
+    "FontMixin",
+    "JeiGuiIconButtonMixin",
+    "JeiIconButtonMixin",
+    "JeiTextFieldFilterMixin",
+    "PatchouliUtilityButtonMixin",
+    "PatchouliWordMixin",
+    "PneumaticCraftContainerScreenMixin",
+    "PneumaticCraftPressureGaugeMixin",
+    "PneumaticCraftWidgetAnimatedStatMixin",
+    "PneumaticCraftWidgetEnergyMixin",
+    "PneumaticCraftWidgetTemperatureMixin"
   ],
   "injectors": {
     "defaultRequire": 1
