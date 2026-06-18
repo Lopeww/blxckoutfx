@@ -14,9 +14,39 @@ public final class BlxckoutFXRenderPipelines {
             BlxckoutFX.MOD_ID,
             "pipeline/button_textured"
     );
+    public static final Identifier CONTENT_ICON_TEXTURED_LOCATION = Identifier.fromNamespaceAndPath(
+            BlxckoutFX.MOD_ID,
+            "pipeline/content_icon_textured"
+    );
+    public static final Identifier JEI_WIDGET_TEXTURED_LOCATION = Identifier.fromNamespaceAndPath(
+            BlxckoutFX.MOD_ID,
+            "pipeline/jei_widget_textured"
+    );
 
     public static final RenderPipeline BUTTON_TEXTURED = RenderPipeline.builder()
             .withLocation(BUTTON_TEXTURED_LOCATION)
+            .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
+            .withUniform("Projection", UniformType.UNIFORM_BUFFER)
+            .withVertexShader("core/position_tex_color")
+            .withFragmentShader("core/position_tex_color")
+            .withSampler("Sampler0")
+            .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
+            .withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
+            .build();
+
+    public static final RenderPipeline CONTENT_ICON_TEXTURED = RenderPipeline.builder()
+            .withLocation(CONTENT_ICON_TEXTURED_LOCATION)
+            .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
+            .withUniform("Projection", UniformType.UNIFORM_BUFFER)
+            .withVertexShader("core/position_tex_color")
+            .withFragmentShader("core/position_tex_color")
+            .withSampler("Sampler0")
+            .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
+            .withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
+            .build();
+
+    public static final RenderPipeline JEI_WIDGET_TEXTURED = RenderPipeline.builder()
+            .withLocation(JEI_WIDGET_TEXTURED_LOCATION)
             .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
             .withUniform("Projection", UniformType.UNIFORM_BUFFER)
             .withVertexShader("core/position_tex_color")

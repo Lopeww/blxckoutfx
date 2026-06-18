@@ -7,6 +7,11 @@
   "client": [
     "AbstractButtonMixin",
     "FontMixin",
+    "FtbAtlasIconRendererMixin",
+    "FtbImageIconRendererMixin",
+    "JeiButtonSpritesMixin",
+    "JeiDrawableSpriteMixin",
+    "JeiScalableDrawableMixin",
     "ScreenBackgroundMixin",
     "GlRenderPassAccessor",
     "GlCommandEncoderMixin",

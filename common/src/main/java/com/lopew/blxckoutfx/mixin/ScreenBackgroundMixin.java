@@ -17,7 +17,12 @@ public class ScreenBackgroundMixin {
                                                      int mouseY,
                                                      float partialTick,
                                                      CallbackInfo ci) {
-        if (BlxckoutFXShaders.isEnabled() && isSupportedScreen((Screen) (Object) this)) {
+        Screen screen = (Screen) (Object) this;
+        boolean apply = BlxckoutFXShaders.isEnabled()
+                && BlxckoutFXShaders.shouldApplyToScreen(screen)
+                && isSupportedScreen(screen);
+
+        if (apply) {
             graphics.blurBeforeThisStratum();
         }
     }

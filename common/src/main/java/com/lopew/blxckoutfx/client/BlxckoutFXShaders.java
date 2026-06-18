@@ -1,5 +1,6 @@
 package com.lopew.blxckoutfx.client;
 
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public final class BlxckoutFXShaders {
@@ -62,6 +63,10 @@ public final class BlxckoutFXShaders {
 
     public static float getCurrentPresetDivideFactor() {
         return PRESETS[presetIndex].divideFactor();
+    }
+
+    public static boolean shouldApplyToScreen(Screen screen) {
+        return !BlxckoutFXScreenExclusions.isExcludedScreen(screen);
     }
 
     public static String getDarkPositionTexColorShaderSource() {

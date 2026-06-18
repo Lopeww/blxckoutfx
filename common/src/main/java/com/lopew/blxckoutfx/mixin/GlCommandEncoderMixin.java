@@ -45,7 +45,8 @@ public class GlCommandEncoderMixin {
         int programId = glProgram.getProgramId();
         int factorLoc = GL20.glGetUniformLocation(programId, "DivideFactor");
         if (factorLoc != -1) {
-            float factor = shouldDarken(pipeline) ? BlxckoutFXShaders.getCurrentPresetDivideFactor() : 1.0F;
+            boolean shouldDarken = shouldDarken(pipeline);
+            float factor = shouldDarken ? getDivideFactor(pipeline) : 1.0F;
             GL20.glUniform1f(factorLoc, factor);
         }
 
@@ -60,16 +61,33 @@ public class GlCommandEncoderMixin {
             return false;
         }
 
+        Minecraft minecraft = Minecraft.getInstance();
+        Screen screen = minecraft.screen;
+
+        if (!BlxckoutFXShaders.shouldApplyToScreen(screen)) {
+            return false;
+        }
+
         if (BlxckoutFXRenderPipelines.BUTTON_TEXTURED_LOCATION.equals(pipeline.getLocation())) {
             return true;
         }
 
-        Minecraft minecraft = Minecraft.getInstance();
-        Screen screen = minecraft.screen;
+        if (BlxckoutFXRenderPipelines.JEI_WIDGET_TEXTURED_LOCATION.equals(pipeline.getLocation())) {
+            return true;
+        }
+
         return screen != null
                 && minecraft.level != null
                 && !isModListScreen(screen)
                 && "pipeline/gui_textured".equals(pipeline.getLocation().getPath());
+    }
+
+    private static float getDivideFactor(RenderPipeline pipeline) {
+        if (BlxckoutFXRenderPipelines.JEI_WIDGET_TEXTURED_LOCATION.equals(pipeline.getLocation())) {
+            return Math.min(BlxckoutFXShaders.getCurrentPresetDivideFactor(), 2.35F);
+        }
+
+        return BlxckoutFXShaders.getCurrentPresetDivideFactor();
     }
 
     private static boolean isModListScreen(Screen screen) {
