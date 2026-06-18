@@ -1,10 +1,18 @@
 <div align="center">
   <img src="./blxckoutfx.png" width="128" height="128" alt="BlxckoutFX Logo">
+    
+  ![Minecraft Sürümleri](https://img.shields.io/badge/MINECRAFT-26.1.2_%7C_1.21.1_%7C_1.20.1-darkgreen?style=for-the-badge)
+  </br>
+  ![Loaders](https://img.shields.io/badge/Loaders-Forge_|_NeoForge_|_Fabric-orange?style=for-the-badge)
+  </br>
+  ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 </div>
 
 # BlxckoutFX
 
 A lightweight Minecraft mod that applies a consistent dark theme to buttons and in-game GUI surfaces using shader-based rendering.
+
+By transforming the default white panels into a sleek custom **mode**, this shader-based solution brings a refined **dark** aesthetic to your interface **everywhere** you look, delivering an eye-friendly experience across all screens.
 
 *Let darkness fall everywhere for your eyes.*
 
@@ -39,11 +47,11 @@ BlxckoutFX is intentionally focused: it changes GUI rendering, not the world its
 
 ### 🌑 Available Themes / Modes
 
-- **Off:** Disables the visual effect.
-- **Soft:** A lighter darkening mode for subtle interface dimming.
-- **Balanced:** The default mode, designed for regular use.
-- **Dark:** A stronger darkening mode for brighter interfaces.
-- **Blxckout:** The strongest preset for users who want the darkest look.
+- **⚪ Off:** Disables the visual effect.
+- **🔘 Soft:** A lighter darkening mode for subtle interface dimming.
+- **⚫ Balanced:** The default mode, designed for regular use.
+- **⬛ Dark:** A stronger darkening mode for brighter interfaces.
+- **👁️‍🗨️ Blxckout:** The strongest preset for users who want the darkest look.
 
 ---
 
@@ -51,9 +59,10 @@ BlxckoutFX is intentionally focused: it changes GUI rendering, not the world its
 
 | Minecraft Version | Loader              | Mod Version | Status           |
 |------------------|---------------------|-------------|------------------|
-| 26.1.2           | NeoForge + Fabric   | 1.0.1       | Main Release     |
-| 1.21.1           | NeoForge + Fabric   | 1.0.1       | Legacy Branch    |
-| 1.20.1           | NeoForge + Fabric   | 1.0.1       | Unsupported Port |
+| 26.1.2           | NeoForge + Fabric   | 1.1.0       | Main Release     |
+| 1.21.1           | NeoForge + Fabric   | 1.1.0       | Legacy Branch    |
+| 1.20.1           | Forge + Fabric      | 1.1.0       | Unsupported Port |
+| 1.12.2           | Forge               | -           | In Development   |
 
 ---
 
@@ -73,6 +82,7 @@ BlxckoutFX is intentionally focused: it changes GUI rendering, not the world its
 - `main` → Minecraft 26.1.2 development
 - `1.21.1` → Minecraft 1.21.1 support branch
 - `1.20.1` → Minecraft 1.20.1 unsupport branch
+- `1.12.2` → Minecraft 1.12.2 backport branch (In Development)
 
 ---
 
