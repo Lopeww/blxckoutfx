@@ -2,9 +2,9 @@
   <img src="./blxckoutfx.png" width="128" height="128" alt="BlxckoutFX Logo">
     
   ![Minecraft Sürümleri](https://img.shields.io/badge/MINECRAFT-26.1.2_%7C_1.21.1_%7C_1.20.1-darkgreen?style=for-the-badge)
-  </br>
+  <br>
   ![Loaders](https://img.shields.io/badge/Loaders-Forge_|_NeoForge_|_Fabric-orange?style=for-the-badge)
-  </br>
+  <br>
   ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 </div>
 
