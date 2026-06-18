@@ -1,6 +1,5 @@
 package com.lopew.blxckoutfx.fabric.mixin;
 
-import com.lopew.blxckoutfx.BlxckoutFX;
 import com.lopew.blxckoutfx.client.BlxckoutFXGUIHandler;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
@@ -32,8 +31,6 @@ public class MouseHandlerMixin {
     @Shadow
     private double mousePressedTime;
 
-    private static boolean blxckoutfx$loggedTitleDragPath;
-
     @Inject(method = "onMove(JDD)V", at = @At("HEAD"))
     private void blxckoutfx$handleTitleScreenDrag(long windowPointer, double mouseX, double mouseY, CallbackInfo ci) {
         Screen screen = this.minecraft.screen;
@@ -53,11 +50,6 @@ public class MouseHandlerMixin {
         double scaledDragX = (mouseX - this.xpos) * window.getGuiScaledWidth() / window.getScreenWidth();
         double scaledDragY = (mouseY - this.ypos) * window.getGuiScaledHeight() / window.getScreenHeight();
 
-        if (BlxckoutFXGUIHandler.onMouseDragged(screen, scaledMouseX, scaledMouseY, this.activeButton, scaledDragX, scaledDragY)
-                && !blxckoutfx$loggedTitleDragPath) {
-            blxckoutfx$loggedTitleDragPath = true;
-            BlxckoutFX.LOGGER.info("BlxckoutFX Fabric title drag path active: screen={}, render=MouseHandler.onMove",
-                    screen.getClass().getName());
-        }
+        BlxckoutFXGUIHandler.onMouseDragged(screen, scaledMouseX, scaledMouseY, this.activeButton, scaledDragX, scaledDragY);
     }
 }

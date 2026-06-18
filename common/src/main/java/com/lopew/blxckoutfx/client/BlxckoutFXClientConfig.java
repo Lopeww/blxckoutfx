@@ -1,5 +1,6 @@
 package com.lopew.blxckoutfx.client;
 
+import com.lopew.blxckoutfx.BlxckoutFX;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -139,7 +140,7 @@ public final class BlxckoutFXClientConfig {
             Files.createDirectories(CONFIG_PATH.getParent());
             Files.writeString(CONFIG_PATH, GSON.toJson(this));
         } catch (IOException e) {
-            System.err.println("BlxckoutFX: Failed to save config: " + e.getMessage());
+            BlxckoutFX.LOGGER.warn("Failed to save BlxckoutFX client config.", e);
         }
     }
 }

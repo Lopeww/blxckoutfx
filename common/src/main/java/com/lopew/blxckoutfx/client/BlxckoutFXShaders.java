@@ -16,10 +16,12 @@ public final class BlxckoutFXShaders {
     private static ShaderInstance positionTexColorShader;
     private static ShaderInstance positionColorTexShader;
     private static ShaderInstance positionColorShader;
+    private static boolean shadersAvailable = true;
     private static final String BLXCKOUT_PRESET_KEY = "preset.blxckoutfx.blxckout";
     private static final float PERCEPTION_R = 0.299F;
     private static final float PERCEPTION_G = 0.587F;
     private static final float PERCEPTION_B = 0.114F;
+    private static final float JEI_WIDGET_MAX_DIVIDE_FACTOR = 2.35F;
 
     private static final ShaderPreset[] PRESETS = {
             new ShaderPreset("preset.blxckoutfx.off", 1.0F),
@@ -36,6 +38,7 @@ public final class BlxckoutFXShaders {
     }
 
     public static void registerShaders(ShaderRegistrar registrar) throws IOException {
+        shadersAvailable = true;
         registrar.register(
                 new ResourceLocation(BlxckoutFX.MOD_ID, "smart_position_tex"),
                 DefaultVertexFormat.POSITION_TEX,
@@ -61,6 +64,14 @@ public final class BlxckoutFXShaders {
         );
     }
 
+    public static void disableShaders() {
+        shadersAvailable = false;
+        positionTexShader = null;
+        positionTexColorShader = null;
+        positionColorTexShader = null;
+        positionColorShader = null;
+    }
+
     public static void applyCurrentPreset(ShaderInstance shader) {
         if (shader == null) {
             return;
@@ -69,7 +80,7 @@ public final class BlxckoutFXShaders {
         ShaderPreset preset = PRESETS[presetIndex];
 
         setUniform(shader, "PerceptionScale", PERCEPTION_R, PERCEPTION_G, PERCEPTION_B);
-        setUniform(shader, "DivideFactor", preset.divideFactor());
+        setUniform(shader, "DivideFactor", getCurrentRenderDivideFactor(preset.divideFactor()));
     }
 
     public static void cyclePreset() {
@@ -90,21 +101,29 @@ public final class BlxckoutFXShaders {
         return BLXCKOUT_PRESET_KEY.equals(PRESETS[presetIndex].translationKey());
     }
 
+    public static boolean isSoftPresetActive() {
+        return "preset.blxckoutfx.soft".equals(PRESETS[presetIndex].translationKey());
+    }
+
     public static boolean isEnabled() {
-        return presetIndex != 0;
+        return shadersAvailable && presetIndex != 0;
     }
 
     public static int getPresetIndex() {
         return presetIndex;
     }
 
-    public static float getCurrentDivideFactor() {
-        return PRESETS[presetIndex].divideFactor();
-    }
-
     private static void setUniform(ShaderInstance shader, String name, float value) {
         AbstractUniform uniform = shader.safeGetUniform(name);
         uniform.set(value);
+    }
+
+    private static float getCurrentRenderDivideFactor(float divideFactor) {
+        if (BlxckoutFXRenderContext.isRenderingJeiWidget()) {
+            return Math.min(divideFactor, JEI_WIDGET_MAX_DIVIDE_FACTOR);
+        }
+
+        return divideFactor;
     }
 
     private static void setUniform(ShaderInstance shader, String name, float x, float y, float z) {

@@ -9,9 +9,11 @@ minecraft {
 
     runs {
         client {
-            workingDirectory project.file('run')
+            workingDirectory project.file('run-dev/client')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             arg '--mixin.config'
             arg "${mod_id}.mixins.json"
             mods {
@@ -21,7 +23,7 @@ minecraft {
             }
         }
         data {
-            workingDirectory project.file('run')
+            workingDirectory project.file('run-dev/data')
             args '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
             arg '--mixin.config'
             arg "${mod_id}.mixins.json"
@@ -32,9 +34,11 @@ minecraft {
             }
         }
         server {
-            workingDirectory project.file('run')
+            workingDirectory project.file('run-dev/server')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             arg '--mixin.config'
             arg "${mod_id}.mixins.json"
             mods {
@@ -48,8 +52,21 @@ minecraft {
 
 sourceSets.main.resources.srcDir 'src/generated/resources'
 
+repositories {
+    flatDir {
+        dirs 'run/mods'
+    }
+}
+
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    runtimeOnly fg.deobf('local:architectury:9.2.14-forge')
+    runtimeOnly fg.deobf('local:ftb-library-forge:2001.2.13')
+    runtimeOnly fg.deobf('local:ftb-quests-forge:2001.4.22')
+    runtimeOnly fg.deobf('local:ftb-teams-forge:2001.3.2')
+    runtimeOnly fg.deobf('local:jei-1.20.1-forge:15.20.0.130')
+    runtimeOnly fg.deobf('local:Patchouli:1.20.1-85-FORGE')
+    runtimeOnly fg.deobf('local:pneumaticcraft-repressurized:6.0.22+mc1.20.1')
 }
 
 jar {

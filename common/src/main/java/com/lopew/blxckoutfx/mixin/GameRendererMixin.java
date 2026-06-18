@@ -1,6 +1,5 @@
 package com.lopew.blxckoutfx.mixin;
 
-import com.lopew.blxckoutfx.BlxckoutFX;
 import com.lopew.blxckoutfx.client.BlxckoutFXShaders;
 import com.lopew.blxckoutfx.client.BlxckoutFXRenderContext;
 import net.minecraft.client.Minecraft;
@@ -14,14 +13,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
-    private static boolean blxckoutfx$loggedShaderPath;
-
     @Inject(method = {"getPositionTexShader", "m_172817_"}, at = @At("HEAD"), cancellable = true)
     private static void blxckoutfx$getPositionTexShader(CallbackInfoReturnable<ShaderInstance> cir) {
         ShaderInstance shader = BlxckoutFXShaders.getPositionTexShader();
 
         if (shouldApply() && shader != null) {
-            logShaderPath("getPositionTexShader");
             BlxckoutFXShaders.applyCurrentPreset(shader);
             cir.setReturnValue(shader);
         }
@@ -32,7 +28,6 @@ public class GameRendererMixin {
         ShaderInstance shader = BlxckoutFXShaders.getPositionTexColorShader();
 
         if (shouldApply() && shader != null) {
-            logShaderPath("getPositionTexColorShader");
             BlxckoutFXShaders.applyCurrentPreset(shader);
             cir.setReturnValue(shader);
         }
@@ -43,7 +38,6 @@ public class GameRendererMixin {
         ShaderInstance shader = BlxckoutFXShaders.getPositionColorTexShader();
 
         if (shouldApply() && shader != null) {
-            logShaderPath("getPositionColorTexShader");
             BlxckoutFXShaders.applyCurrentPreset(shader);
             cir.setReturnValue(shader);
         }
@@ -54,20 +48,8 @@ public class GameRendererMixin {
         ShaderInstance shader = BlxckoutFXShaders.getPositionColorShader();
 
         if (shouldApply() && BlxckoutFXShaders.isBlxckoutPresetActive() && shader != null) {
-            logShaderPath("getPositionColorShader");
             BlxckoutFXShaders.applyCurrentPreset(shader);
             cir.setReturnValue(shader);
-        }
-    }
-
-    private static void logShaderPath(String method) {
-        if (!blxckoutfx$loggedShaderPath) {
-            blxckoutfx$loggedShaderPath = true;
-            BlxckoutFX.LOGGER.info("BlxckoutFX shader mixin active: method={}, presetIndex={}, buttonRender={}, levelScreen={}",
-                    method,
-                    BlxckoutFXShaders.getPresetIndex(),
-                    BlxckoutFXRenderContext.isRenderingButton(),
-                    Minecraft.getInstance().level != null);
         }
     }
 

@@ -59,13 +59,14 @@ public class GuiGraphicsMixin {
     private static boolean isModsScreenLogo(ResourceLocation atlasLocation) {
         String namespace = atlasLocation.getNamespace();
         String path = atlasLocation.getPath();
+        boolean modMenuLogo = ("modmenu".equals(namespace) && path.endsWith("_icon"))
+                || ("minecraft".equals(namespace) && "textures/misc/unknown_pack.png".equals(path));
 
-        if (isFabricModMenuScreen()) {
-            return ("modmenu".equals(namespace) && path.endsWith("_icon"))
-                    || ("minecraft".equals(namespace) && "textures/misc/unknown_pack.png".equals(path));
+        if (!modMenuLogo) {
+            return false;
         }
 
-        return false;
+        return isFabricModMenuScreen();
     }
 
     private static boolean isFabricModMenuScreen() {

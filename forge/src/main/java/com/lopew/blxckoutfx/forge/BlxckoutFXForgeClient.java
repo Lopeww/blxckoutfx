@@ -39,7 +39,8 @@ public final class BlxckoutFXForgeClient {
             BlxckoutFXShaders.registerShaders((id, vertexFormat, loadCallback) ->
                     event.registerShader(new ShaderInstance(event.getResourceProvider(), id, vertexFormat), loadCallback));
         } catch (IOException exception) {
-            throw new RuntimeException("Failed to load BlxckoutFX shaders", exception);
+            BlxckoutFXShaders.disableShaders();
+            BlxckoutFX.LOGGER.error("Failed to load BlxckoutFX shaders; disabling screen darkening so the game can continue.", exception);
         }
     }
 

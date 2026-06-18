@@ -6,6 +6,7 @@ build/
 # Minecraft run data
 run/
 runs/
+run-dev/
 logs/
 crash-reports/
 
@@ -28,4 +29,3 @@ replay_pid*
 *.war
 *.nar
 *.ear
-

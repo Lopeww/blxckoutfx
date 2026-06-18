@@ -39,8 +39,13 @@ public final class BlxckoutFXFabric implements ClientModInitializer {
             );
         });
 
-        CoreShaderRegistrationCallback.EVENT.register(context ->
-                BlxckoutFXShaders.registerShaders(context::register)
-        );
+        CoreShaderRegistrationCallback.EVENT.register(context -> {
+            try {
+                BlxckoutFXShaders.registerShaders(context::register);
+            } catch (Exception exception) {
+                BlxckoutFXShaders.disableShaders();
+                BlxckoutFX.LOGGER.error("Failed to load BlxckoutFX shaders; disabling screen darkening so the game can continue.", exception);
+            }
+        });
     }
 }

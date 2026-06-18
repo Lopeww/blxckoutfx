@@ -3,6 +3,7 @@ package com.lopew.blxckoutfx.client;
 public final class BlxckoutFXRenderContext {
     private static int buttonRenderDepth;
     private static int textureDarkeningSuppressDepth;
+    private static int jeiWidgetRenderDepth;
 
     public static void enterButtonRender() {
         buttonRenderDepth++;
@@ -26,6 +27,18 @@ public final class BlxckoutFXRenderContext {
 
     public static boolean isTextureDarkeningSuppressed() {
         return textureDarkeningSuppressDepth > 0;
+    }
+
+    public static void enterJeiWidgetRender() {
+        jeiWidgetRenderDepth++;
+    }
+
+    public static void exitJeiWidgetRender() {
+        jeiWidgetRenderDepth = Math.max(0, jeiWidgetRenderDepth - 1);
+    }
+
+    public static boolean isRenderingJeiWidget() {
+        return jeiWidgetRenderDepth > 0;
     }
 
     private BlxckoutFXRenderContext() {
