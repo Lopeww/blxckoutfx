@@ -10,13 +10,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GuiButtonRecipeTab.class)
 public class GuiButtonRecipeTabMixin {
-    @Inject(method = "drawButton", at = @At("HEAD"), require = 1)
+    @Inject(method = "drawButton(Lnet/minecraft/client/Minecraft;IIF)V", at = @At("HEAD"), require = 1)
     private void blxckoutfx$enterRecipeTabRender(Minecraft mc, int mouseX, int mouseY, float partialTicks, CallbackInfo ci) {
         BlxckoutFXRenderContext.enterButtonRender();
         BlxckoutFXRenderContext.enterIconColorPreserve();
     }
 
-    @Inject(method = "drawButton", at = @At("RETURN"), require = 1)
+    @Inject(method = "drawButton(Lnet/minecraft/client/Minecraft;IIF)V", at = @At("RETURN"), require = 1)
     private void blxckoutfx$exitRecipeTabRender(Minecraft mc, int mouseX, int mouseY, float partialTicks, CallbackInfo ci) {
         BlxckoutFXRenderContext.exitIconColorPreserve();
         BlxckoutFXRenderContext.exitButtonRender();

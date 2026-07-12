@@ -11,7 +11,15 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(FontRenderer.class)
 public class FontRendererMixin {
-    @ModifyVariable(method = "renderString", at = @At("HEAD"), index = 4, require = 1)
+    // Change the public draw boundary once. renderString is invoked twice for shadowed text
+    // and is rewritten by SmoothFont, while this signature is retained by both renderers.
+    @ModifyVariable(
+            method = "drawString(Ljava/lang/String;FFIZ)I",
+            at = @At("HEAD"),
+            argsOnly = true,
+            ordinal = 0,
+            require = 1
+    )
     private int blxckoutfx$adjustTextColor(int color) {
         GuiScreen screen = Minecraft.getMinecraft().currentScreen;
         if (screen == null || !BlxckoutFXShaders.isEnabled() || !BlxckoutFXShaders.shouldApplyToScreen(screen)) {

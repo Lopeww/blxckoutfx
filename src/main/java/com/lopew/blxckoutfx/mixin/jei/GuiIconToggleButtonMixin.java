@@ -12,12 +12,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(targets = "mezz.jei.gui.elements.GuiIconToggleButton", remap = false)
 public class GuiIconToggleButtonMixin {
     @Inject(
-            method = "draw",
+            method = "draw(Lnet/minecraft/client/Minecraft;IIF)V",
             at = @At(
                     value = "INVOKE",
                     target = "Lmezz/jei/api/gui/IDrawable;draw(Lnet/minecraft/client/Minecraft;II)V"
             ),
-            require = 1,
+            require = 0,
             remap = false
     )
     private void blxckoutfx$suppressJeiConfigIconDarkening(Minecraft minecraft, int mouseX, int mouseY, float partialTicks, CallbackInfo ci) {
@@ -25,13 +25,13 @@ public class GuiIconToggleButtonMixin {
     }
 
     @Inject(
-            method = "draw",
+            method = "draw(Lnet/minecraft/client/Minecraft;IIF)V",
             at = @At(
                     value = "INVOKE",
                     target = "Lmezz/jei/api/gui/IDrawable;draw(Lnet/minecraft/client/Minecraft;II)V",
                     shift = At.Shift.AFTER
             ),
-            require = 1,
+            require = 0,
             remap = false
     )
     private void blxckoutfx$restoreJeiConfigIconDarkening(Minecraft minecraft, int mouseX, int mouseY, float partialTicks, CallbackInfo ci) {

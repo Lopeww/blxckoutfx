@@ -12,12 +12,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(targets = "mezz.jei.gui.recipes.ShapelessIcon", remap = false)
 public class ShapelessIconMixin {
     @Inject(
-            method = "draw",
+            method = "draw(Lnet/minecraft/client/Minecraft;I)V",
             at = @At(
                     value = "INVOKE",
                     target = "Lmezz/jei/api/gui/IDrawable;draw(Lnet/minecraft/client/Minecraft;)V"
             ),
-            require = 1,
+            require = 0,
             remap = false
     )
     private void blxckoutfx$suppressShapelessIconDarkening(Minecraft minecraft, int recipeWidth, CallbackInfo ci) {
@@ -25,13 +25,13 @@ public class ShapelessIconMixin {
     }
 
     @Inject(
-            method = "draw",
+            method = "draw(Lnet/minecraft/client/Minecraft;I)V",
             at = @At(
                     value = "INVOKE",
                     target = "Lmezz/jei/api/gui/IDrawable;draw(Lnet/minecraft/client/Minecraft;)V",
                     shift = At.Shift.AFTER
             ),
-            require = 1,
+            require = 0,
             remap = false
     )
     private void blxckoutfx$restoreShapelessIconDarkening(Minecraft minecraft, int recipeWidth, CallbackInfo ci) {

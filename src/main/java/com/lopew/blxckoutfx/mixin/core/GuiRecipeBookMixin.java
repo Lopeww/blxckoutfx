@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(GuiRecipeBook.class)
 public class GuiRecipeBookMixin {
     @Inject(
-            method = "render",
+            method = "render(IIF)V",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/client/gui/recipebook/GuiRecipeBook;drawTexturedModalRect(IIIIII)V"
@@ -23,7 +23,7 @@ public class GuiRecipeBookMixin {
     }
 
     @Inject(
-            method = "render",
+            method = "render(IIF)V",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/client/gui/recipebook/GuiRecipeBook;drawTexturedModalRect(IIIIII)V",

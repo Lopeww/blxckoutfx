@@ -15,7 +15,7 @@ public class JourneyMapDrawUtilMixin {
             at = @At("HEAD"),
             argsOnly = true,
             ordinal = 0,
-            require = 1,
+            require = 0,
             remap = false
     )
     private static int blxckoutfx$darkenJourneyMapOptionRectangle(int color) {

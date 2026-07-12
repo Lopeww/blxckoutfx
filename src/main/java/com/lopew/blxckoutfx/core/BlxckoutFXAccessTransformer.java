@@ -1,30 +1,18 @@
 package com.lopew.blxckoutfx.core;
 
 import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
 public class BlxckoutFXAccessTransformer implements IClassTransformer {
-    private static final String TEXTURE_MAP_CLASS = "net.minecraft.client.renderer.texture.TextureMap";
-    private static final String GUI_RECIPE_BOOK_CLASS = "net.minecraft.client.gui.recipebook.GuiRecipeBook";
-    private static final String INGREDIENT_CLASS = "net.minecraft.item.crafting.Ingredient";
-    private static final String RENDER_ITEM_CLASS = "net.minecraft.client.renderer.RenderItem";
-    private static final String PLAYER_LIST_CLASS = "net.minecraft.server.management.PlayerList";
-    private static final String GUI_INGAME_CLASS = "net.minecraft.client.gui.GuiIngame";
-    private static final String CONTAINER_CLASS = "net.minecraft.inventory.Container";
-    private static final String ENUM_DYE_COLOR_CLASS = "net.minecraft.item.EnumDyeColor";
-    private static final String TEXT_FORMATTING_CLASS = "net.minecraft.util.text.TextFormatting";
-    private static final String COMMAND_HANDLER_CLASS = "net.minecraft.command.CommandHandler";
-    private static final String FONT_RENDERER_CLASS = "net.minecraft.client.gui.FontRenderer";
-    private static final String STYLE_CLASS = "net.minecraft.util.text.Style";
     private static final String FTB_ATLAS_SPRITE_ICON_CLASS = "com.feed_the_beast.ftblib.lib.icon.AtlasSpriteIcon";
     private static final String FTB_IMAGE_ICON_CLASS = "com.feed_the_beast.ftblib.lib.icon.ImageIcon";
     private static final String FTB_ICON_DRAW_DESC = "(IIII)V";
@@ -63,73 +51,10 @@ public class BlxckoutFXAccessTransformer implements IClassTransformer {
     private static final String RENDER_CONTEXT_CLASS = "com/lopew/blxckoutfx/client/BlxckoutFXRenderContext";
     private static final String AE2_ICON_HOOKS_CLASS = "com/lopew/blxckoutfx/client/integration/ae2/BlxckoutFXAe2IconHooks";
 
-    private static final String INIT_MISSING_IMAGE_NAME = "initMissingImage";
-    private static final String INIT_MISSING_IMAGE_SRG = "func_110569_e";
-    private static final String INIT_MISSING_IMAGE_DESC = "()V";
-
-    private static final String RENDER_MODEL_COLOR_NAME = "renderModel";
-    private static final String RENDER_MODEL_COLOR_SRG = "func_191965_a";
-    private static final String RENDER_MODEL_COLOR_DESC = "(Lnet/minecraft/client/renderer/block/model/IBakedModel;I)V";
-    private static final String RENDER_MODEL_STACK_NAME = "renderModel";
-    private static final String RENDER_MODEL_STACK_SRG = "func_191961_a";
-    private static final String RENDER_MODEL_STACK_DESC = "(Lnet/minecraft/client/renderer/block/model/IBakedModel;Lnet/minecraft/item/ItemStack;)V";
-
-    private static final String[] TEXTURE_MAP_FIELD_NAMES = {
-            "mapUploadedSprites", "listAnimatedSprites", "missingImage", "basePath", "mapRegisteredSprites"
-    };
-    private static final String[] TEXTURE_MAP_FIELD_SRGS = {
-            "field_94252_e", "field_94258_i", "field_94249_f", "field_94254_c", "field_110574_e"
-    };
-    private static final String[] GUI_RECIPE_BOOK_FIELD_NAMES = {
-            "width", "height", "xOffset", "recipeTabs"
-    };
-    private static final String[] GUI_RECIPE_BOOK_FIELD_SRGS = {
-            "field_191904_o", "field_191905_p", "field_191903_n", "field_193018_j"
-    };
-    private static final String INGREDIENT_MATCHING_STACKS_NAME = "matchingStacks";
-    private static final String INGREDIENT_MATCHING_STACKS_SRG = "field_193371_b";
-    private static final String COMMANDS_ALLOWED_FOR_ALL_NAME = "commandsAllowedForAll";
-    private static final String COMMANDS_ALLOWED_FOR_ALL_SRG = "field_72407_n";
-    private static final String CHAT_LISTENERS_NAME = "chatListeners";
-    private static final String CHAT_LISTENERS_SRG = "field_191743_I";
-    private static final String CONTAINER_LISTENERS_NAME = "listeners";
-    private static final String CONTAINER_LISTENERS_SRG = "field_75149_d";
-    private static final String CHAT_COLOR_NAME = "chatColor";
-    private static final String CHAT_COLOR_SRG = "field_176793_x";
-    private static final String FORMATTING_CODE_NAME = "formattingCode";
-    private static final String FORMATTING_CODE_SRG = "field_96329_z";
-    private static final String COMMAND_SET_NAME = "commandSet";
-    private static final String COMMAND_SET_SRG = "field_71561_b";
-    private static final String UNICODE_PAGE_LOCATIONS_NAME = "UNICODE_PAGE_LOCATIONS";
-    private static final String UNICODE_PAGE_LOCATIONS_SRG = "field_111274_c";
-    private static final String STYLE_GET_PARENT_NAME = "getParent";
-    private static final String STYLE_GET_PARENT_SRG = "func_150224_n";
-    private static final String STYLE_GET_PARENT_DESC = "()Lnet/minecraft/util/text/Style;";
-    private static final String[] STYLE_FIELD_NAMES = {
-            "bold", "italic", "strikethrough", "underlined", "obfuscated",
-            "color", "clickEvent", "hoverEvent", "insertion"
-    };
-    private static final String[] STYLE_FIELD_SRGS = {
-            "field_150248_c", "field_150245_d", "field_150243_f", "field_150246_e", "field_150244_g",
-            "field_150247_b", "field_150251_h", "field_150252_i", "field_179990_j"
-    };
-
     @Override
     public byte[] transform(String name, String transformedName, byte[] basicClass) {
-        if (basicClass == null
-                || (!TEXTURE_MAP_CLASS.equals(transformedName)
-                && !GUI_RECIPE_BOOK_CLASS.equals(transformedName)
-                && !INGREDIENT_CLASS.equals(transformedName)
-                && !RENDER_ITEM_CLASS.equals(transformedName)
-                && !PLAYER_LIST_CLASS.equals(transformedName)
-                && !GUI_INGAME_CLASS.equals(transformedName)
-                && !CONTAINER_CLASS.equals(transformedName)
-                && !ENUM_DYE_COLOR_CLASS.equals(transformedName)
-                && !TEXT_FORMATTING_CLASS.equals(transformedName)
-                && !COMMAND_HANDLER_CLASS.equals(transformedName)
-                && !FONT_RENDERER_CLASS.equals(transformedName)
-                && !STYLE_CLASS.equals(transformedName)
-                && !isFtbIconClass(transformedName)
+        if (basicClass == null || !FMLLaunchHandler.side().isClient()
+                || (!isFtbIconClass(transformedName)
                 && !AE2_GUI_IMG_BUTTON_CLASS.equals(transformedName)
                 && !AE2_GUI_TAB_BUTTON_CLASS.equals(transformedName)
                 && !AE2_GUI_TOGGLE_BUTTON_CLASS.equals(transformedName)
@@ -182,72 +107,6 @@ public class BlxckoutFXAccessTransformer implements IClassTransformer {
                     "render",
                     PATCHOULI_COMPONENT_IMAGE_RENDER_DESC
             );
-        } else if (TEXTURE_MAP_CLASS.equals(transformedName)) {
-            for (FieldNode field : classNode.fields) {
-                if (matches(field.name, "mapRegisteredSprites", "field_110574_e") && makePublic(field)) {
-                    changed = true;
-                } else if (matchesAny(field.name, TEXTURE_MAP_FIELD_NAMES, TEXTURE_MAP_FIELD_SRGS) && makeProtected(field)) {
-                    changed = true;
-                }
-            }
-            for (MethodNode method : classNode.methods) {
-                if (isInitMissingImage(method) && makeProtected(method)) {
-                    changed = true;
-                }
-            }
-        } else if (GUI_RECIPE_BOOK_CLASS.equals(transformedName)) {
-            for (FieldNode field : classNode.fields) {
-                if (matchesAny(field.name, GUI_RECIPE_BOOK_FIELD_NAMES, GUI_RECIPE_BOOK_FIELD_SRGS) && makePublic(field)) {
-                    changed = true;
-                }
-            }
-        } else if (INGREDIENT_CLASS.equals(transformedName)) {
-            for (FieldNode field : classNode.fields) {
-                if ((INGREDIENT_MATCHING_STACKS_NAME.equals(field.name) || INGREDIENT_MATCHING_STACKS_SRG.equals(field.name)) && makePublic(field)) {
-                    changed = true;
-                }
-            }
-        } else if (PLAYER_LIST_CLASS.equals(transformedName)) {
-            for (FieldNode field : classNode.fields) {
-                if ((COMMANDS_ALLOWED_FOR_ALL_NAME.equals(field.name) || COMMANDS_ALLOWED_FOR_ALL_SRG.equals(field.name)) && makePublic(field)) {
-                    changed = true;
-                }
-            }
-        } else if (GUI_INGAME_CLASS.equals(transformedName)) {
-            for (FieldNode field : classNode.fields) {
-                if ((CHAT_LISTENERS_NAME.equals(field.name) || CHAT_LISTENERS_SRG.equals(field.name)) && makePublic(field)) {
-                    changed = true;
-                }
-            }
-        } else if (CONTAINER_CLASS.equals(transformedName)) {
-            changed = makeNamedFieldPublic(classNode, CONTAINER_LISTENERS_NAME, CONTAINER_LISTENERS_SRG);
-        } else if (ENUM_DYE_COLOR_CLASS.equals(transformedName)) {
-            changed = makeNamedFieldPublic(classNode, CHAT_COLOR_NAME, CHAT_COLOR_SRG);
-        } else if (TEXT_FORMATTING_CLASS.equals(transformedName)) {
-            changed = makeNamedFieldPublic(classNode, FORMATTING_CODE_NAME, FORMATTING_CODE_SRG);
-        } else if (COMMAND_HANDLER_CLASS.equals(transformedName)) {
-            changed = makeNamedFieldPublic(classNode, COMMAND_SET_NAME, COMMAND_SET_SRG);
-        } else if (FONT_RENDERER_CLASS.equals(transformedName)) {
-            changed = makeNamedFieldPublic(classNode, UNICODE_PAGE_LOCATIONS_NAME, UNICODE_PAGE_LOCATIONS_SRG);
-        } else if (STYLE_CLASS.equals(transformedName)) {
-            for (FieldNode field : classNode.fields) {
-                if (matchesAny(field.name, STYLE_FIELD_NAMES, STYLE_FIELD_SRGS) && makePublic(field)) {
-                    changed = true;
-                }
-            }
-            for (MethodNode method : classNode.methods) {
-                if (STYLE_GET_PARENT_DESC.equals(method.desc)
-                        && matches(method.name, STYLE_GET_PARENT_NAME, STYLE_GET_PARENT_SRG)
-                        && makePublic(method)) {
-                    changed = true;
-                }
-            }
-        } else {
-            for (MethodNode method : classNode.methods) {
-                if (isRenderModelMethod(method) && makePublic(method)) {
-                    changed = true;
-                }
-            }
         }
 
         if (!changed) {
@@ -257,20 +116,6 @@ public class BlxckoutFXAccessTransformer implements IClassTransformer {
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         classNode.accept(writer);
         return writer.toByteArray();
-    }
-
-    private static boolean matchesAny(String name, String[] deobfNames, String[] srgNames) {
-        for (String candidate : deobfNames) {
-            if (candidate.equals(name)) {
-                return true;
-            }
-        }
-        for (String candidate : srgNames) {
-            if (candidate.equals(name)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private static boolean matches(String name, String deobfName, String srgName) {
@@ -573,58 +418,4 @@ public class BlxckoutFXAccessTransformer implements IClassTransformer {
         return new MethodInsnNode(Opcodes.INVOKESTATIC, RENDER_CONTEXT_CLASS, methodName, "()V", false);
     }
 
-    private static boolean makeNamedFieldPublic(ClassNode classNode, String deobfName, String srgName) {
-        boolean changed = false;
-        for (FieldNode field : classNode.fields) {
-            if (matches(field.name, deobfName, srgName) && makePublic(field)) {
-                changed = true;
-            }
-        }
-        return changed;
-    }
-
-    private static boolean isInitMissingImage(MethodNode method) {
-        if (!INIT_MISSING_IMAGE_DESC.equals(method.desc)) {
-            return false;
-        }
-        return INIT_MISSING_IMAGE_NAME.equals(method.name) || INIT_MISSING_IMAGE_SRG.equals(method.name);
-    }
-
-    private static boolean isRenderModelMethod(MethodNode method) {
-        if (RENDER_MODEL_COLOR_DESC.equals(method.desc)) {
-            return RENDER_MODEL_COLOR_NAME.equals(method.name) || RENDER_MODEL_COLOR_SRG.equals(method.name);
-        }
-        if (RENDER_MODEL_STACK_DESC.equals(method.desc)) {
-            return RENDER_MODEL_STACK_NAME.equals(method.name) || RENDER_MODEL_STACK_SRG.equals(method.name);
-        }
-        return false;
-    }
-
-    private static boolean makeProtected(FieldNode field) {
-        int oldAccess = field.access;
-        field.access &= ~(Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC);
-        field.access |= Opcodes.ACC_PROTECTED;
-        return oldAccess != field.access;
-    }
-
-    private static boolean makeProtected(MethodNode method) {
-        int oldAccess = method.access;
-        method.access &= ~(Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC);
-        method.access |= Opcodes.ACC_PROTECTED;
-        return oldAccess != method.access;
-    }
-
-    private static boolean makePublic(FieldNode field) {
-        int oldAccess = field.access;
-        field.access &= ~(Opcodes.ACC_PRIVATE | Opcodes.ACC_PROTECTED);
-        field.access |= Opcodes.ACC_PUBLIC;
-        return oldAccess != field.access;
-    }
-
-    private static boolean makePublic(MethodNode method) {
-        int oldAccess = method.access;
-        method.access &= ~(Opcodes.ACC_PRIVATE | Opcodes.ACC_PROTECTED);
-        method.access |= Opcodes.ACC_PUBLIC;
-        return oldAccess != method.access;
-    }
 }

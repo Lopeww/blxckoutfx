@@ -1,11 +1,8 @@
 package com.lopew.blxckoutfx;
 
-import com.lopew.blxckoutfx.client.BlxckoutFXClientConfig;
-import com.lopew.blxckoutfx.client.BlxckoutFXGUIHandler;
-import com.lopew.blxckoutfx.client.BlxckoutFXKeybinds;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.Logger;
@@ -23,7 +20,13 @@ public class BlxckoutFX
 {
     public static final String MODID = "blxckoutfx";
     public static final String NAME = "BlxckoutFX";
-    public static final String VERSION = "1.0.0";
+    public static final String VERSION = "1.0.1";
+
+    @SidedProxy(
+            clientSide = "com.lopew.blxckoutfx.client.ClientProxy",
+            serverSide = "com.lopew.blxckoutfx.CommonProxy"
+    )
+    public static CommonProxy proxy;
 
     private static Logger logger;
 
@@ -37,19 +40,7 @@ public class BlxckoutFX
     @EventHandler
     public void init(FMLInitializationEvent event)
     {
+        proxy.init();
         logger.info("{} initialized", NAME);
-        
-        try {
-            MinecraftForge.EVENT_BUS.register(new BlxckoutFXClientConfig.ConfigEventHandler());
-            
-            if (event.getSide().isClient()) {
-                MinecraftForge.EVENT_BUS.register(new BlxckoutFXGUIHandler());
-                MinecraftForge.EVENT_BUS.register(new BlxckoutFXKeybinds());
-                BlxckoutFXKeybinds.init();
-            }
-        } catch (Exception e) {
-            logger.error("Exception during BlxckoutFX initialization", e);
-            throw e;
-        }
     }
 }

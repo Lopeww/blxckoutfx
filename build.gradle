@@ -5,11 +5,18 @@ buildscript {
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
+        classpath 'org.ow2.asm:asm:5.2'
+        classpath 'org.ow2.asm:asm-tree:5.2'
     }
 }
 
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
+
+import java.util.jar.JarFile
+import groovy.json.JsonSlurper
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.tree.ClassNode
 
 ext.mod_id = project.findProperty('mod_id') ?: 'blxckoutfx'
 ext.mod_name = project.findProperty('mod_name') ?: 'BlxckoutFX'
@@ -22,14 +29,17 @@ ext.issue_tracker = project.findProperty('issue_tracker') ?: 'https://github.com
 ext.minecraft_version = project.findProperty('minecraft_version') ?: '1.12.2'
 ext.forge_version = project.findProperty('forge_version') ?: '14.23.5.2859'
 ext.mod_version = project.findProperty('mod_version') ?: '1.0.0'
+ext.mixin_version = '0.8.3'
 
 version = mod_version
 group = project.findProperty('mod_group') ?: 'com.lopew.blxckoutfx'
 archivesBaseName = mod_id
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+def generatedMixinResources = file("${buildDir}/generated/resources/mixin")
 
-sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
+sourceSets.main.resources.srcDir generatedMixinResources
+
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 minecraft {
     mappings channel: 'snapshot', version: '20171003-1.12'
@@ -40,27 +50,31 @@ minecraft {
             jvmArg '-noverify'
 
             property 'forge.logging.markers', 'REGISTRIES'
-            property 'fml.coreMods.load', 'com.lopew.blxckoutfx.core.BlxckoutFXCorePlugin'
+            property 'fml.coreMods.load', 'com.lopew.blxckoutfx.core.BlxckoutFXDevelopmentCorePlugin'
 
             property 'forge.logging.console.level', 'info'
         }
 
         server {
             property 'forge.logging.markers', 'REGISTRIES'
+            property 'fml.coreMods.load', 'com.lopew.blxckoutfx.core.BlxckoutFXDevelopmentCorePlugin'
             property 'forge.logging.console.level', 'info'
         }
     }
 }
 
 repositories {
+    // ForgeGradle writes remapped legacy Forge artifacts here during setup.
+    maven { url = uri("${gradle.gradleUserHomeDir}/caches/forge_gradle/minecraft_user_repo") }
     maven { url = 'https://modmaven.dev' }
     maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
     maven { url = 'https://www.cursemaven.com' }
 }
 
 configurations {
-    shade
-    compile.extendsFrom shade
+    mixinEmbed
+    compileOnly.extendsFrom mixinEmbed
+    runtimeOnly.extendsFrom mixinEmbed
 }
 
 configurations.all {
@@ -78,32 +92,25 @@ dependencies {
 
     compileOnly fg.deobf("mezz.jei:jei_1.12.2:4.16.1.301")
     runtimeOnly fg.deobf("mezz.jei:jei_1.12.2:4.16.1.301")
-    implementation fg.deobf("curse.maven:journeymap-32274:5172461")
-    implementation fg.deobf("curse.maven:patchouli-306770:3162874")
-    implementation fg.deobf("curse.maven:pneumaticcraft-repressurized-281849:2978408")
+    compileOnly fg.deobf("curse.maven:journeymap-32274:5172461")
+    runtimeOnly fg.deobf("curse.maven:journeymap-32274:5172461")
+    compileOnly fg.deobf("curse.maven:patchouli-306770:3162874")
+    runtimeOnly fg.deobf("curse.maven:patchouli-306770:3162874")
+    compileOnly fg.deobf("curse.maven:pneumaticcraft-repressurized-281849:2978408")
+    runtimeOnly fg.deobf("curse.maven:pneumaticcraft-repressurized-281849:2978408")
 
-    shade('org.spongepowered:mixin:0.8.3') {
-        exclude module: 'launchwrapper'
-        exclude module: 'guava'
-        exclude module: 'gson'
-        exclude module: 'commons-io'
-        exclude module: 'log4j-core'
-        exclude module: 'log4j-api'
-        exclude module: 'asm'
-        exclude module: 'asm-analysis'
-        exclude module: 'asm-commons'
-        exclude module: 'asm-tree'
-        exclude module: 'asm-util'
-        exclude module: 'slf4j-api'
+    // Forge provides LaunchWrapper, Log4j and ASM. Embed the complete Mixin runtime only.
+    mixinEmbed("org.spongepowered:mixin:${mixin_version}") {
+        transitive = false
     }
-    annotationProcessor 'org.spongepowered:mixin:0.8.3:processor'
+    annotationProcessor "org.spongepowered:mixin:${mixin_version}:processor"
 
 }
 
-task generateMixinIdentitySrg {
+task generateMixinMcpToSrg {
     dependsOn 'createSrgToMcp'
     def input = file("${buildDir}/createSrgToMcp/output.srg")
-    def output = file("${buildDir}/${mod_id}-identity.srg")
+    def output = file("${buildDir}/${mod_id}-mcp-to-srg.srg")
     inputs.file(input)
     outputs.file(output)
     doLast {
@@ -111,24 +118,27 @@ task generateMixinIdentitySrg {
         input.eachLine { line ->
             if (line.startsWith('CL: ')) {
                 def parts = line.substring(4).trim().split(/\s+/)
-                sb << "CL: ${parts[1]} ${parts[1]}\n"
+                sb << "CL: ${parts[1]} ${parts[0]}\n"
             } else if (line.startsWith('FD: ')) {
                 def parts = line.substring(4).trim().split(/\s+/)
-                sb << "FD: ${parts[1]} ${parts[1]}\n"
+                sb << "FD: ${parts[1]} ${parts[0]}\n"
             } else if (line.startsWith('MD: ')) {
                 def parts = line.substring(4).trim().split(/\s+/)
-                sb << "MD: ${parts[2]} ${parts[3]} ${parts[2]} ${parts[3]}\n"
+                sb << "MD: ${parts[2]} ${parts[3]} ${parts[0]} ${parts[1]}\n"
             }
         }
         output.text = sb.toString()
     }
 }
 
-compileJava.dependsOn generateMixinIdentitySrg
+compileJava.dependsOn generateMixinMcpToSrg
 compileJava {
+    doFirst {
+        generatedMixinResources.mkdirs()
+    }
     options.compilerArgs += [
-        "-AreobfSrgFile=${buildDir}/${mod_id}-identity.srg".toString(),
-        "-AoutRefMapFile=${projectDir}/src/main/resources/${mod_id}.refmap.json".toString(),
+        "-AreobfSrgFile=${buildDir}/${mod_id}-mcp-to-srg.srg".toString(),
+        "-AoutRefMapFile=${generatedMixinResources}/${mod_id}.refmap.json".toString(),
         "-AdefaultObfuscationEnv=searge"
     ]
 }
@@ -148,6 +158,7 @@ def resourceProperties = [
 ]
 
 processResources {
+    dependsOn compileJava
     inputs.properties resourceProperties
     filesMatching(['mcmod.info', 'pack.mcmeta']) {
         expand resourceProperties
@@ -163,23 +174,344 @@ def manifestAttributes = [
     "Implementation-Vendor": mod_author,
     "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
     "FMLCorePlugin": "com.lopew.blxckoutfx.core.BlxckoutFXCorePlugin",
-    "FMLCorePluginContainsFMLMod": true,
-    "ForceLoadAsMod": true,
+    "FMLCorePluginContainsFMLMod": "true",
+    // TweakClass makes Forge ignore this jar as a mod; Mixin reparses it when this marker is present.
+    "ForceLoadAsMod": "true",
+    // Production Forge must initialise Mixin through its first-class tweaker.
+    "TweakClass": "org.spongepowered.asm.launch.MixinTweaker",
+    "TweakOrder": 0,
     "MixinConfigs": "${mod_id}.mixins.json"
 ]
 
 jar {
     from {
-        configurations.shade.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.mixinEmbed.collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        // 1.12.2 uses LaunchWrapper, so retain only its three runtime services.
+        exclude 'META-INF/services/**'
+        exclude 'META-INF/maven/**'
+        exclude 'org/spongepowered/tools/**'
     }
     exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
-    exclude 'META-INF/maven/**'
-    exclude 'META-INF/services/javax.annotation.processing.Processor'
-    exclude 'META-INF/services/org.spongepowered.tools.obfuscation.service.IObfuscationService'
-    exclude 'org/spongepowered/tools/**'
+    exclude 'com/lopew/blxckoutfx/core/BlxckoutFXDevelopmentCorePlugin.class'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         attributes(manifestAttributes)
     }
 }
 
 jar.finalizedBy('reobfJar')
+
+task verifyReleaseJar {
+    group = 'verification'
+    description = 'Verifies that the reobfuscated release jar contains a complete LaunchWrapper Mixin runtime.'
+    dependsOn 'reobfJar'
+
+    doLast {
+        File releaseJar = file("${buildDir}/libs/${archivesBaseName}-${version}.jar")
+        if (!releaseJar.isFile()) {
+            throw new GradleException("Release jar was not created: ${releaseJar}")
+        }
+
+        JarFile zip = new JarFile(releaseJar)
+        try {
+            String mixinConfig = mod_id + '.mixins.json'
+            String optionalMixinConfig = mod_id + '.optional.mixins.json'
+            String mixinConfigManifest = mixinConfig
+            String refmap = mod_id + '.refmap.json'
+            Set<String> entries = [] as Set
+            Map<String, Integer> entryCounts = [:]
+            zip.entries().each { entry ->
+                entries.add(entry.name)
+                entryCounts[entry.name] = (entryCounts[entry.name] ?: 0) + 1
+            }
+
+            [
+                'org/spongepowered/asm/launch/MixinBootstrap.class',
+                'org/spongepowered/asm/launch/MixinTweaker.class',
+                'org/spongepowered/asm/service/MixinService.class',
+                'org/spongepowered/asm/service/IMixinService.class',
+                'org/spongepowered/asm/launch/platform/MixinPlatformManager.class',
+                'com/lopew/blxckoutfx/BlxckoutFX.class',
+                'com/lopew/blxckoutfx/core/BlxckoutFXCorePlugin.class',
+                'com/lopew/blxckoutfx/mixin/BlxckoutFXOptionalMixinPlugin.class',
+                'mcmod.info',
+                mixinConfig,
+                optionalMixinConfig,
+                refmap,
+                'META-INF/services/org.spongepowered.asm.service.IGlobalPropertyService',
+                'META-INF/services/org.spongepowered.asm.service.IMixinService',
+                'META-INF/services/org.spongepowered.asm.service.IMixinServiceBootstrap'
+            ].each { requiredEntry ->
+                if (!entries.contains(requiredEntry)) {
+                    throw new GradleException("Release jar is missing required entry: ${requiredEntry}")
+                }
+            }
+
+            def duplicateEntries = entryCounts.findAll { name, count -> count > 1 }.keySet()
+            if (!duplicateEntries.isEmpty()) {
+                throw new GradleException("Release jar contains duplicate entries: ${duplicateEntries}")
+            }
+            if (entries.any { it.startsWith('org/spongepowered/tools/') }) {
+                throw new GradleException('Release jar contains Mixin annotation-processor classes')
+            }
+            if (entries.contains('com/lopew/blxckoutfx/core/BlxckoutFXDevelopmentCorePlugin.class')) {
+                throw new GradleException('Release jar contains the development-only Mixin bootstrap plugin')
+            }
+            def refmapEntries = entries.findAll { it.endsWith('.refmap.json') }
+            if (refmapEntries != ([refmap] as Set)) {
+                throw new GradleException("Release jar contains stale or duplicate refmaps: ${refmapEntries}")
+            }
+            def embeddedOptionalModClasses = entries.findAll { entryName ->
+                (entryName.startsWith('mezz/')
+                        || entryName.startsWith('journeymap/')
+                        || entryName.startsWith('vazkii/')
+                        || entryName.startsWith('appeng/')
+                        || entryName.startsWith('me/desht/')
+                        || entryName.startsWith('com/feed_the_beast/'))
+            }
+            if (!embeddedOptionalModClasses.isEmpty()) {
+                throw new GradleException("Release jar embeds optional mod classes: ${embeddedOptionalModClasses}")
+            }
+            if (entries.count { it.startsWith('org/spongepowered/asm/') && it.endsWith('.class') } < 400) {
+                throw new GradleException('Release jar contains an incomplete Mixin runtime')
+            }
+
+            def readEntry = { entryName ->
+                def stream = zip.getInputStream(zip.getEntry(entryName))
+                try {
+                    return stream.getText('UTF-8')
+                } finally {
+                    stream.close()
+                }
+            }
+            def readEntryBytes = { entryName ->
+                def stream = zip.getInputStream(zip.getEntry(entryName))
+                try {
+                    return stream.bytes
+                } finally {
+                    stream.close()
+                }
+            }
+
+            entries.findAll { it.endsWith('.class') }.each { classEntry ->
+                byte[] classBytes = readEntryBytes(classEntry)
+                int majorVersion = ((classBytes[6] & 0xFF) << 8) | (classBytes[7] & 0xFF)
+                if (majorVersion != 52) {
+                    throw new GradleException("Release jar contains non-Java-8 bytecode (${majorVersion}): ${classEntry}")
+                }
+            }
+
+            def metadata = new JsonSlurper().parseText(readEntry('mcmod.info'))
+            if (!(metadata instanceof List) || metadata.size() != 1
+                    || metadata[0].modid != mod_id
+                    || metadata[0].name != mod_name
+                    || metadata[0].version != project.version.toString()
+                    || metadata[0].mcversion != minecraft_version
+                    || metadata[0].clientSideOnly != true) {
+                throw new GradleException('Release jar has invalid Forge mod metadata')
+            }
+
+            ClassNode modClass = new ClassNode()
+            new ClassReader(readEntryBytes('com/lopew/blxckoutfx/BlxckoutFX.class')).accept(
+                    modClass,
+                    ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES
+            )
+            def modAnnotation = modClass.visibleAnnotations?.find {
+                it.desc == 'Lnet/minecraftforge/fml/common/Mod;'
+            }
+            Map modAnnotationValues = [:]
+            if (modAnnotation?.values) {
+                for (int i = 0; i < modAnnotation.values.size(); i += 2) {
+                    modAnnotationValues[modAnnotation.values[i]] = modAnnotation.values[i + 1]
+                }
+            }
+            if (modAnnotationValues.modid != mod_id
+                    || modAnnotationValues.name != mod_name
+                    || modAnnotationValues.version != project.version.toString()
+                    || modAnnotationValues.useMetadata != true
+                    || modAnnotationValues.clientSideOnly != true) {
+                throw new GradleException('Release jar main class has invalid @Mod registration metadata')
+            }
+            def lifecycleHandlers = modClass.methods.findAll { method ->
+                method.visibleAnnotations?.any { it.desc == 'Lnet/minecraftforge/fml/common/Mod$EventHandler;' }
+            }*.name as Set
+            if (!lifecycleHandlers.containsAll(['preInit', 'init'])) {
+                throw new GradleException("Release jar is missing Forge lifecycle handlers: ${lifecycleHandlers}")
+            }
+
+            def mixinConfigJson = new JsonSlurper().parseText(readEntry(mixinConfig))
+            if (mixinConfigJson.required != true
+                    || mixinConfigJson.compatibilityLevel != 'JAVA_8'
+                    || mixinConfigJson.refmap != refmap
+                    || !mixinConfigJson.client
+                    || mixinConfigJson.mixins
+                    || mixinConfigJson.server) {
+                throw new GradleException('Release jar has an invalid client-only Mixin configuration')
+            }
+            mixinConfigJson.client.each { mixinName ->
+                String mixinClass = mixinConfigJson.package.replace('.', '/') + '/' + mixinName.replace('.', '/') + '.class'
+                if (!entries.contains(mixinClass)) {
+                    throw new GradleException("Release jar is missing configured Mixin class: ${mixinClass}")
+                }
+                if (mixinName.startsWith('jei.') || mixinName.startsWith('journeymap.')) {
+                    throw new GradleException("Optional Mixin is incorrectly included in the required config: ${mixinName}")
+                }
+            }
+            def optionalMixinConfigJson = new JsonSlurper().parseText(readEntry(optionalMixinConfig))
+            if (optionalMixinConfigJson.required != false
+                    || optionalMixinConfigJson.plugin != 'com.lopew.blxckoutfx.mixin.BlxckoutFXOptionalMixinPlugin'
+                    || optionalMixinConfigJson.compatibilityLevel != 'JAVA_8'
+                    || optionalMixinConfigJson.refmap != refmap
+                    || !optionalMixinConfigJson.client
+                    || optionalMixinConfigJson.mixins
+                    || optionalMixinConfigJson.server) {
+                throw new GradleException('Release jar has an invalid optional Mixin configuration')
+            }
+            optionalMixinConfigJson.client.each { mixinName ->
+                if (!mixinName.startsWith('jei.') && !mixinName.startsWith('journeymap.')) {
+                    throw new GradleException("Non-optional Mixin is incorrectly included in the optional config: ${mixinName}")
+                }
+                String mixinClass = optionalMixinConfigJson.package.replace('.', '/') + '/' + mixinName.replace('.', '/') + '.class'
+                if (!entries.contains(mixinClass)) {
+                    throw new GradleException("Release jar is missing configured optional Mixin class: ${mixinClass}")
+                }
+            }
+            Set<String> requiredMixinClasses = mixinConfigJson.client.collect { mixinName ->
+                mixinConfigJson.package.replace('.', '/') + '/' + mixinName.replace('.', '/')
+            } as Set
+            Set<String> optionalMixinClasses = optionalMixinConfigJson.client.collect { mixinName ->
+                optionalMixinConfigJson.package.replace('.', '/') + '/' + mixinName.replace('.', '/')
+            } as Set
+
+            def annotationsOf = { node ->
+                def annotations = []
+                if (node.visibleAnnotations) {
+                    annotations.addAll(node.visibleAnnotations)
+                }
+                if (node.invisibleAnnotations) {
+                    annotations.addAll(node.invisibleAnnotations)
+                }
+                return annotations
+            }
+            def hasExplicitFalse = { annotation, key ->
+                if (!annotation.values) {
+                    return false
+                }
+                for (int i = 0; i < annotation.values.size(); i += 2) {
+                    if (key == annotation.values[i] && Boolean.FALSE == annotation.values[i + 1]) {
+                        return true
+                    }
+                }
+                return false
+            }
+            (requiredMixinClasses + optionalMixinClasses).each { mixinClass ->
+                String classEntry = mixinClass + '.class'
+                ClassNode classNode = new ClassNode()
+                new ClassReader(readEntryBytes(classEntry)).accept(
+                        classNode,
+                        ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES
+                )
+
+                def shadowFields = classNode.fields.findAll { field ->
+                    annotationsOf(field).any { it.desc == 'Lorg/spongepowered/asm/mixin/Shadow;' }
+                }
+                if (!shadowFields.isEmpty()) {
+                    throw new GradleException("Configured Mixin contains brittle field shadows: ${mixinClass} ${shadowFields*.name}")
+                }
+
+                if (requiredMixinClasses.contains(mixinClass)) {
+                    def remapFalseAnnotations = []
+                    remapFalseAnnotations.addAll(annotationsOf(classNode).findAll { hasExplicitFalse(it, 'remap') })
+                    classNode.methods.each { method ->
+                        remapFalseAnnotations.addAll(annotationsOf(method).findAll { hasExplicitFalse(it, 'remap') })
+                    }
+                    if (!remapFalseAnnotations.isEmpty()) {
+                        throw new GradleException("Required vanilla Mixin disables remapping: ${mixinClass}")
+                    }
+                } else if (!annotationsOf(classNode).any { it.desc == 'Lorg/spongepowered/asm/mixin/Pseudo;' }) {
+                    throw new GradleException("Optional Mixin is missing @Pseudo: ${mixinClass}")
+                }
+            }
+            def refmapJson = new JsonSlurper().parseText(readEntry(refmap))
+            if (!refmapJson.data || !refmapJson.data.searge || !refmapJson.mappings) {
+                throw new GradleException('Release jar has an empty or non-SRG Mixin refmap')
+            }
+            def fontRendererMappings = refmapJson.data.searge['com/lopew/blxckoutfx/mixin/core/FontRendererMixin']
+            def fontRendererDrawString = fontRendererMappings?.get('drawString(Ljava/lang/String;FFIZ)I')
+            if (fontRendererDrawString != 'Lnet/minecraft/client/gui/FontRenderer;func_175065_a(Ljava/lang/String;FFIZ)I') {
+                throw new GradleException("Release jar has an invalid FontRenderer SRG target: ${fontRendererDrawString}")
+            }
+            if (fontRendererMappings.renderString != null) {
+                throw new GradleException('Release jar still targets FontRenderer.renderString instead of the stable drawString boundary')
+            }
+            def toggleMappings = refmapJson.data.searge['com/lopew/blxckoutfx/mixin/core/GuiButtonToggleMixin']
+            def toggleInitTexture = toggleMappings?.get('initTextureValues(IIIILnet/minecraft/util/ResourceLocation;)V')
+            if (toggleInitTexture != 'Lnet/minecraft/client/gui/GuiButtonToggle;func_191751_a(IIIILnet/minecraft/util/ResourceLocation;)V') {
+                throw new GradleException("Release jar has an invalid GuiButtonToggle SRG target: ${toggleInitTexture}")
+            }
+            if (toggleMappings?.resourceLocation != null || toggleMappings?.xTexStart != null || toggleMappings?.yTexStart != null) {
+                throw new GradleException('Release jar must not use GuiButtonToggle field shadows')
+            }
+            requiredMixinClasses.each { mixinClass ->
+                if (!refmapJson.data.searge.containsKey(mixinClass)) {
+                    throw new GradleException("Required Mixin has no production refmap entry: ${mixinClass}")
+                }
+            }
+            refmapJson.data.searge.each { mixinClass, mappings ->
+                mappings.each { reference, mappedReference ->
+                    if (mappedReference instanceof String
+                            && mappedReference.startsWith('Lnet/minecraft/')
+                            && mappedReference.contains(';')
+                            && mappedReference.contains('(')) {
+                        String mappedMethod = mappedReference.substring(mappedReference.indexOf(';') + 1, mappedReference.indexOf('('))
+                        if (!mappedMethod.startsWith('func_') && mappedMethod != '<init>') {
+                            throw new GradleException("Vanilla refmap entry was not converted to SRG: ${mixinClass} ${reference} -> ${mappedReference}")
+                        }
+                    }
+                }
+            }
+
+            [
+                'assets/blxckoutfx/shaders/blxckout.vsh',
+                'assets/blxckoutfx/shaders/posColor.fsh',
+                'assets/blxckoutfx/shaders/posTex.fsh'
+            ].each { asset ->
+                if (!entries.contains(asset)) {
+                    throw new GradleException("Release jar is missing runtime asset: ${asset}")
+                }
+            }
+
+            def serviceExpectations = [
+                'META-INF/services/org.spongepowered.asm.service.IGlobalPropertyService': 'org.spongepowered.asm.service.mojang.Blackboard',
+                'META-INF/services/org.spongepowered.asm.service.IMixinService': 'org.spongepowered.asm.service.mojang.MixinServiceLaunchWrapper',
+                'META-INF/services/org.spongepowered.asm.service.IMixinServiceBootstrap': 'org.spongepowered.asm.service.mojang.MixinServiceLaunchWrapperBootstrap'
+            ]
+            serviceExpectations.each { entryName, provider ->
+                String contents = readEntry(entryName).trim()
+                if (contents != provider) {
+                    throw new GradleException("Unexpected Mixin service provider in ${entryName}: ${contents}")
+                }
+            }
+
+            def manifest = zip.manifest.mainAttributes
+            [
+                'Manifest-Version': '1.0',
+                'FMLCorePlugin': 'com.lopew.blxckoutfx.core.BlxckoutFXCorePlugin',
+                'FMLCorePluginContainsFMLMod': 'true',
+                'ForceLoadAsMod': 'true',
+                'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker',
+                'TweakOrder': '0',
+                'MixinConfigs': mixinConfigManifest
+            ].each { attribute, expectedValue ->
+                if (manifest.getValue(attribute) != expectedValue) {
+                    throw new GradleException("Unexpected manifest ${attribute}: ${manifest.getValue(attribute)}")
+                }
+            }
+        } finally {
+            zip.close()
+        }
+    }
+}
+
+build.dependsOn verifyReleaseJar

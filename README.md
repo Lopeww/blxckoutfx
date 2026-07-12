@@ -12,6 +12,8 @@
 
 A lightweight Minecraft mod that applies a consistent dark theme to buttons and in-game GUI surfaces using shader-based rendering.
 
+The Minecraft 1.12.2 Forge release targets Forge `14.23.5.2860` and Java 8. It uses no Java 9+ APIs; Java 8u51 may work but a current Java 8 update is recommended for TLS, graphics-driver, and launcher stability.
+
 By transforming the default white panels into a sleek custom **mode**, this shader-based solution brings a refined **dark** aesthetic to your interface **everywhere** you look, delivering an eye-friendly experience across all screens.
 
 *Let darkness fall everywhere for your eyes.*
@@ -70,7 +72,7 @@ BlxckoutFX is intentionally focused: it changes GUI rendering, not the world its
 | 26.1.2           | NeoForge + Fabric   | 2.0.0       | Main Release     |
 | 1.21.1           | NeoForge + Fabric   | 2.0.0       | Release          |
 | 1.20.1           | Forge + Fabric      | 2.0.0       | Release          |
-| 1.12.2           | Forge               | 1.0.0       | Release          |
+| 1.12.2           | Forge               | 1.0.1       | Release          |
 
 ---
 

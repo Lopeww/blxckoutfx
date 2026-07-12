@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin({ GuiButtonExt.class, GuiUnicodeGlyphButton.class })
 public class ForgeConfigButtonMixin {
-    @Inject(method = "drawButton", at = @At("HEAD"), require = 1)
+    @Inject(method = "drawButton(Lnet/minecraft/client/Minecraft;IIF)V", at = @At("HEAD"), require = 1)
     private void blxckoutfx$enterForgeConfigButtonRender(
             Minecraft minecraft,
             int mouseX,
@@ -22,7 +22,7 @@ public class ForgeConfigButtonMixin {
         BlxckoutFXRenderContext.enterButtonRender();
     }
 
-    @Inject(method = "drawButton", at = @At("RETURN"), require = 1)
+    @Inject(method = "drawButton(Lnet/minecraft/client/Minecraft;IIF)V", at = @At("RETURN"), require = 1)
     private void blxckoutfx$exitForgeConfigButtonRender(
             Minecraft minecraft,
             int mouseX,

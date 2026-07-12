@@ -17,7 +17,7 @@ public class WorldVertexBufferUploaderMixin {
     @Unique
     private boolean blxckoutfx$shaderBound;
 
-    @Inject(method = "draw", at = @At("HEAD"), require = 1)
+    @Inject(method = "draw(Lnet/minecraft/client/renderer/BufferBuilder;)V", at = @At("HEAD"), require = 1)
     private void blxckoutfx$bindDarkeningShader(BufferBuilder buffer, CallbackInfo ci) {
         this.blxckoutfx$shaderBound = false;
         if (shouldDarken()) {
@@ -25,7 +25,7 @@ public class WorldVertexBufferUploaderMixin {
         }
     }
 
-    @Inject(method = "draw", at = @At("RETURN"), require = 1)
+    @Inject(method = "draw(Lnet/minecraft/client/renderer/BufferBuilder;)V", at = @At("RETURN"), require = 1)
     private void blxckoutfx$unbindDarkeningShader(BufferBuilder buffer, CallbackInfo ci) {
         if (this.blxckoutfx$shaderBound) {
             this.blxckoutfx$shaderBound = false;

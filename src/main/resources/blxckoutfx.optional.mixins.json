@@ -1,0 +1,16 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "com.lopew.blxckoutfx.mixin",
+  "plugin": "com.lopew.blxckoutfx.mixin.BlxckoutFXOptionalMixinPlugin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "blxckoutfx.refmap.json",
+  "client": [
+    "jei.GuiIconButtonMixin",
+    "jei.GuiIconButtonSmallMixin",
+    "jei.GuiIconToggleButtonMixin",
+    "jei.ShapelessIconMixin",
+    "journeymap.JourneyMapDrawUtilMixin",
+    "journeymap.JourneyMapThemeButtonMixin"
+  ]
+}

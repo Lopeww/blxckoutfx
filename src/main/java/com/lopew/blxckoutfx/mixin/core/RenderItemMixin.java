@@ -11,12 +11,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(RenderItem.class)
 public class RenderItemMixin {
-    @Inject(method = "renderItemModelIntoGUI", at = @At("HEAD"), require = 1)
+    @Inject(method = "renderItemModelIntoGUI(Lnet/minecraft/item/ItemStack;IILnet/minecraft/client/renderer/block/model/IBakedModel;)V", at = @At("HEAD"), require = 1)
     private void blxckoutfx$enterItemGuiRender(ItemStack stack, int x, int y, IBakedModel model, CallbackInfo ci) {
         BlxckoutFXRenderContext.enterItemRender();
     }
 
-    @Inject(method = "renderItemModelIntoGUI", at = @At("RETURN"), require = 1)
+    @Inject(method = "renderItemModelIntoGUI(Lnet/minecraft/item/ItemStack;IILnet/minecraft/client/renderer/block/model/IBakedModel;)V", at = @At("RETURN"), require = 1)
     private void blxckoutfx$exitItemGuiRender(ItemStack stack, int x, int y, IBakedModel model, CallbackInfo ci) {
         BlxckoutFXRenderContext.exitItemRender();
     }

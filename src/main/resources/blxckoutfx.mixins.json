@@ -16,12 +16,6 @@
     "core.GuiButtonRecipeTabMixin",
     "core.GuiRepairMixin",
     "core.FontRendererMixin",
-    "core.RenderItemMixin",
-    "jei.GuiIconButtonMixin",
-    "jei.GuiIconButtonSmallMixin",
-    "jei.GuiIconToggleButtonMixin",
-    "jei.ShapelessIconMixin",
-    "journeymap.JourneyMapDrawUtilMixin",
-    "journeymap.JourneyMapThemeButtonMixin"
+    "core.RenderItemMixin"
   ]
 }

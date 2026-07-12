@@ -12,14 +12,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Pseudo
 @Mixin(targets = "journeymap.client.ui.theme.ThemeButton", remap = false)
 public class JourneyMapThemeButtonMixin {
-    @Inject(method = "drawNativeButton", at = @At("HEAD"), require = 0, remap = false)
+    @Inject(method = "drawNativeButton(Lnet/minecraft/client/Minecraft;II)V", at = @At("HEAD"), require = 0, remap = false)
     private void blxckoutfx$enterPuristButtonDarkening(Minecraft minecraft, int mouseX, int mouseY, CallbackInfo ci) {
         if (BlxckoutFXJourneyMapThemeSupport.isPuristTheme(this)) {
             BlxckoutFXRenderContext.enterButtonRender();
         }
     }
 
-    @Inject(method = "drawNativeButton", at = @At("RETURN"), require = 0, remap = false)
+    @Inject(method = "drawNativeButton(Lnet/minecraft/client/Minecraft;II)V", at = @At("RETURN"), require = 0, remap = false)
     private void blxckoutfx$exitPuristButtonDarkening(Minecraft minecraft, int mouseX, int mouseY, CallbackInfo ci) {
         if (BlxckoutFXJourneyMapThemeSupport.isPuristTheme(this)) {
             BlxckoutFXRenderContext.exitButtonRender();
