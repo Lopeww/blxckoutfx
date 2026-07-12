@@ -13,6 +13,9 @@
     "entrypoints": {
         "client": [
             "com.lopew.blxckoutfx.fabric.BlxckoutFXFabric"
+        ],
+        "modmenu": [
+            "com.lopew.blxckoutfx.fabric.BlxckoutFXModMenuIntegration"
         ]
     },
     "mixins": [

@@ -1,0 +1,23 @@
+package com.lopew.blxckoutfx.mixin.core;
+
+import com.lopew.blxckoutfx.client.render.BlxckoutFXRenderPipelines;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import net.minecraft.client.gui.components.AbstractSliderButton;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+
+@Mixin(AbstractSliderButton.class)
+public class AbstractSliderButtonMixin {
+    @ModifyArg(
+            method = "extractWidgetRenderState",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIIII)V"
+            ),
+            index = 0
+    )
+    private RenderPipeline blxckoutfx$useButtonPipeline(RenderPipeline pipeline) {
+        return BlxckoutFXRenderPipelines.BUTTON_TEXTURED;
+    }
+}

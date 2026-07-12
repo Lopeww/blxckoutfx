@@ -1,11 +1,11 @@
 <div align="center">
   <img src="./blxckoutfx.png" width="128" height="128" alt="BlxckoutFX Logo">
 
-  ![Minecraft Sürümleri](https://img.shields.io/badge/MINECRAFT-26.1.2_%7C_1.21.1_%7C_1.20.1-darkgreen?style=for-the-badge)
-  <br>
-  ![Loaders](https://img.shields.io/badge/Loaders-Forge_|_NeoForge_|_Fabric-orange?style=for-the-badge)
-  <br>
-  ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
+![Minecraft Sürümleri](https://img.shields.io/badge/MINECRAFT-26.1.2_%7C_1.21.1_%7C_1.20.1_%7C_1.12.2-darkgreen?style=for-the-badge)
+<br>
+![Loaders](https://img.shields.io/badge/Loaders-Forge_|_NeoForge_|_Fabric-orange?style=for-the-badge)
+<br>
+![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 </div>
 
 # BlxckoutFX
@@ -40,9 +40,12 @@ BlxckoutFX is intentionally focused: it changes GUI rendering, not the world its
 - **Button Darkening in Menus:** Menu screens darken buttons only.
 - **In-Game GUI Dark Theme:** In-game screens can darken both buttons and GUI panels.
 - **Shader-Based Visual Styling:** No manual shader setup is required.
-- **Loader Support:** Supports NeoForge and Fabric Loader.
-- **Draggable FX Button:** The on-screen `FX` button cycles themes on left click and can be moved by holding and dragging.
-- **Config Screen:** Toggle the inventory button and adjust its saved position.
+- **Loader Support:** Supports Forge, NeoForge and Fabric Loader.
+- **Config Screen:** A redesigned, searchable configuration screen with categories, live preset previews, and persistent settings. It is also available through Mod Menu on Fabric.
+- **Enhanced Inventory Button:** Choose Classic or Short styling, use a corner preset or a custom position, and lock the button when its placement is final.
+- **Quick Controls:** Left-click cycles forward, right-click cycles backward, middle-click opens the config screen, and drag repositions the unlocked inventory button.
+- **AE2 Integration:** Dedicated Applied Energistics 2 rendering fixes and a selectable Blxckout/Blackout theme mode for supported 1.21.1+ versions.
+- **Compatibility Fixes:** Improved JourneyMap, JEI, FTB, and Mod Menu GUI/icon handling so supported elements remain readable and correctly layered.
 - **Readable Text Handling:** Soft, Balanced, and Dark modes use fixed readable text colors for better consistency.
 
 ### 🌑 Available Themes / Modes
@@ -53,16 +56,27 @@ BlxckoutFX is intentionally focused: it changes GUI rendering, not the world its
 - **⬛ Dark:** A stronger darkening mode for brighter interfaces.
 - **👁️‍🗨️ Blxckout:** The strongest preset for users who want the darkest look.
 
+### 🖥️ AE2 Themes
+
+- **Off:** Disables the dedicated AE2 Blackout effect.
+- **Blackout:** Applies the dedicated Blackout treatment to supported Applied Energistics 2 screens. It can be toggled directly from the inventory button while an AE2 screen is open.
+
 ---
 
 ## 📥 Versions
 
 | Minecraft Version | Loader              | Mod Version | Status           |
 |------------------|---------------------|-------------|------------------|
-| 26.1.2           | NeoForge + Fabric   | 1.1.0       | Main Release     |
-| 1.21.1           | NeoForge + Fabric   | 1.1.0       | Legacy Branch    |
-| 1.20.1           | Forge + Fabric      | 1.1.0       | Unsupported Port |
-| 1.12.2           | Forge               | -           | In Development   |
+| 26.1.2           | NeoForge + Fabric   | 2.0.0       | Main Release     |
+| 1.21.1           | NeoForge + Fabric   | 2.0.0       | Release          |
+| 1.20.1           | Forge + Fabric      | 2.0.0       | Release          |
+| 1.12.2           | Forge               | 1.0.0       | Release          |
+
+---
+
+## 📝 Changelog
+
+[View the full changelog](CHANGELOG.md)
 
 ---
 
@@ -81,8 +95,8 @@ BlxckoutFX is intentionally focused: it changes GUI rendering, not the world its
 
 - `main` → Minecraft 26.1.2 development
 - `1.21.1` → Minecraft 1.21.1 support branch
-- `1.20.1` → Minecraft 1.20.1 unsupport branch
-- `1.12.2` → Minecraft 1.12.2 backport branch (In Development)
+- `1.20.1` → Minecraft 1.20.1 unsupported branch
+- `1.12.2` → Minecraft 1.12.2 unsupported branch
 
 ---
 
