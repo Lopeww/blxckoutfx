@@ -1,0 +1,27 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.lopew.blxckoutfx.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "blxckoutfx.refmap.json",
+  "client": [
+    "core.WorldVertexBufferUploaderMixin",
+    "core.GuiButtonMixin",
+    "core.ForgeConfigButtonMixin",
+    "core.GuiButtonLanguageMixin",
+    "core.GuiButtonImageMixin",
+    "core.GuiButtonToggleMixin",
+    "core.GuiBeaconButtonMixin",
+    "core.GuiRecipeBookMixin",
+    "core.GuiButtonRecipeTabMixin",
+    "core.GuiRepairMixin",
+    "core.FontRendererMixin",
+    "core.RenderItemMixin",
+    "jei.GuiIconButtonMixin",
+    "jei.GuiIconButtonSmallMixin",
+    "jei.GuiIconToggleButtonMixin",
+    "jei.ShapelessIconMixin",
+    "journeymap.JourneyMapDrawUtilMixin",
+    "journeymap.JourneyMapThemeButtonMixin"
+  ]
+}

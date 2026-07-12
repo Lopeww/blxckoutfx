@@ -1,0 +1,40 @@
+# eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
+
+# idea
+out
+*.ipr
+*.iws
+*.iml
+.idea/*
+!.idea/scopes
+
+# gradle
+build
+.gradle
+
+# other
+eclipse
+run
+logs
+crash-reports
+*.log
+*.hprof
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# Files from Forge MDK
+forge*changelog.txt
+
+# release/development outputs
+mcmodsrepo
+libs
+*.jar
+!gradle/wrapper/gradle-wrapper.jar

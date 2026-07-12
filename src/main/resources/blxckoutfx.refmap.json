@@ -1,0 +1,82 @@
+{
+  "mappings": {
+    "com/lopew/blxckoutfx/mixin/core/WorldVertexBufferUploaderMixin": {
+      "draw": "Lnet/minecraft/client/renderer/WorldVertexBufferUploader;draw(Lnet/minecraft/client/renderer/BufferBuilder;)V"
+    },
+    "com/lopew/blxckoutfx/mixin/core/GuiRepairMixin": {
+      "drawGuiContainerBackgroundLayer": "Lnet/minecraft/client/gui/GuiRepair;drawGuiContainerBackgroundLayer(FII)V"
+    },
+    "com/lopew/blxckoutfx/mixin/core/GuiButtonImageMixin": {
+      "drawButton": "Lnet/minecraft/client/gui/GuiButtonImage;drawButton(Lnet/minecraft/client/Minecraft;IIF)V"
+    },
+    "com/lopew/blxckoutfx/mixin/core/RenderItemMixin": {
+      "renderItemModelIntoGUI": "Lnet/minecraft/client/renderer/RenderItem;renderItemModelIntoGUI(Lnet/minecraft/item/ItemStack;IILnet/minecraft/client/renderer/block/model/IBakedModel;)V"
+    },
+    "com/lopew/blxckoutfx/mixin/core/GuiButtonToggleMixin": {
+      "drawButton": "Lnet/minecraft/client/gui/GuiButtonToggle;drawButton(Lnet/minecraft/client/Minecraft;IIF)V"
+    },
+    "com/lopew/blxckoutfx/mixin/core/FontRendererMixin": {
+      "renderString": "Lnet/minecraft/client/gui/FontRenderer;renderString(Ljava/lang/String;FFIZ)I"
+    },
+    "com/lopew/blxckoutfx/mixin/core/GuiButtonMixin": {
+      "drawButton": "Lnet/minecraft/client/gui/GuiButton;drawButton(Lnet/minecraft/client/Minecraft;IIF)V"
+    },
+    "com/lopew/blxckoutfx/mixin/core/GuiRecipeBookMixin": {
+      "render": "Lnet/minecraft/client/gui/recipebook/GuiRecipeBook;render(IIF)V"
+    },
+    "com/lopew/blxckoutfx/mixin/core/GuiButtonRecipeTabMixin": {
+      "drawButton": "Lnet/minecraft/client/gui/recipebook/GuiButtonRecipeTab;drawButton(Lnet/minecraft/client/Minecraft;IIF)V"
+    },
+    "com/lopew/blxckoutfx/mixin/core/GuiBeaconButtonMixin": {
+      "net.minecraft.client.gui.inventory.GuiBeacon$Button": "net/minecraft/client/gui/inventory/GuiBeacon$Button",
+      "drawButton": "Lnet/minecraft/client/gui/inventory/GuiBeacon$Button;drawButton(Lnet/minecraft/client/Minecraft;IIF)V"
+    },
+    "com/lopew/blxckoutfx/mixin/core/ForgeConfigButtonMixin": {
+      "drawButton": "drawButton(Lnet/minecraft/client/Minecraft;IIF)V"
+    },
+    "com/lopew/blxckoutfx/mixin/core/GuiButtonLanguageMixin": {
+      "drawButton": "Lnet/minecraft/client/gui/GuiButtonLanguage;drawButton(Lnet/minecraft/client/Minecraft;IIF)V"
+    }
+  },
+  "data": {
+    "searge": {
+      "com/lopew/blxckoutfx/mixin/core/WorldVertexBufferUploaderMixin": {
+        "draw": "Lnet/minecraft/client/renderer/WorldVertexBufferUploader;draw(Lnet/minecraft/client/renderer/BufferBuilder;)V"
+      },
+      "com/lopew/blxckoutfx/mixin/core/GuiRepairMixin": {
+        "drawGuiContainerBackgroundLayer": "Lnet/minecraft/client/gui/GuiRepair;drawGuiContainerBackgroundLayer(FII)V"
+      },
+      "com/lopew/blxckoutfx/mixin/core/GuiButtonImageMixin": {
+        "drawButton": "Lnet/minecraft/client/gui/GuiButtonImage;drawButton(Lnet/minecraft/client/Minecraft;IIF)V"
+      },
+      "com/lopew/blxckoutfx/mixin/core/RenderItemMixin": {
+        "renderItemModelIntoGUI": "Lnet/minecraft/client/renderer/RenderItem;renderItemModelIntoGUI(Lnet/minecraft/item/ItemStack;IILnet/minecraft/client/renderer/block/model/IBakedModel;)V"
+      },
+      "com/lopew/blxckoutfx/mixin/core/GuiButtonToggleMixin": {
+        "drawButton": "Lnet/minecraft/client/gui/GuiButtonToggle;drawButton(Lnet/minecraft/client/Minecraft;IIF)V"
+      },
+      "com/lopew/blxckoutfx/mixin/core/FontRendererMixin": {
+        "renderString": "Lnet/minecraft/client/gui/FontRenderer;renderString(Ljava/lang/String;FFIZ)I"
+      },
+      "com/lopew/blxckoutfx/mixin/core/GuiButtonMixin": {
+        "drawButton": "Lnet/minecraft/client/gui/GuiButton;drawButton(Lnet/minecraft/client/Minecraft;IIF)V"
+      },
+      "com/lopew/blxckoutfx/mixin/core/GuiRecipeBookMixin": {
+        "render": "Lnet/minecraft/client/gui/recipebook/GuiRecipeBook;render(IIF)V"
+      },
+      "com/lopew/blxckoutfx/mixin/core/GuiButtonRecipeTabMixin": {
+        "drawButton": "Lnet/minecraft/client/gui/recipebook/GuiButtonRecipeTab;drawButton(Lnet/minecraft/client/Minecraft;IIF)V"
+      },
+      "com/lopew/blxckoutfx/mixin/core/GuiBeaconButtonMixin": {
+        "net.minecraft.client.gui.inventory.GuiBeacon$Button": "net/minecraft/client/gui/inventory/GuiBeacon$Button",
+        "drawButton": "Lnet/minecraft/client/gui/inventory/GuiBeacon$Button;drawButton(Lnet/minecraft/client/Minecraft;IIF)V"
+      },
+      "com/lopew/blxckoutfx/mixin/core/ForgeConfigButtonMixin": {
+        "drawButton": "drawButton(Lnet/minecraft/client/Minecraft;IIF)V"
+      },
+      "com/lopew/blxckoutfx/mixin/core/GuiButtonLanguageMixin": {
+        "drawButton": "Lnet/minecraft/client/gui/GuiButtonLanguage;drawButton(Lnet/minecraft/client/Minecraft;IIF)V"
+      }
+    }
+  }
+}

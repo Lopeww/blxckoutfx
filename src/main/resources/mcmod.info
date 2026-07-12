@@ -1,0 +1,18 @@
+[
+{
+  "modid": "${mod_id}",
+  "name": "${mod_name}",
+  "description": "${description} Client-side only.",
+  "version": "${version}",
+  "mcversion": "${minecraft_version}",
+  "url": "${mod_url}",
+  "updateUrl": "",
+  "authorList": ["${mod_author}"],
+  "credits": "BlxckoutFX is developed by Lopew.",
+  "logoFile": "${mod_icon}",
+  "license": "${license}",
+  "clientSideOnly": true,
+  "screenshots": [],
+  "dependencies": []
+}
+]

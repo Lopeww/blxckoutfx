@@ -1,0 +1,185 @@
+buildscript {
+    repositories {
+        maven { url = 'https://maven.minecraftforge.net/' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'eclipse'
+
+ext.mod_id = project.findProperty('mod_id') ?: 'blxckoutfx'
+ext.mod_name = project.findProperty('mod_name') ?: 'BlxckoutFX'
+ext.mod_author = project.findProperty('mod_author') ?: 'Lopew'
+ext.mod_icon = project.findProperty('mod_icon') ?: 'blxckoutfx.png'
+ext.mod_license = project.findProperty('license') ?: 'MIT'
+ext.mod_description = project.findProperty('description') ?: 'Let darkness fall everywhere for your eyes.'
+ext.mod_url = project.findProperty('mod_url') ?: 'https://github.com/Lopeww/blxckoutfx'
+ext.issue_tracker = project.findProperty('issue_tracker') ?: 'https://github.com/Lopeww/blxckoutfx/issues'
+ext.minecraft_version = project.findProperty('minecraft_version') ?: '1.12.2'
+ext.forge_version = project.findProperty('forge_version') ?: '14.23.5.2859'
+ext.mod_version = project.findProperty('mod_version') ?: '1.0.0'
+
+version = mod_version
+group = project.findProperty('mod_group') ?: 'com.lopew.blxckoutfx'
+archivesBaseName = mod_id
+
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+
+sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
+
+minecraft {
+    mappings channel: 'snapshot', version: '20171003-1.12'
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            jvmArg '-noverify'
+
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'fml.coreMods.load', 'com.lopew.blxckoutfx.core.BlxckoutFXCorePlugin'
+
+            property 'forge.logging.console.level', 'info'
+        }
+
+        server {
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'info'
+        }
+    }
+}
+
+repositories {
+    maven { url = 'https://modmaven.dev' }
+    maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+    maven { url = 'https://www.cursemaven.com' }
+}
+
+configurations {
+    shade
+    compile.extendsFrom shade
+}
+
+configurations.all {
+    exclude group: 'org.ow2.asm', module: 'asm'
+    exclude group: 'org.ow2.asm', module: 'asm-analysis'
+    exclude group: 'org.ow2.asm', module: 'asm-commons'
+    exclude group: 'org.ow2.asm', module: 'asm-tree'
+    exclude group: 'org.ow2.asm', module: 'asm-util'
+    exclude group: 'org.slf4j', module: 'slf4j-api'
+    exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j18-impl'
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    compileOnly fg.deobf("mezz.jei:jei_1.12.2:4.16.1.301")
+    runtimeOnly fg.deobf("mezz.jei:jei_1.12.2:4.16.1.301")
+    implementation fg.deobf("curse.maven:journeymap-32274:5172461")
+    implementation fg.deobf("curse.maven:patchouli-306770:3162874")
+    implementation fg.deobf("curse.maven:pneumaticcraft-repressurized-281849:2978408")
+
+    shade('org.spongepowered:mixin:0.8.3') {
+        exclude module: 'launchwrapper'
+        exclude module: 'guava'
+        exclude module: 'gson'
+        exclude module: 'commons-io'
+        exclude module: 'log4j-core'
+        exclude module: 'log4j-api'
+        exclude module: 'asm'
+        exclude module: 'asm-analysis'
+        exclude module: 'asm-commons'
+        exclude module: 'asm-tree'
+        exclude module: 'asm-util'
+        exclude module: 'slf4j-api'
+    }
+    annotationProcessor 'org.spongepowered:mixin:0.8.3:processor'
+
+}
+
+task generateMixinIdentitySrg {
+    dependsOn 'createSrgToMcp'
+    def input = file("${buildDir}/createSrgToMcp/output.srg")
+    def output = file("${buildDir}/${mod_id}-identity.srg")
+    inputs.file(input)
+    outputs.file(output)
+    doLast {
+        def sb = new StringBuilder()
+        input.eachLine { line ->
+            if (line.startsWith('CL: ')) {
+                def parts = line.substring(4).trim().split(/\s+/)
+                sb << "CL: ${parts[1]} ${parts[1]}\n"
+            } else if (line.startsWith('FD: ')) {
+                def parts = line.substring(4).trim().split(/\s+/)
+                sb << "FD: ${parts[1]} ${parts[1]}\n"
+            } else if (line.startsWith('MD: ')) {
+                def parts = line.substring(4).trim().split(/\s+/)
+                sb << "MD: ${parts[2]} ${parts[3]} ${parts[2]} ${parts[3]}\n"
+            }
+        }
+        output.text = sb.toString()
+    }
+}
+
+compileJava.dependsOn generateMixinIdentitySrg
+compileJava {
+    options.compilerArgs += [
+        "-AreobfSrgFile=${buildDir}/${mod_id}-identity.srg".toString(),
+        "-AoutRefMapFile=${projectDir}/src/main/resources/${mod_id}.refmap.json".toString(),
+        "-AdefaultObfuscationEnv=searge"
+    ]
+}
+
+def resourceProperties = [
+    mod_id: mod_id,
+    mod_name: mod_name,
+    mod_author: mod_author,
+    mod_icon: mod_icon,
+    license: mod_license,
+    description: mod_description,
+    mod_url: mod_url,
+    issue_tracker: issue_tracker,
+    version: project.version,
+    minecraft_version: minecraft_version,
+    forge_version: forge_version
+]
+
+processResources {
+    inputs.properties resourceProperties
+    filesMatching(['mcmod.info', 'pack.mcmeta']) {
+        expand resourceProperties
+    }
+}
+
+def manifestAttributes = [
+    "Specification-Title": mod_id,
+    "Specification-Vendor": mod_author,
+    "Specification-Version": "${version}",
+    "Implementation-Title": mod_name,
+    "Implementation-Version": "${version}",
+    "Implementation-Vendor": mod_author,
+    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+    "FMLCorePlugin": "com.lopew.blxckoutfx.core.BlxckoutFXCorePlugin",
+    "FMLCorePluginContainsFMLMod": true,
+    "ForceLoadAsMod": true,
+    "MixinConfigs": "${mod_id}.mixins.json"
+]
+
+jar {
+    from {
+        configurations.shade.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
+    exclude 'META-INF/maven/**'
+    exclude 'META-INF/services/javax.annotation.processing.Processor'
+    exclude 'META-INF/services/org.spongepowered.tools.obfuscation.service.IObfuscationService'
+    exclude 'org/spongepowered/tools/**'
+    manifest {
+        attributes(manifestAttributes)
+    }
+}
+
+jar.finalizedBy('reobfJar')
