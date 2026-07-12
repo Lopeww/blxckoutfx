@@ -1,31 +1,37 @@
-# Gradle
-.gradle/
-build/
-**/build/
+# eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
 
-# Minecraft run data
-run/
-runs/
-run-dev/
-logs/
-crash-reports/
-
-# IDE
-.idea/
+# idea
+out
+*.ipr
+*.iws
 *.iml
-.vscode/
+.idea/*
+!.idea/scopes
 
-# OS
-.DS_Store
-Thumbs.db
+# gradle
+build
+.gradle
 
-# Java
-*.class
+# other
+eclipse
+run
+runs
+tmp
+*.log
+*.log.gz
+crash-reports
+*.hprof
 hs_err_pid*
 replay_pid*
 
-# Archives and generated jars
+# local analysis / temporary files
+tmp_*.txt
+jei_gui_files.txt
 *.jar
-*.war
-*.nar
-*.ear
+!gradle/wrapper/gradle-wrapper.jar

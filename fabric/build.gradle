@@ -2,6 +2,18 @@ plugins {
     id 'multiloader-loader'
     id 'fabric-loom'
 }
+
+repositories {
+    maven {
+        name = "BlameJared Maven"
+        url = "https://maven.blamejared.com"
+    }
+    maven {
+        name = "TerraformersMC"
+        url = uri("https://maven.terraformersmc.com/releases/")
+    }
+}
+
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
     mappings loom.layered {
@@ -10,28 +22,28 @@ dependencies {
     }
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+    modImplementation "com.terraformersmc:modmenu:${modmenu_version}"
+    implementation project(":common")
+
+    modRuntimeOnly "mezz.jei:jei-${minecraft_version}-fabric:15.20.0.132"
 }
 
 loom {
-    def aw = project(':common').file("src/main/resources/${mod_id}.accesswidener")
-    if (aw.exists()) {
-        accessWidenerPath.set(aw)
-    }
-    mixin {
-        defaultRefmapName.set("${mod_id}.refmap.json")
+    if (project(":common").file("src/main/resources/${mod_id}.accesswidener").exists()) {
+        accessWidenerPath.set(project(":common").file("src/main/resources/${mod_id}.accesswidener"))
     }
     runs {
         client {
             client()
-            setConfigName('Fabric Client')
-            ideConfigGenerated(false)
-            runDir('runs/client')
+            setConfigName("Fabric Client")
+            ideConfigGenerated(true)
+            runDir("run")
         }
         server {
             server()
-            setConfigName('Fabric Server')
-            ideConfigGenerated(false)
-            runDir('runs/server')
+            setConfigName("Fabric Server")
+            ideConfigGenerated(true)
+            runDir("run")
         }
     }
 }

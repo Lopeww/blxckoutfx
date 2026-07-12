@@ -1,79 +1,101 @@
 plugins {
     id 'multiloader-loader'
-    id 'net.minecraftforge.gradle'
+    id 'net.neoforged.moddev.legacyforge'
 }
 
-minecraft {
-    mappings channel: 'official', version: minecraft_version
-    copyIdeResources = true
+def clientDevGameDir = file('build/dev-client-run')
 
+repositories {
+    mavenCentral()
+    maven {
+        name = "BlameJared Maven"
+        url = "https://maven.blamejared.com"
+    }
+    maven {
+        name = "ModMaven"
+        url = "https://modmaven.dev"
+    }
+    maven {
+        name = "CurseMaven"
+        url = "https://www.cursemaven.com"
+    }
+}
+
+legacyForge {
+    version = "${minecraft_version}-${forge_version}"
+
+    validateAccessTransformers = true
+
+    def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        accessTransformers = ["src/main/resources/META-INF/accesstransformer.cfg"]
+    }
+    parchment {
+        minecraftVersion = parchment_minecraft
+        mappingsVersion = parchment_version
+    }
     runs {
         client {
-            workingDirectory project.file('run-dev/client')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            arg '--mixin.config'
-            arg "${mod_id}.mixins.json"
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                }
-            }
+            client()
+            gameDirectory = clientDevGameDir
+            programArguments.addAll '--mixin', "${mod_id}.mixins.json"
         }
         data {
-            workingDirectory project.file('run-dev/data')
-            args '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-            arg '--mixin.config'
-            arg "${mod_id}.mixins.json"
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                }
-            }
+            data()
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
         server {
-            workingDirectory project.file('run-dev/server')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            arg '--mixin.config'
-            arg "${mod_id}.mixins.json"
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                }
-            }
+            server()
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
         }
     }
 }
 
 sourceSets.main.resources.srcDir 'src/generated/resources'
 
-repositories {
-    flatDir {
-        dirs 'run/mods'
-    }
+dependencies {
+    compileOnly project(":common")
+    compileOnly "io.github.llamalad7:mixinextras-common:0.3.5"
+    annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
+    annotationProcessor "io.github.llamalad7:mixinextras-common:0.3.5"
+
+    modRuntimeOnly "mezz.jei:jei-${minecraft_version}-forge:15.20.0.132"
+    modRuntimeOnly "io.github.llamalad7:mixinextras-forge:0.3.5"
+
+    modRuntimeOnly "vazkii.patchouli:Patchouli:1.20.1-85-FORGE"
+    modRuntimeOnly "me.desht.pneumaticcraft:pneumaticcraft-repressurized:6.0.22+mc1.20.1"
+    modRuntimeOnly "appeng:appliedenergistics2-forge:15.4.10"
+    modRuntimeOnly "curse.maven:guideme-1173950:8204776"
+    modRuntimeOnly "curse.maven:journeymap-32274:5789363"
+    modRuntimeOnly "curse.maven:ftb-quests-forge-289412:8078538"
+    modRuntimeOnly "curse.maven:architectury-api-419699:5137938"
+    modRuntimeOnly "curse.maven:ftb-library-forge-404465:8226927"
+    modRuntimeOnly "curse.maven:ftb-teams-forge-404468:7499810"
+    modRuntimeOnly "curse.maven:ex-pattern-provider-892005:8291632"
+    modRuntimeOnly "curse.maven:advancedae-1084104:7939754"
+    modRuntimeOnly "curse.maven:mega-cells-622112:6175008"
+    modRuntimeOnly "curse.maven:applied-energistics-2-wireless-terminals-459929:7251206"
+    modRuntimeOnly "curse.maven:jade-324717:6855440"
+    modRuntimeOnly "curse.maven:glodium-957920:5226922"
+    modRuntimeOnly "curse.maven:cloth-config-348521:5729105"
+    modRuntimeOnly "curse.maven:curios-309927:5680164"
+    modRuntimeOnly "curse.maven:geckolib-388172:8285794"
 }
 
-dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    runtimeOnly fg.deobf('local:architectury:9.2.14-forge')
-    runtimeOnly fg.deobf('local:ftb-library-forge:2001.2.13')
-    runtimeOnly fg.deobf('local:ftb-quests-forge:2001.4.22')
-    runtimeOnly fg.deobf('local:ftb-teams-forge:2001.3.2')
-    runtimeOnly fg.deobf('local:jei-1.20.1-forge:15.20.0.130')
-    runtimeOnly fg.deobf('local:Patchouli:1.20.1-85-FORGE')
-    runtimeOnly fg.deobf('local:pneumaticcraft-repressurized:6.0.22+mc1.20.1')
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += [
+            "-AoutRefMapFile=${layout.buildDirectory.file("classes/java/main/${mod_id}-${project.name}-${minecraft_version}-refmap.json").get().asFile}",
+            "-AreobfTsrgFile=${layout.buildDirectory.file("moddev/artifacts/namedToIntermediate.tsrg").get().asFile}",
+            "-AdefaultObfuscationEnv=searge",
+            "-AmappingTypes=tsrg"
+    ]
 }
 
 jar {
     finalizedBy('reobfJar')
-    manifest {
-        attributes([
-                'MixinConfigs': "${mod_id}.mixins.json"
-        ])
-    }
 }

@@ -9,15 +9,22 @@
         "${mod_author}"
     ],
     "license": "${license}",
+    "contact": {
+        "homepage": "${homepage_url}",
+        "discord": "${discord_url}",
+        "curseforge": "${curseforge_url}"
+    },
     "environment": "client",
     "entrypoints": {
         "client": [
             "com.lopew.blxckoutfx.fabric.BlxckoutFXFabric"
+        ],
+        "modmenu": [
+            "com.lopew.blxckoutfx.fabric.BlxckoutFXModMenuIntegration"
         ]
     },
     "mixins": [
-        "${mod_id}.mixins.json",
-        "${mod_id}.fabric.mixins.json"
+        "${mod_id}.mixins.json"
     ],
     "depends": {
         "fabricloader": ">=${fabric_loader_version}",

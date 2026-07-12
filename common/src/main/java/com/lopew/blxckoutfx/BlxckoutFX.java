@@ -1,12 +1,12 @@
 package com.lopew.blxckoutfx;
 
-import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class BlxckoutFX {
     public static final String MOD_ID = "blxckoutfx";
     public static final String MOD_NAME = "BlxckoutFX";
-    public static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 
     public static void init() {
         LOGGER.info("{} initialized", MOD_NAME);

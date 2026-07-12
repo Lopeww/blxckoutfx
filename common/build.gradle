@@ -1,24 +1,33 @@
 plugins {
     id 'multiloader-common'
-    id 'fabric-loom'
+    id 'net.neoforged.moddev.legacyforge'
+}
+
+legacyForge {
+    mcpVersion = minecraft_version
+    if (file("src/main/resources/META-INF/accesstransformer.cfg").exists()) {
+        accessTransformers = ["src/main/resources/META-INF/accesstransformer.cfg"]
+    }
+    parchment {
+        minecraftVersion = parchment_minecraft
+        mappingsVersion = parchment_version
+    }
 }
 
 dependencies {
-    minecraft "com.mojang:minecraft:${minecraft_version}"
-    mappings loom.layered {
-        officialMojangMappings()
-        parchment("org.parchmentmc.data:parchment-${parchment_minecraft}:${parchment_version}@zip")
-    }
     compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
-    // Fabric and Forge both load the common mixin set.
+    annotationProcessor group: 'org.spongepowered', name: 'mixin', version: '0.8.5', classifier: 'processor'
     compileOnly group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
     annotationProcessor group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
 }
 
-loom {
-    mixin {
-        defaultRefmapName.set("${mod_id}.refmap.json")
-    }
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += [
+            "-AoutRefMapFile=${layout.buildDirectory.file("classes/java/main/${mod_id}-${project.name}-${minecraft_version}-refmap.json").get().asFile}",
+            "-AreobfTsrgFile=${layout.buildDirectory.file("moddev/artifacts/namedToIntermediate.tsrg").get().asFile}",
+            "-AdefaultObfuscationEnv=searge",
+            "-AmappingTypes=tsrg"
+    ]
 }
 
 configurations {
@@ -36,4 +45,3 @@ artifacts {
     commonJava sourceSets.main.java.sourceDirectories.singleFile
     commonResources sourceSets.main.resources.sourceDirectories.singleFile
 }
-

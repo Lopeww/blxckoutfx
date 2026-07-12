@@ -13,9 +13,13 @@ java {
     withJavadocJar()
 }
 
+tasks.withType(Javadoc).configureEach {
+    options.addBooleanOption('Xdoclint:none', true)
+    options.addBooleanOption('quiet', true)
+}
+
 repositories {
     mavenCentral()
-    // https://docs.gradle.org/current/userguide/declaring_repositories.html#declaring_content_exclusively_found_in_one_repository
     exclusiveContent {
         forRepository {
             maven {
@@ -26,28 +30,23 @@ repositories {
         filter { includeGroupAndSubgroups('org.spongepowered') }
     }
     exclusiveContent {
-        forRepository {
-            maven {
-                name = 'ParchmentMC'
-                url = 'https://maven.parchmentmc.org/'
-            }
-        }
+        forRepositories(
+                maven {
+                    name = 'ParchmentMC'
+                    url = 'https://maven.parchmentmc.org/'
+                },
+                maven {
+                    name = "NeoForge"
+                    url = 'https://maven.neoforged.net/releases'
+                }
+        )
         filter { includeGroup('org.parchmentmc.data') }
-    }
-    maven {
-        name = 'MinecraftForge'
-        url = 'https://maven.minecraftforge.net/'
-    }
-    maven {
-        name = 'BlameJared'
-        url = 'https://maven.blamejared.com'
     }
 }
 
-// Declare capabilities on the outgoing configurations.
-// Read more about capabilities here: https://docs.gradle.org/current/userguide/component_capabilities.html#sec:declaring-additional-capabilities-for-a-local-component
 ['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements'].each { variant ->
     configurations."$variant".outgoing {
+        capability("$group:${project.name}:$version")
         capability("$group:${base.archivesName.get()}:$version")
         capability("$group:$mod_id-${project.name}-${minecraft_version}:$version")
         capability("$group:$mod_id:$version")
@@ -76,7 +75,8 @@ jar {
                 'Implementation-Title'  : project.name,
                 'Implementation-Version': project.jar.archiveVersion,
                 'Implementation-Vendor' : mod_author,
-                'Built-On-Minecraft'    : minecraft_version
+                'Built-On-Minecraft'    : minecraft_version,
+                'MixinConfigs'          : "${mod_id}.mixins.json"
         ])
     }
 }
@@ -84,25 +84,39 @@ jar {
 processResources {
     var expandProps = [
             'version'                      : version,
-            'group'                        : project.group, //Else we target the task's group.
+            'group'                        : project.group,
             'minecraft_version'            : minecraft_version,
             'minecraft_version_range'      : minecraft_version_range,
-            'fabric_version'               : fabric_version,
             'fabric_loader_version'        : fabric_loader_version,
+            'fabric_version'               : fabric_version,
             'mod_name'                     : mod_name,
             'mod_author'                   : mod_author,
             'mod_id'                       : mod_id,
-            'license'                      : license,
             'mod_icon'                     : mod_icon,
+            'license'                      : license,
+            'credits'                      : credits,
             'description'                  : project.description,
-            'forge_version'                : forge_version,
-            'forge_loader_version_range'   : forge_loader_version_range,
-            'java_version'                 : java_version
+            'homepage_url'                 : homepage_url,
+            'curseforge_url'               : curseforge_url,
+            'discord_url'                  : discord_url,
+            "forge_version": forge_version,
+            "forge_loader_version_range": forge_loader_version_range,
+            'java_version'                 : java_version,
+            'mixin_refmap'                 : "${mod_id}-${project.name}-${minecraft_version}-refmap.json"
     ]
 
-    filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/mods.toml', '*.mixins.json']) {
+    var jsonExpandProps = expandProps.collectEntries {
+        key, value -> [(key): value instanceof String ? value.replace("\n", "\\\\n") : value]
+    }
+
+    filesMatching(['META-INF/mods.toml']) {
         expand expandProps
     }
+
+    filesMatching(['pack.mcmeta', 'fabric.mod.json', "${mod_id}.mixins.json".toString()]) {
+        expand jsonExpandProps
+    }
+
     inputs.properties(expandProps)
 }
 
