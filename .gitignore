@@ -22,9 +22,3 @@ build
 eclipse
 run
 runs
-
-# local analysis and reference material
-/assets/
-/docs/
-/journeymap/
-/net/

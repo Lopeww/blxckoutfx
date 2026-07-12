@@ -36,7 +36,7 @@ public class FontMixin {
     }
 
     private static int adjustTextColor(int color) {
-        if (color == 0 || Minecraft.getInstance().screen == null) {
+        if (color == 0 || Minecraft.getInstance().gui.screen() == null) {
             return color;
         }
 
@@ -45,7 +45,7 @@ public class FontMixin {
         }
 
         if (!BlxckoutFXRenderContext.isRenderingInventoryButton()
-                && BlxckoutFXAe2Support.isAe2Screen(Minecraft.getInstance().screen)
+                && BlxckoutFXAe2Support.isAe2Screen(Minecraft.getInstance().gui.screen())
                 && BlxckoutFXAe2Support.isBlackoutAe2ThemeActive()) {
             if (BlxckoutFXRenderContext.isRenderingExtendedAeTagPlaceholder()) {
                 return withOriginalAlphaOrOpaque(color, EXTENDED_AE_TAG_STORAGE_PLACEHOLDER_COLOR);

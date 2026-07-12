@@ -1,12 +1,12 @@
 package com.lopew.blxckoutfx.client.render;
 
 import com.lopew.blxckoutfx.BlxckoutFX;
+import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.client.renderer.BindGroupLayouts;
 import net.minecraft.resources.Identifier;
 
 public final class BlxckoutFXRenderPipelines {
@@ -53,79 +53,79 @@ public final class BlxckoutFXRenderPipelines {
 
     public static final RenderPipeline BUTTON_TEXTURED = RenderPipeline.builder()
             .withLocation(BUTTON_TEXTURED_LOCATION)
-            .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
-            .withUniform("Projection", UniformType.UNIFORM_BUFFER)
+            .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
             .withVertexShader("core/position_tex_color")
             .withFragmentShader("core/position_tex_color")
-            .withSampler("Sampler0")
+            .withBindGroupLayout(BindGroupLayouts.SAMPLER0)
             .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
-            .withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
+            .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
+            .withPrimitiveTopology(PrimitiveTopology.QUADS)
             .build();
 
     public static final RenderPipeline CONTENT_ICON_TEXTURED = RenderPipeline.builder()
             .withLocation(CONTENT_ICON_TEXTURED_LOCATION)
-            .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
-            .withUniform("Projection", UniformType.UNIFORM_BUFFER)
+            .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
             .withVertexShader("core/position_tex_color")
             .withFragmentShader("core/position_tex_color")
-            .withSampler("Sampler0")
+            .withBindGroupLayout(BindGroupLayouts.SAMPLER0)
             .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
-            .withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
+            .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
+            .withPrimitiveTopology(PrimitiveTopology.QUADS)
             .build();
 
     public static final RenderPipeline WAYPOINT_ICON_TEXTURED = RenderPipeline.builder()
             .withLocation(WAYPOINT_ICON_TEXTURED_LOCATION)
-            .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
-            .withUniform("Projection", UniformType.UNIFORM_BUFFER)
+            .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
             .withVertexShader("core/position_tex_color")
             .withFragmentShader("core/clean_position_tex_color")
-            .withSampler("Sampler0")
+            .withBindGroupLayout(BindGroupLayouts.SAMPLER0)
             .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
-            .withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
+            .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
+            .withPrimitiveTopology(PrimitiveTopology.QUADS)
             .build();
 
     public static final RenderPipeline JEI_WIDGET_TEXTURED = RenderPipeline.builder()
             .withLocation(JEI_WIDGET_TEXTURED_LOCATION)
-            .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
-            .withUniform("Projection", UniformType.UNIFORM_BUFFER)
+            .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
             .withVertexShader("core/position_tex_color")
             .withFragmentShader("core/position_tex_color")
-            .withSampler("Sampler0")
+            .withBindGroupLayout(BindGroupLayouts.SAMPLER0)
             .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
-            .withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
+            .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
+            .withPrimitiveTopology(PrimitiveTopology.QUADS)
             .build();
 
     public static final RenderPipeline AE2_BLACKOUT_TEXTURED = RenderPipeline.builder()
             .withLocation(AE2_BLACKOUT_TEXTURED_LOCATION)
-            .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
-            .withUniform("Projection", UniformType.UNIFORM_BUFFER)
+            .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
             .withVertexShader("core/position_tex_color")
             .withFragmentShader(AE2_BLACKOUT_POSITION_TEX_COLOR_SHADER)
-            .withSampler("Sampler0")
+            .withBindGroupLayout(BindGroupLayouts.SAMPLER0)
             .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
-            .withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
+            .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
+            .withPrimitiveTopology(PrimitiveTopology.QUADS)
             .build();
 
     public static final RenderPipeline AE2_TRANSFER_BUTTON_TEXTURED = RenderPipeline.builder()
             .withLocation(AE2_TRANSFER_BUTTON_TEXTURED_LOCATION)
-            .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
-            .withUniform("Projection", UniformType.UNIFORM_BUFFER)
+            .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
             .withVertexShader("core/position_tex_color")
             .withFragmentShader(AE2_TRANSFER_BUTTON_POSITION_TEX_COLOR_SHADER)
-            .withSampler("Sampler0")
+            .withBindGroupLayout(BindGroupLayouts.SAMPLER0)
             .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
-            .withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
+            .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
+            .withPrimitiveTopology(PrimitiveTopology.QUADS)
             .build();
 
     public static final RenderPipeline MODMENU_ICON_BUTTON_TEXTURED = RenderPipeline.builder()
             .withLocation(MODMENU_ICON_BUTTON_TEXTURED_LOCATION)
-            .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
-            .withUniform("Projection", UniformType.UNIFORM_BUFFER)
+            .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
             .withVertexShader("core/position_tex_color")
             .withFragmentShader(MODMENU_ICON_BUTTON_POSITION_TEX_COLOR_SHADER)
-            .withSampler("Sampler0")
+            .withBindGroupLayout(BindGroupLayouts.SAMPLER0)
             .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
-            .withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
+            .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
+            .withPrimitiveTopology(PrimitiveTopology.QUADS)
             .build();
 
     private BlxckoutFXRenderPipelines() {

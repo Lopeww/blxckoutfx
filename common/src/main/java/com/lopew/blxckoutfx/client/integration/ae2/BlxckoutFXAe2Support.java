@@ -21,12 +21,8 @@ public final class BlxckoutFXAe2Support {
             "megacells"
     };
 
-    private static boolean themeEnabled;
-    private static BlxckoutFXClientConfig.Ae2ThemeMode themeMode;
-
-    static {
-        syncFromConfig(BlxckoutFXClientConfig.load());
-    }
+    private static boolean themeEnabled = true;
+    private static BlxckoutFXClientConfig.Ae2ThemeMode themeMode = BlxckoutFXClientConfig.Ae2ThemeMode.Blackout;
 
     public static void syncFromConfig(BlxckoutFXClientConfig config) {
         themeEnabled = config.isAe2ThemeEnabled();

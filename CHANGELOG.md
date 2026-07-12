@@ -1,6 +1,10 @@
 # Changelog
 
-## 2.0.0 - Major Update
+## 2.0.0 - Minecraft 26.2 Release
+
+- Ported BlxckoutFX 2.0.0 to Minecraft 26.2 for Fabric and NeoForge.
+
+## 2.0.0 - Major Update (Minecraft 26.1.2, 1.21.1, and 1.20.1)
 
 ### New
 

@@ -1,5 +1,8 @@
 package com.lopew.blxckoutfx.client.integration.journeymap;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Locale;
@@ -10,9 +13,13 @@ public final class BlxckoutFXJourneyMapThemeSupport {
     private static final String JOURNEYMAP_WAYPOINT_MANAGER_SCREEN_PREFIX = "journeymap.client.ui.waypointmanager.";
     private static final String THEME_LOADER_CLASS = "journeymap.client.io.ThemeLoader";
     private static final String PURIST_THEME_NAME = "Purist";
+    private static final String PURIST_THEME_NAME_NORMALIZED = normalizeThemeName(PURIST_THEME_NAME);
+
+    private static volatile Method currentThemeGetter;
+    private static volatile boolean currentThemeGetterResolved;
 
     public static boolean isPuristThemeActive() {
-        return normalizeThemeName(getCurrentThemeName()).equals(normalizeThemeName(PURIST_THEME_NAME));
+        return PURIST_THEME_NAME_NORMALIZED.equals(normalizeThemeName(getCurrentThemeName()));
     }
 
     public static boolean shouldBypassThemeButtonDarkening() {
@@ -32,29 +39,39 @@ public final class BlxckoutFXJourneyMapThemeSupport {
     }
 
     private static String currentScreenClassName() {
-        try {
-            Class<?> minecraftClass = Class.forName("net.minecraft.client.Minecraft");
-            Object minecraft = minecraftClass.getMethod("getInstance").invoke(null);
-            if (minecraft == null) {
-                return "";
-            }
-
-            Object screen = minecraftClass.getField("screen").get(minecraft);
-            return screen != null ? screen.getClass().getName() : "";
-        } catch (ReflectiveOperationException | LinkageError exception) {
-            return "";
-        }
+        Screen screen = Minecraft.getInstance().gui.screen();
+        return screen == null ? "" : screen.getClass().getName();
     }
 
     private static String getCurrentThemeName() {
         try {
-            Class<?> themeLoaderClass = Class.forName(THEME_LOADER_CLASS);
-            Method getCurrentTheme = themeLoaderClass.getMethod("getCurrentTheme");
+            Method getCurrentTheme = getCurrentThemeGetter();
+            if (getCurrentTheme == null) {
+                return "";
+            }
             Object theme = getCurrentTheme.invoke(null);
             return getThemeName(theme);
         } catch (ReflectiveOperationException | LinkageError exception) {
             return "";
         }
+    }
+
+    private static Method getCurrentThemeGetter() throws ReflectiveOperationException {
+        if (currentThemeGetterResolved) {
+            return currentThemeGetter;
+        }
+
+        synchronized (BlxckoutFXJourneyMapThemeSupport.class) {
+            if (!currentThemeGetterResolved) {
+                try {
+                    currentThemeGetter = Class.forName(THEME_LOADER_CLASS).getMethod("getCurrentTheme");
+                } finally {
+                    currentThemeGetterResolved = true;
+                }
+            }
+        }
+
+        return currentThemeGetter;
     }
 
     private static String getThemeName(Object theme) {
@@ -79,18 +96,8 @@ public final class BlxckoutFXJourneyMapThemeSupport {
     }
 
     private static boolean isJourneyMapFullscreen() {
-        try {
-            Class<?> minecraftClass = Class.forName("net.minecraft.client.Minecraft");
-            Object minecraft = minecraftClass.getMethod("getInstance").invoke(null);
-            if (minecraft == null) {
-                return false;
-            }
-
-            Object screen = minecraftClass.getField("screen").get(minecraft);
-            return screen != null && JOURNEYMAP_FULLSCREEN_CLASS.equals(screen.getClass().getName());
-        } catch (ReflectiveOperationException | LinkageError exception) {
-            return false;
-        }
+        Screen screen = Minecraft.getInstance().gui.screen();
+        return screen != null && JOURNEYMAP_FULLSCREEN_CLASS.equals(screen.getClass().getName());
     }
 
     private BlxckoutFXJourneyMapThemeSupport() {

@@ -2,7 +2,6 @@ package com.lopew.blxckoutfx.fabric;
 
 import com.lopew.blxckoutfx.BlxckoutFX;
 import com.lopew.blxckoutfx.platform.BlxckoutFXPlatform;
-import com.lopew.blxckoutfx.client.config.BlxckoutFXClientConfig;
 import com.lopew.blxckoutfx.client.gui.BlxckoutFXGUIHandler;
 import com.lopew.blxckoutfx.client.render.BlxckoutFXShaders;
 import net.fabricmc.api.ClientModInitializer;
@@ -18,7 +17,7 @@ public final class BlxckoutFXFabric implements ClientModInitializer {
         BlxckoutFX.init();
         registerClientEvents();
 
-        boolean buttonSystemEnabled = BlxckoutFXClientConfig.load().isInventoryButtonEnabled();
+        boolean buttonSystemEnabled = BlxckoutFXGUIHandler.isInventoryButtonEnabled();
         BlxckoutFX.LOGGER.info("BlxckoutFX Fabric client loaded! Button system active: {}", buttonSystemEnabled ? "YES" : "NO");
     }
 

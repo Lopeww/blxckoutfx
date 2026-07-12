@@ -1,33 +1,31 @@
 package com.lopew.blxckoutfx.mixin.jei;
 
 import com.lopew.blxckoutfx.client.render.BlxckoutFXRenderPipelines;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.Identifier;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Pseudo
 @Mixin(targets = "mezz.jei.common.gui.elements.DrawableSprite", remap = false)
 public class JeiDrawableSpriteMixin {
-    @Shadow
-    @Final
-    private Identifier spriteId;
-
-    @ModifyArg(
+    @ModifyArgs(
             method = "draw(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IIIIII)V",
             at = @At(
                     value = "INVOKE",
                     target = "Lmezz/jei/common/platform/IPlatformRenderHelper;blitSprite(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;IIIIIIII)V"
             ),
-            index = 1,
             require = 0
     )
-    private RenderPipeline blxckoutfx$useJeiWidgetPipeline(RenderPipeline pipeline) {
-        return isJeiOverlayButtonIcon(spriteId) ? BlxckoutFXRenderPipelines.JEI_WIDGET_TEXTURED : pipeline;
+    private void blxckoutfx$useJeiWidgetPipeline(Args args) {
+        TextureAtlasSprite sprite = args.get(2);
+        Identifier spriteId = sprite.contents().name();
+        if (isJeiOverlayButtonIcon(spriteId)) {
+            args.set(1, BlxckoutFXRenderPipelines.JEI_WIDGET_TEXTURED);
+        }
     }
 
     private static boolean isJeiOverlayButtonIcon(Identifier spriteId) {

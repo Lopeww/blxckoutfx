@@ -2,7 +2,7 @@ package com.lopew.blxckoutfx.client.render;
 
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import com.lopew.blxckoutfx.client.config.BlxckoutFXClientConfig;
+import com.lopew.blxckoutfx.client.gui.BlxckoutFXGUIHandler;
 import com.lopew.blxckoutfx.client.screen.BlxckoutFXScreenExclusions;
 
 public final class BlxckoutFXShaders {
@@ -21,10 +21,6 @@ public final class BlxckoutFXShaders {
 
     private static int presetIndex = 2;
 
-    static {
-        presetIndex = clampPresetIndex(BlxckoutFXClientConfig.load().getPresetIndex());
-    }
-
     public static void cyclePreset() {
         int next = presetIndex + 1;
         if (next >= PRESETS.length) {
@@ -32,7 +28,7 @@ public final class BlxckoutFXShaders {
         }
 
         presetIndex = clampPresetIndex(next);
-        BlxckoutFXClientConfig.load().setPresetIndex(presetIndex);
+        BlxckoutFXGUIHandler.getConfig().setPresetIndex(presetIndex);
     }
 
     public static void cyclePresetBackward() {
@@ -42,7 +38,7 @@ public final class BlxckoutFXShaders {
         }
 
         presetIndex = clampPresetIndex(next);
-        BlxckoutFXClientConfig.load().setPresetIndex(presetIndex);
+        BlxckoutFXGUIHandler.getConfig().setPresetIndex(presetIndex);
     }
 
     public static void syncPresetIndex(int index) {

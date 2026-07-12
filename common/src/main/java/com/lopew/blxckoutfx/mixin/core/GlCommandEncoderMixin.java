@@ -72,7 +72,7 @@ public class GlCommandEncoderMixin {
 
         int ae2ConfigArrowRectLoc = GL20.glGetUniformLocation(programId, "Ae2ConfigArrowRect");
         if (ae2ConfigArrowRectLoc != -1) {
-            Screen currentScreen = Minecraft.getInstance().screen;
+            Screen currentScreen = Minecraft.getInstance().gui.screen();
             float rectX1 = 0.0F;
             float rectY1 = 0.0F;
             float rectX2 = 0.0F;
@@ -96,7 +96,7 @@ public class GlCommandEncoderMixin {
 
         int ae2ConfigArrowSecondRectLoc = GL20.glGetUniformLocation(programId, "Ae2ConfigArrowSecondRect");
         if (ae2ConfigArrowSecondRectLoc != -1) {
-            Screen currentScreen = Minecraft.getInstance().screen;
+            Screen currentScreen = Minecraft.getInstance().gui.screen();
             float rectX1 = 0.0F;
             float rectY1 = 0.0F;
             float rectX2 = 0.0F;
@@ -140,7 +140,7 @@ public class GlCommandEncoderMixin {
         }
 
         Minecraft minecraft = Minecraft.getInstance();
-        Screen screen = minecraft.screen;
+        Screen screen = minecraft.gui.screen();
 
         BlxckoutFXScreenExclusions.ScreenPolicy policy = BlxckoutFXScreenExclusions.getScreenPolicy(screen);
         if (policy == BlxckoutFXScreenExclusions.ScreenPolicy.NONE) {

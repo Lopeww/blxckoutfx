@@ -117,7 +117,7 @@ public class BlxckoutFXConfigScreen extends Screen {
 
         int buttonY = this.rootY + this.rootH - 23;
         this.doneButton = new ButtonWidget(this.rootX + this.rootW - 76, buttonY, 64, 16, Component.translatable("ui.blxckoutfx.config.done"), this::saveAndClose);
-        this.cancelButton = new ButtonWidget(this.rootX + this.rootW - 146, buttonY, 64, 16, Component.translatable("ui.blxckoutfx.config.cancel"), () -> Minecraft.getInstance().setScreen(this.parent));
+        this.cancelButton = new ButtonWidget(this.rootX + this.rootW - 146, buttonY, 64, 16, Component.translatable("ui.blxckoutfx.config.cancel"), () -> Minecraft.getInstance().gui.setScreen(this.parent));
 
         rebuildRows();
     }
@@ -172,7 +172,7 @@ public class BlxckoutFXConfigScreen extends Screen {
 
     private void saveAndClose() {
         saveCurrentValues();
-        Minecraft.getInstance().setScreen(this.parent);
+        Minecraft.getInstance().gui.setScreen(this.parent);
     }
 
     private void saveCurrentValues() {

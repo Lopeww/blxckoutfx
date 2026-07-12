@@ -2,8 +2,8 @@ package com.lopew.blxckoutfx.neoforge;
 
 import com.lopew.blxckoutfx.BlxckoutFX;
 import com.lopew.blxckoutfx.platform.BlxckoutFXPlatform;
-import com.lopew.blxckoutfx.client.config.BlxckoutFXClientConfig;
 import com.lopew.blxckoutfx.client.config.BlxckoutFXConfigScreen;
+import com.lopew.blxckoutfx.client.gui.BlxckoutFXGUIHandler;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -18,7 +18,7 @@ public final class BlxckoutFXNeoForgeClient {
         container.registerExtensionPoint(IConfigScreenFactory.class,
                 (IConfigScreenFactory) (modContainer, modListScreen) -> new BlxckoutFXConfigScreen(modListScreen));
 
-        boolean buttonSystemEnabled = BlxckoutFXClientConfig.load().isInventoryButtonEnabled();
+        boolean buttonSystemEnabled = BlxckoutFXGUIHandler.isInventoryButtonEnabled();
         BlxckoutFX.LOGGER.info("BlxckoutFX NeoForge client loaded! Button system active: {}", buttonSystemEnabled ? "YES" : "NO");
     }
 }

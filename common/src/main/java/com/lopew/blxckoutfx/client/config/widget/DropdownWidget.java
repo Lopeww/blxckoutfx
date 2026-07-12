@@ -246,7 +246,7 @@ public final class DropdownWidget implements ControlWidget {
     }
 
     private PopupBounds popupBounds() {
-        Screen screen = Minecraft.getInstance().screen;
+        Screen screen = Minecraft.getInstance().gui.screen();
         int screenWidth = screen == null ? Integer.MAX_VALUE : screen.width;
         int screenHeight = screen == null ? Integer.MAX_VALUE : screen.height;
         int popupWidth = Math.min(this.width, MAX_POPUP_WIDTH);

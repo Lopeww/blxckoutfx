@@ -130,7 +130,7 @@ public abstract class JourneyMapWaypointOptionButtonMixin {
 
     @Unique
     private static boolean isWaypointManagerScreen() {
-        return net.minecraft.client.Minecraft.getInstance().screen != null
-                && net.minecraft.client.Minecraft.getInstance().screen.getClass().getName().startsWith("journeymap.client.ui.waypointmanager.");
+        return net.minecraft.client.Minecraft.getInstance().gui.screen() != null
+                && net.minecraft.client.Minecraft.getInstance().gui.screen().getClass().getName().startsWith("journeymap.client.ui.waypointmanager.");
     }
 }

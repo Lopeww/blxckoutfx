@@ -125,31 +125,31 @@ public class InventoryButton extends Button {
     @Override
     public void onClick(MouseButtonEvent event, boolean doubleClick) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft == null || minecraft.screen == null) {
+        if (minecraft == null || minecraft.gui.screen() == null) {
             return;
         }
 
-        BlxckoutFXGUIHandler.onMouseClicked(minecraft.screen, event.x(), event.y(), event.button());
+        BlxckoutFXGUIHandler.onMouseClicked(minecraft.gui.screen(), event.x(), event.y(), event.button());
     }
 
     @Override
     protected void onDrag(MouseButtonEvent event, double dx, double dy) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft == null || minecraft.screen == null) {
+        if (minecraft == null || minecraft.gui.screen() == null) {
             return;
         }
 
-        BlxckoutFXGUIHandler.onMouseDragged(minecraft.screen, event.x(), event.y(), event.button(), dx, dy);
+        BlxckoutFXGUIHandler.onMouseDragged(minecraft.gui.screen(), event.x(), event.y(), event.button(), dx, dy);
     }
 
     @Override
     public void onRelease(MouseButtonEvent event) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft == null || minecraft.screen == null) {
+        if (minecraft == null || minecraft.gui.screen() == null) {
             return;
         }
 
-        BlxckoutFXGUIHandler.onMouseReleased(minecraft.screen, event.x(), event.y(), event.button());
+        BlxckoutFXGUIHandler.onMouseReleased(minecraft.gui.screen(), event.x(), event.y(), event.button());
     }
 
     public void beginDrag(double mouseX, double mouseY) {

@@ -7,6 +7,7 @@
   "client": [
     "core.AbstractButtonMixin",
     "core.AbstractSliderButtonMixin",
+    "core.SpriteIconButtonMixin",
     "core.FontMixin",
     "ae2.AdvancedAeQuantumCrafterTerminalMixin",
     "ae2.Ae2AddonIconMixin",

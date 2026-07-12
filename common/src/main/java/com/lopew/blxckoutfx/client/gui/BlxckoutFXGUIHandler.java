@@ -27,8 +27,9 @@ public final class BlxckoutFXGUIHandler {
     private static final Map<Screen, InventoryButton> inventoryButtons = new IdentityHashMap<>();
     private static Screen lastScreen;
 
-    private static void reloadConfig() {
-        onConfigChanged(BlxckoutFXClientConfig.load());
+    static {
+        BlxckoutFXShaders.syncPresetIndex(config.getPresetIndex());
+        BlxckoutFXAe2Support.syncFromConfig(config);
     }
 
     public static void onConfigChanged(BlxckoutFXClientConfig newConfig) {
@@ -41,7 +42,6 @@ public final class BlxckoutFXGUIHandler {
     public static void onScreenInit(Screen screen, ButtonSink buttonSink) {
         inventoryButtons.remove(screen);
         lastScreen = screen;
-        reloadConfig();
 
         if (!config.isInventoryButtonEnabled() || !isSupportedScreen(screen)) {
             return;
@@ -99,11 +99,18 @@ public final class BlxckoutFXGUIHandler {
         if (screen == lastScreen) {
             lastScreen = null;
         }
-        reloadConfig();
+    }
+
+    public static BlxckoutFXClientConfig getConfig() {
+        return config;
+    }
+
+    public static boolean isInventoryButtonEnabled() {
+        return config.isInventoryButtonEnabled();
     }
 
     public static void handleClientTick(Minecraft minecraft) {
-        Screen screen = minecraft == null ? null : minecraft.screen;
+        Screen screen = minecraft == null ? null : minecraft.gui.screen();
         if (screen != lastScreen) {
             if (lastScreen != null) {
                 inventoryButtons.remove(lastScreen);
@@ -196,13 +203,13 @@ public final class BlxckoutFXGUIHandler {
 
     private static void syncCurrentScreenButtonState() {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft == null || minecraft.screen == null) {
+        if (minecraft == null || minecraft.gui.screen() == null) {
             return;
         }
 
-        InventoryButton inventoryButton = getButton(minecraft.screen);
+        InventoryButton inventoryButton = getButton(minecraft.gui.screen());
         if (inventoryButton != null) {
-            syncButtonState(minecraft.screen, inventoryButton);
+            syncButtonState(minecraft.gui.screen(), inventoryButton);
         }
     }
 
@@ -383,7 +390,7 @@ public final class BlxckoutFXGUIHandler {
     private static void openConfig(Screen screen) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft != null) {
-            minecraft.setScreen(new BlxckoutFXConfigScreen(screen));
+            minecraft.gui.setScreen(new BlxckoutFXConfigScreen(screen));
         }
     }
 

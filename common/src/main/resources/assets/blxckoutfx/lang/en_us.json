@@ -14,7 +14,7 @@
   "ui.blxckoutfx.config.ae2_mode.blxckout": "Blxckout",
   "ui.blxckoutfx.config.ae2_mode.blackout": "Blackout",
   "ui.blxckoutfx.config.warning.unsupported.title": "Unsupported",
-  "ui.blxckoutfx.config.warning.unsupported.description": "Applied Energistics 2 has not released a 26.1.2 Fabric build yet, so this integration cannot be used.",
+  "ui.blxckoutfx.config.warning.unsupported.description": "Applied Energistics 2 has not released a 26.2 Fabric build yet, so this integration cannot be used.",
 
   "ui.blxckoutfx.config.group.general": "General",
   "ui.blxckoutfx.config.group.blxckoutfx": "BlxckoutFX",
