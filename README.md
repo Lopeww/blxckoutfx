@@ -1,9 +1,9 @@
 <div align="center">
   <img src="./blxckoutfx.png" width="128" height="128" alt="BlxckoutFX Logo">
 
-![Minecraft Sürümleri](https://img.shields.io/badge/MINECRAFT-26.1.2_%7C_1.21.1_%7C_1.20.1_%7C_1.12.2-darkgreen?style=for-the-badge)
+![Minecraft Versions](https://img.shields.io/badge/MINECRAFT-26.2_%7C_26.1.2_%7C_1.21.1_%7C_1.20.1_%7C_1.12.2-darkgreen?style=for-the-badge)
 <br>
-![Loaders](https://img.shields.io/badge/Loaders-Forge_|_NeoForge_|_Fabric-orange?style=for-the-badge)
+![Loaders](https://img.shields.io/badge/Loaders-NeoForge_|_Fabric-orange?style=for-the-badge)
 <br>
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 </div>
@@ -40,7 +40,7 @@ BlxckoutFX is intentionally focused: it changes GUI rendering, not the world its
 - **Button Darkening in Menus:** Menu screens darken buttons only.
 - **In-Game GUI Dark Theme:** In-game screens can darken both buttons and GUI panels.
 - **Shader-Based Visual Styling:** No manual shader setup is required.
-- **Loader Support:** Supports Forge, NeoForge and Fabric Loader.
+- **Loader Support:** Supports NeoForge and Fabric Loader on this branch.
 - **Config Screen:** A redesigned, searchable configuration screen with categories, live preset previews, and persistent settings. It is also available through Mod Menu on Fabric.
 - **Enhanced Inventory Button:** Choose Classic or Short styling, use a corner preset or a custom position, and lock the button when its placement is final.
 - **Quick Controls:** Left-click cycles forward, right-click cycles backward, middle-click opens the config screen, and drag repositions the unlocked inventory button.
@@ -65,12 +65,13 @@ BlxckoutFX is intentionally focused: it changes GUI rendering, not the world its
 
 ## 📥 Versions
 
-| Minecraft Version | Loader              | Mod Version | Status           |
-|------------------|---------------------|-------------|------------------|
-| 26.1.2           | NeoForge + Fabric   | 2.0.0       | Main Release     |
-| 1.21.1           | NeoForge + Fabric   | 2.0.0       | Release          |
-| 1.20.1           | Forge + Fabric      | 2.0.0       | Release          |
-| 1.12.2           | Forge               | 1.0.1       | Release          |
+| Minecraft Version | Loader              | Mod Version | Status          |
+|------------------|---------------------|-------------|-----------------|
+| 26.2             | NeoForge + Fabric   | 2.0.0       | Release         |
+| 26.1.2           | NeoForge + Fabric   | 2.0.0       | Main Release    |
+| 1.21.1           | NeoForge + Fabric   | 2.0.0       | Release         |
+| 1.20.1           | Forge + Fabric      | 2.0.0       | Release         |
+| 1.12.2           | Forge               | 1.0.1       | Release         |
 
 ---
 
@@ -93,7 +94,8 @@ BlxckoutFX is intentionally focused: it changes GUI rendering, not the world its
 
 ## 📂 Branch Structure
 
-- `main` → Minecraft 26.1.2 development
+- `main` → Minecraft 26.1.2 main release branch
+- `26.2` → Minecraft 26.2 release port branch
 - `1.21.1` → Minecraft 1.21.1 support branch
 - `1.20.1` → Minecraft 1.20.1 unsupported branch
 - `1.12.2` → Minecraft 1.12.2 unsupported branch
