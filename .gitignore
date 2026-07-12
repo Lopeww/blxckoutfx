@@ -22,3 +22,9 @@ build
 eclipse
 run
 runs
+/.tmp/
+/tmp*
+/assets/ae2/
+/com/llamalad7/
+/de/mari_023/
+/net/fabricmc/

@@ -1,8 +1,7 @@
 package com.lopew.blxckoutfx.neoforge;
 
 import com.lopew.blxckoutfx.BlxckoutFX;
-import com.lopew.blxckoutfx.client.BlackoutFXKeybinds;
-import com.lopew.blxckoutfx.client.BlxckoutFXGUIHandler;
+import com.lopew.blxckoutfx.client.gui.BlxckoutFXGUIHandler;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -14,7 +13,7 @@ import net.neoforged.neoforge.client.event.ScreenEvent;
 public final class BlxckoutFXNeoForgeClientEvents {
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
-        BlackoutFXKeybinds.handleClientTick(Minecraft.getInstance());
+        BlxckoutFXGUIHandler.handleClientTick(Minecraft.getInstance());
     }
 
     @SubscribeEvent
