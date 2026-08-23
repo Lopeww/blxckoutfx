@@ -12,6 +12,17 @@ public final class BlxckoutFXRenderContext {
     private static int jeiInformationRecipeRenderDepth;
     private static int pneumaticCraftWidgetRenderDepth;
     private static int pneumaticCraftScreenRenderDepth;
+    private static int tfcScribingLogoRenderDepth;
+    private static int tfcSewingWorkspaceRenderDepth;
+    private static int tfcSewingControlScopeRenderDepth;
+    private static int tfcFirepitTemperatureRenderDepth;
+    private static int tfcFirepitPotRenderDepth;
+    private static int tfcFirepitGrillRenderDepth;
+    private static int tfcCrucibleTemperatureRenderDepth;
+    private static int tfcCrucibleVesselRenderDepth;
+    private static int tfcAnvilVisualRenderDepth;
+    private static int tfcAnvilForgingGridRenderDepth;
+    private static int tfcAnvilActionIconRenderDepth;
     private static int balancedCappedDarkeningDepth;
     private static int ae2ScreenRenderDepth;
     private static int ae2CraftingTermScreenRenderDepth;
@@ -62,6 +73,50 @@ public final class BlxckoutFXRenderContext {
     private static int vanillaIconButtonY2;
     private static int pneumaticColorWhitelistCount;
     private static final float[] pneumaticColorWhitelist = new float[PNEUMATIC_COLOR_WHITELIST_SIZE * 3];
+    private static final int[] TFC_SCRIBING_LOGO_COLOR_WHITELIST = {
+            0xFFFFFF, 0x000000, 0xD8D8D8, 0x182C45, 0xAADBD7, 0x8B8B8B,
+            0x89B7B4, 0x031D1B, 0xC1C1C1, 0x608482, 0xDDE8E8
+    };
+    private static int tfcScribingLogoX1;
+    private static int tfcScribingLogoY1;
+    private static int tfcScribingLogoX2;
+    private static int tfcScribingLogoY2;
+    private static int tfcSewingWorkspaceX1;
+    private static int tfcSewingWorkspaceY1;
+    private static int tfcSewingWorkspaceX2;
+    private static int tfcSewingWorkspaceY2;
+    private static int tfcSewingControlScopeX1;
+    private static int tfcSewingControlScopeY1;
+    private static int tfcSewingControlScopeX2;
+    private static int tfcSewingControlScopeY2;
+    private static int tfcFirepitTemperatureX1;
+    private static int tfcFirepitTemperatureY1;
+    private static int tfcFirepitTemperatureX2;
+    private static int tfcFirepitTemperatureY2;
+    private static int tfcFirepitPotX1;
+    private static int tfcFirepitPotY1;
+    private static int tfcFirepitPotX2;
+    private static int tfcFirepitPotY2;
+    private static int tfcFirepitGrillX1;
+    private static int tfcFirepitGrillY1;
+    private static int tfcFirepitGrillX2;
+    private static int tfcFirepitGrillY2;
+    private static int tfcCrucibleTemperatureX1;
+    private static int tfcCrucibleTemperatureY1;
+    private static int tfcCrucibleTemperatureX2;
+    private static int tfcCrucibleTemperatureY2;
+    private static int tfcCrucibleVesselX1;
+    private static int tfcCrucibleVesselY1;
+    private static int tfcCrucibleVesselX2;
+    private static int tfcCrucibleVesselY2;
+    private static int tfcAnvilVisualX1;
+    private static int tfcAnvilVisualY1;
+    private static int tfcAnvilVisualX2;
+    private static int tfcAnvilVisualY2;
+    private static int tfcAnvilForgingGridX1;
+    private static int tfcAnvilForgingGridY1;
+    private static int tfcAnvilForgingGridX2;
+    private static int tfcAnvilForgingGridY2;
 
     static {
         setPneumaticColorWhitelist(
@@ -78,6 +133,116 @@ public final class BlxckoutFXRenderContext {
 
     public static void enterButtonRender() {
         buttonRenderDepth++;
+    }
+
+    public static void reset() {
+        buttonRenderDepth = 0;
+        inventoryButtonRenderDepth = 0;
+        textureDarkeningSuppressDepth = 0;
+        jeiWidgetRenderDepth = 0;
+        jeiRecipeLayoutRenderDepth = 0;
+        jeiInformationRecipeRenderDepth = 0;
+        pneumaticCraftWidgetRenderDepth = 0;
+        pneumaticCraftScreenRenderDepth = 0;
+        tfcScribingLogoRenderDepth = 0;
+        tfcSewingWorkspaceRenderDepth = 0;
+        tfcSewingControlScopeRenderDepth = 0;
+        tfcFirepitTemperatureRenderDepth = 0;
+        tfcFirepitPotRenderDepth = 0;
+        tfcFirepitGrillRenderDepth = 0;
+        tfcCrucibleTemperatureRenderDepth = 0;
+        tfcCrucibleVesselRenderDepth = 0;
+        tfcAnvilVisualRenderDepth = 0;
+        tfcAnvilForgingGridRenderDepth = 0;
+        tfcAnvilActionIconRenderDepth = 0;
+        balancedCappedDarkeningDepth = 0;
+        ae2ScreenRenderDepth = 0;
+        ae2CraftingTermScreenRenderDepth = 0;
+        ae2TextureRenderDepth = 0;
+        ae2StackSizeLabelRenderDepth = 0;
+        ae2IconRenderDepth = 0;
+        ae2PowerUnitIconRenderDepth = 0;
+        ae2ForceWhiteIconRenderDepth = 0;
+        ae2BrightenIconRenderDepth = 0;
+        ae2TransferButtonRenderDepth = 0;
+        ae2SearchFieldRenderDepth = 0;
+        extendedAeTagPlaceholderRenderDepth = 0;
+        ae2ScrollbarThumbDepth = 0;
+        ae2CraftingTerminalSectionDepth = 0;
+        ae2OutputSlotPaletteDepth = 0;
+        ae2PatternModesBackgroundDepth = 0;
+        ae2VerticalButtonBarBackgroundDepth = 0;
+        ae2WarningTextRenderDepth = 0;
+        ae2UpgradePanelBorderDepth = 0;
+        ae2MolecularAssemblerGridDepth = 0;
+        ae2SortButtonRenderDepth = 0;
+        ae2SchedulingButtonRenderDepth = 0;
+        vanillaIconButtonDepth = 0;
+        vanillaIconButtonMode = 0;
+        ae2CraftingTerminalSectionX1 = 0;
+        ae2CraftingTerminalSectionY1 = 0;
+        ae2CraftingTerminalSectionX2 = 0;
+        ae2CraftingTerminalSectionY2 = 0;
+        ae2MolecularAssemblerGridX1 = 0;
+        ae2MolecularAssemblerGridY1 = 0;
+        ae2MolecularAssemblerGridX2 = 0;
+        ae2MolecularAssemblerGridY2 = 0;
+        ae2TransferButtonX1 = 0;
+        ae2TransferButtonY1 = 0;
+        ae2TransferButtonX2 = 0;
+        ae2TransferButtonY2 = 0;
+        ae2SortButtonX1 = 0;
+        ae2SortButtonY1 = 0;
+        ae2SortButtonX2 = 0;
+        ae2SortButtonY2 = 0;
+        ae2SchedulingButtonX1 = 0;
+        ae2SchedulingButtonY1 = 0;
+        ae2SchedulingButtonX2 = 0;
+        ae2SchedulingButtonY2 = 0;
+        vanillaIconButtonX1 = 0;
+        vanillaIconButtonY1 = 0;
+        vanillaIconButtonX2 = 0;
+        vanillaIconButtonY2 = 0;
+        tfcScribingLogoX1 = 0;
+        tfcScribingLogoY1 = 0;
+        tfcScribingLogoX2 = 0;
+        tfcScribingLogoY2 = 0;
+        tfcSewingWorkspaceX1 = 0;
+        tfcSewingWorkspaceY1 = 0;
+        tfcSewingWorkspaceX2 = 0;
+        tfcSewingWorkspaceY2 = 0;
+        tfcSewingControlScopeX1 = 0;
+        tfcSewingControlScopeY1 = 0;
+        tfcSewingControlScopeX2 = 0;
+        tfcSewingControlScopeY2 = 0;
+        tfcFirepitTemperatureX1 = 0;
+        tfcFirepitTemperatureY1 = 0;
+        tfcFirepitTemperatureX2 = 0;
+        tfcFirepitTemperatureY2 = 0;
+        tfcFirepitPotX1 = 0;
+        tfcFirepitPotY1 = 0;
+        tfcFirepitPotX2 = 0;
+        tfcFirepitPotY2 = 0;
+        tfcFirepitGrillX1 = 0;
+        tfcFirepitGrillY1 = 0;
+        tfcFirepitGrillX2 = 0;
+        tfcFirepitGrillY2 = 0;
+        tfcCrucibleTemperatureX1 = 0;
+        tfcCrucibleTemperatureY1 = 0;
+        tfcCrucibleTemperatureX2 = 0;
+        tfcCrucibleTemperatureY2 = 0;
+        tfcCrucibleVesselX1 = 0;
+        tfcCrucibleVesselY1 = 0;
+        tfcCrucibleVesselX2 = 0;
+        tfcCrucibleVesselY2 = 0;
+        tfcAnvilVisualX1 = 0;
+        tfcAnvilVisualY1 = 0;
+        tfcAnvilVisualX2 = 0;
+        tfcAnvilVisualY2 = 0;
+        tfcAnvilForgingGridX1 = 0;
+        tfcAnvilForgingGridY1 = 0;
+        tfcAnvilForgingGridX2 = 0;
+        tfcAnvilForgingGridY2 = 0;
     }
 
     public static void exitButtonRender() {
@@ -218,6 +383,377 @@ public final class BlxckoutFXRenderContext {
         return pneumaticCraftScreenRenderDepth > 0;
     }
 
+    public static void enterTfcScribingLogoRender(int guiX1, int guiY1, int guiX2, int guiY2) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft == null || minecraft.getWindow() == null) {
+            return;
+        }
+
+        double guiScale = Math.max(1.0D, minecraft.getWindow().getGuiScale());
+        int framebufferHeight = minecraft.getWindow().getHeight();
+        tfcScribingLogoRenderDepth++;
+        tfcScribingLogoX1 = (int) Math.floor(guiX1 * guiScale);
+        tfcScribingLogoX2 = (int) Math.ceil(guiX2 * guiScale);
+        tfcScribingLogoY1 = framebufferHeight - (int) Math.ceil(guiY2 * guiScale);
+        tfcScribingLogoY2 = framebufferHeight - (int) Math.floor(guiY1 * guiScale);
+    }
+
+    public static void exitTfcScribingLogoRender() {
+        tfcScribingLogoRenderDepth = Math.max(0, tfcScribingLogoRenderDepth - 1);
+        if (tfcScribingLogoRenderDepth == 0) {
+            tfcScribingLogoX1 = 0;
+            tfcScribingLogoY1 = 0;
+            tfcScribingLogoX2 = 0;
+            tfcScribingLogoY2 = 0;
+        }
+    }
+
+    public static boolean isRenderingTfcScribingLogo() {
+        return tfcScribingLogoRenderDepth > 0;
+    }
+
+    public static float getTfcScribingLogoMode() {
+        return isRenderingTfcScribingLogo() ? 1.0F : 0.0F;
+    }
+
+    public static float getTfcScribingLogoX1() { return tfcScribingLogoX1; }
+    public static float getTfcScribingLogoY1() { return tfcScribingLogoY1; }
+    public static float getTfcScribingLogoX2() { return tfcScribingLogoX2; }
+    public static float getTfcScribingLogoY2() { return tfcScribingLogoY2; }
+
+    public static void enterTfcSewingWorkspaceRender(int guiX1, int guiY1, int guiX2, int guiY2) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft == null || minecraft.getWindow() == null) {
+            return;
+        }
+
+        double guiScale = Math.max(1.0D, minecraft.getWindow().getGuiScale());
+        int framebufferHeight = minecraft.getWindow().getHeight();
+        tfcSewingWorkspaceRenderDepth++;
+        tfcSewingWorkspaceX1 = (int) Math.floor(guiX1 * guiScale);
+        tfcSewingWorkspaceX2 = (int) Math.ceil(guiX2 * guiScale);
+        tfcSewingWorkspaceY1 = framebufferHeight - (int) Math.ceil(guiY2 * guiScale);
+        tfcSewingWorkspaceY2 = framebufferHeight - (int) Math.floor(guiY1 * guiScale);
+    }
+
+    public static void exitTfcSewingWorkspaceRender() {
+        tfcSewingWorkspaceRenderDepth = Math.max(0, tfcSewingWorkspaceRenderDepth - 1);
+        if (tfcSewingWorkspaceRenderDepth == 0) {
+            tfcSewingWorkspaceX1 = 0;
+            tfcSewingWorkspaceY1 = 0;
+            tfcSewingWorkspaceX2 = 0;
+            tfcSewingWorkspaceY2 = 0;
+        }
+    }
+
+    public static float getTfcSewingWorkspaceMode() {
+        return tfcSewingWorkspaceRenderDepth > 0 ? 1.0F : 0.0F;
+    }
+
+    public static float getTfcSewingWorkspaceX1() { return tfcSewingWorkspaceX1; }
+    public static float getTfcSewingWorkspaceY1() { return tfcSewingWorkspaceY1; }
+    public static float getTfcSewingWorkspaceX2() { return tfcSewingWorkspaceX2; }
+    public static float getTfcSewingWorkspaceY2() { return tfcSewingWorkspaceY2; }
+
+    public static void enterTfcSewingControlScopeRender(int guiX1, int guiY1, int guiX2, int guiY2) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft == null || minecraft.getWindow() == null) {
+            return;
+        }
+
+        double guiScale = Math.max(1.0D, minecraft.getWindow().getGuiScale());
+        int framebufferHeight = minecraft.getWindow().getHeight();
+        tfcSewingControlScopeRenderDepth++;
+        tfcSewingControlScopeX1 = (int) Math.floor(guiX1 * guiScale);
+        tfcSewingControlScopeX2 = (int) Math.ceil(guiX2 * guiScale);
+        tfcSewingControlScopeY1 = framebufferHeight - (int) Math.ceil(guiY2 * guiScale);
+        tfcSewingControlScopeY2 = framebufferHeight - (int) Math.floor(guiY1 * guiScale);
+    }
+
+    public static void exitTfcSewingControlScopeRender() {
+        tfcSewingControlScopeRenderDepth = Math.max(0, tfcSewingControlScopeRenderDepth - 1);
+        if (tfcSewingControlScopeRenderDepth == 0) {
+            tfcSewingControlScopeX1 = 0;
+            tfcSewingControlScopeY1 = 0;
+            tfcSewingControlScopeX2 = 0;
+            tfcSewingControlScopeY2 = 0;
+        }
+    }
+
+    public static float getTfcSewingControlScopeMode() {
+        return tfcSewingControlScopeRenderDepth > 0 ? 1.0F : 0.0F;
+    }
+
+    public static float getTfcSewingControlScopeX1() { return tfcSewingControlScopeX1; }
+    public static float getTfcSewingControlScopeY1() { return tfcSewingControlScopeY1; }
+    public static float getTfcSewingControlScopeX2() { return tfcSewingControlScopeX2; }
+    public static float getTfcSewingControlScopeY2() { return tfcSewingControlScopeY2; }
+
+    public static void enterTfcFirepitTemperatureRender(int guiX1, int guiY1, int guiX2, int guiY2) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft == null || minecraft.getWindow() == null) {
+            return;
+        }
+
+        double guiScale = Math.max(1.0D, minecraft.getWindow().getGuiScale());
+        int framebufferHeight = minecraft.getWindow().getHeight();
+        tfcFirepitTemperatureRenderDepth++;
+        tfcFirepitTemperatureX1 = (int) Math.floor(guiX1 * guiScale);
+        tfcFirepitTemperatureX2 = (int) Math.ceil(guiX2 * guiScale);
+        tfcFirepitTemperatureY1 = framebufferHeight - (int) Math.ceil(guiY2 * guiScale);
+        tfcFirepitTemperatureY2 = framebufferHeight - (int) Math.floor(guiY1 * guiScale);
+    }
+
+    public static void exitTfcFirepitTemperatureRender() {
+        tfcFirepitTemperatureRenderDepth = Math.max(0, tfcFirepitTemperatureRenderDepth - 1);
+        if (tfcFirepitTemperatureRenderDepth == 0) {
+            tfcFirepitTemperatureX1 = 0;
+            tfcFirepitTemperatureY1 = 0;
+            tfcFirepitTemperatureX2 = 0;
+            tfcFirepitTemperatureY2 = 0;
+        }
+    }
+
+    public static float getTfcFirepitTemperatureMode() {
+        return tfcFirepitTemperatureRenderDepth > 0 ? 1.0F : 0.0F;
+    }
+
+    public static float getTfcFirepitTemperatureX1() { return tfcFirepitTemperatureX1; }
+    public static float getTfcFirepitTemperatureY1() { return tfcFirepitTemperatureY1; }
+    public static float getTfcFirepitTemperatureX2() { return tfcFirepitTemperatureX2; }
+    public static float getTfcFirepitTemperatureY2() { return tfcFirepitTemperatureY2; }
+
+    public static void enterTfcFirepitPotRender(int guiX1, int guiY1, int guiX2, int guiY2) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft == null || minecraft.getWindow() == null) {
+            return;
+        }
+
+        double guiScale = Math.max(1.0D, minecraft.getWindow().getGuiScale());
+        int framebufferHeight = minecraft.getWindow().getHeight();
+        tfcFirepitPotRenderDepth++;
+        tfcFirepitPotX1 = (int) Math.floor(guiX1 * guiScale);
+        tfcFirepitPotX2 = (int) Math.ceil(guiX2 * guiScale);
+        tfcFirepitPotY1 = framebufferHeight - (int) Math.ceil(guiY2 * guiScale);
+        tfcFirepitPotY2 = framebufferHeight - (int) Math.floor(guiY1 * guiScale);
+    }
+
+    public static void exitTfcFirepitPotRender() {
+        tfcFirepitPotRenderDepth = Math.max(0, tfcFirepitPotRenderDepth - 1);
+        if (tfcFirepitPotRenderDepth == 0) {
+            tfcFirepitPotX1 = 0;
+            tfcFirepitPotY1 = 0;
+            tfcFirepitPotX2 = 0;
+            tfcFirepitPotY2 = 0;
+        }
+    }
+
+    public static float getTfcFirepitPotMode() {
+        return tfcFirepitPotRenderDepth > 0 ? 1.0F : 0.0F;
+    }
+
+    public static float getTfcFirepitPotX1() { return tfcFirepitPotX1; }
+    public static float getTfcFirepitPotY1() { return tfcFirepitPotY1; }
+    public static float getTfcFirepitPotX2() { return tfcFirepitPotX2; }
+    public static float getTfcFirepitPotY2() { return tfcFirepitPotY2; }
+
+    public static void enterTfcFirepitGrillRender(int guiX1, int guiY1, int guiX2, int guiY2) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft == null || minecraft.getWindow() == null) {
+            return;
+        }
+
+        double guiScale = Math.max(1.0D, minecraft.getWindow().getGuiScale());
+        int framebufferHeight = minecraft.getWindow().getHeight();
+        tfcFirepitGrillRenderDepth++;
+        tfcFirepitGrillX1 = (int) Math.floor(guiX1 * guiScale);
+        tfcFirepitGrillX2 = (int) Math.ceil(guiX2 * guiScale);
+        tfcFirepitGrillY1 = framebufferHeight - (int) Math.ceil(guiY2 * guiScale);
+        tfcFirepitGrillY2 = framebufferHeight - (int) Math.floor(guiY1 * guiScale);
+    }
+
+    public static void exitTfcFirepitGrillRender() {
+        tfcFirepitGrillRenderDepth = Math.max(0, tfcFirepitGrillRenderDepth - 1);
+        if (tfcFirepitGrillRenderDepth == 0) {
+            tfcFirepitGrillX1 = 0;
+            tfcFirepitGrillY1 = 0;
+            tfcFirepitGrillX2 = 0;
+            tfcFirepitGrillY2 = 0;
+        }
+    }
+
+    public static float getTfcFirepitGrillMode() {
+        return tfcFirepitGrillRenderDepth > 0 ? 1.0F : 0.0F;
+    }
+
+    public static float getTfcFirepitGrillX1() { return tfcFirepitGrillX1; }
+    public static float getTfcFirepitGrillY1() { return tfcFirepitGrillY1; }
+    public static float getTfcFirepitGrillX2() { return tfcFirepitGrillX2; }
+    public static float getTfcFirepitGrillY2() { return tfcFirepitGrillY2; }
+
+    public static void enterTfcCrucibleTemperatureRender(int guiX1, int guiY1, int guiX2, int guiY2) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft == null || minecraft.getWindow() == null) {
+            return;
+        }
+
+        double guiScale = Math.max(1.0D, minecraft.getWindow().getGuiScale());
+        int framebufferHeight = minecraft.getWindow().getHeight();
+        tfcCrucibleTemperatureRenderDepth++;
+        tfcCrucibleTemperatureX1 = (int) Math.floor(guiX1 * guiScale);
+        tfcCrucibleTemperatureX2 = (int) Math.ceil(guiX2 * guiScale);
+        tfcCrucibleTemperatureY1 = framebufferHeight - (int) Math.ceil(guiY2 * guiScale);
+        tfcCrucibleTemperatureY2 = framebufferHeight - (int) Math.floor(guiY1 * guiScale);
+    }
+
+    public static void exitTfcCrucibleTemperatureRender() {
+        tfcCrucibleTemperatureRenderDepth = Math.max(0, tfcCrucibleTemperatureRenderDepth - 1);
+        if (tfcCrucibleTemperatureRenderDepth == 0) {
+            tfcCrucibleTemperatureX1 = 0;
+            tfcCrucibleTemperatureY1 = 0;
+            tfcCrucibleTemperatureX2 = 0;
+            tfcCrucibleTemperatureY2 = 0;
+        }
+    }
+
+    public static float getTfcCrucibleTemperatureMode() {
+        return tfcCrucibleTemperatureRenderDepth > 0 ? 1.0F : 0.0F;
+    }
+
+    public static float getTfcCrucibleTemperatureX1() { return tfcCrucibleTemperatureX1; }
+    public static float getTfcCrucibleTemperatureY1() { return tfcCrucibleTemperatureY1; }
+    public static float getTfcCrucibleTemperatureX2() { return tfcCrucibleTemperatureX2; }
+    public static float getTfcCrucibleTemperatureY2() { return tfcCrucibleTemperatureY2; }
+
+    public static void enterTfcCrucibleVesselRender(int guiX1, int guiY1, int guiX2, int guiY2) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft == null || minecraft.getWindow() == null) {
+            return;
+        }
+
+        double guiScale = Math.max(1.0D, minecraft.getWindow().getGuiScale());
+        int framebufferHeight = minecraft.getWindow().getHeight();
+        tfcCrucibleVesselRenderDepth++;
+        tfcCrucibleVesselX1 = (int) Math.floor(guiX1 * guiScale);
+        tfcCrucibleVesselX2 = (int) Math.ceil(guiX2 * guiScale);
+        tfcCrucibleVesselY1 = framebufferHeight - (int) Math.ceil(guiY2 * guiScale);
+        tfcCrucibleVesselY2 = framebufferHeight - (int) Math.floor(guiY1 * guiScale);
+    }
+
+    public static void exitTfcCrucibleVesselRender() {
+        tfcCrucibleVesselRenderDepth = Math.max(0, tfcCrucibleVesselRenderDepth - 1);
+        if (tfcCrucibleVesselRenderDepth == 0) {
+            tfcCrucibleVesselX1 = 0;
+            tfcCrucibleVesselY1 = 0;
+            tfcCrucibleVesselX2 = 0;
+            tfcCrucibleVesselY2 = 0;
+        }
+    }
+
+    public static float getTfcCrucibleVesselMode() {
+        return tfcCrucibleVesselRenderDepth > 0 ? 1.0F : 0.0F;
+    }
+
+    public static float getTfcCrucibleVesselX1() { return tfcCrucibleVesselX1; }
+    public static float getTfcCrucibleVesselY1() { return tfcCrucibleVesselY1; }
+    public static float getTfcCrucibleVesselX2() { return tfcCrucibleVesselX2; }
+    public static float getTfcCrucibleVesselY2() { return tfcCrucibleVesselY2; }
+
+    public static void enterTfcAnvilVisualRender(int guiX1, int guiY1, int guiX2, int guiY2) {
+        enterTfcRect(guiX1, guiY1, guiX2, guiY2, TfcRect.ANVIL_VISUAL);
+    }
+
+    public static void exitTfcAnvilVisualRender() {
+        tfcAnvilVisualRenderDepth = Math.max(0, tfcAnvilVisualRenderDepth - 1);
+        if (tfcAnvilVisualRenderDepth == 0) {
+            tfcAnvilVisualX1 = 0;
+            tfcAnvilVisualY1 = 0;
+            tfcAnvilVisualX2 = 0;
+            tfcAnvilVisualY2 = 0;
+        }
+    }
+
+    public static float getTfcAnvilVisualMode() { return tfcAnvilVisualRenderDepth > 0 ? 1.0F : 0.0F; }
+    public static float getTfcAnvilVisualX1() { return tfcAnvilVisualX1; }
+    public static float getTfcAnvilVisualY1() { return tfcAnvilVisualY1; }
+    public static float getTfcAnvilVisualX2() { return tfcAnvilVisualX2; }
+    public static float getTfcAnvilVisualY2() { return tfcAnvilVisualY2; }
+
+    public static void enterTfcAnvilForgingGridRender(int guiX1, int guiY1, int guiX2, int guiY2) {
+        enterTfcRect(guiX1, guiY1, guiX2, guiY2, TfcRect.ANVIL_FORGING_GRID);
+    }
+
+    public static void exitTfcAnvilForgingGridRender() {
+        tfcAnvilForgingGridRenderDepth = Math.max(0, tfcAnvilForgingGridRenderDepth - 1);
+        if (tfcAnvilForgingGridRenderDepth == 0 && tfcAnvilActionIconRenderDepth == 0) {
+            tfcAnvilForgingGridX1 = 0;
+            tfcAnvilForgingGridY1 = 0;
+            tfcAnvilForgingGridX2 = 0;
+            tfcAnvilForgingGridY2 = 0;
+        }
+    }
+
+    public static void enterTfcAnvilActionIconRender(int guiX1, int guiY1, int guiX2, int guiY2) {
+        enterTfcRect(guiX1, guiY1, guiX2, guiY2, TfcRect.ANVIL_ACTION_ICON);
+    }
+
+    public static void exitTfcAnvilActionIconRender() {
+        tfcAnvilActionIconRenderDepth = Math.max(0, tfcAnvilActionIconRenderDepth - 1);
+        if (tfcAnvilActionIconRenderDepth == 0 && tfcAnvilForgingGridRenderDepth == 0) {
+            tfcAnvilForgingGridX1 = 0;
+            tfcAnvilForgingGridY1 = 0;
+            tfcAnvilForgingGridX2 = 0;
+            tfcAnvilForgingGridY2 = 0;
+        }
+    }
+
+    public static float getTfcAnvilForgingGridMode() {
+        return tfcAnvilActionIconRenderDepth > 0 ? 2.0F : tfcAnvilForgingGridRenderDepth > 0 ? 1.0F : 0.0F;
+    }
+    public static float getTfcAnvilForgingGridX1() { return tfcAnvilForgingGridX1; }
+    public static float getTfcAnvilForgingGridY1() { return tfcAnvilForgingGridY1; }
+    public static float getTfcAnvilForgingGridX2() { return tfcAnvilForgingGridX2; }
+    public static float getTfcAnvilForgingGridY2() { return tfcAnvilForgingGridY2; }
+
+    private static void enterTfcRect(int guiX1, int guiY1, int guiX2, int guiY2, TfcRect rect) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft == null || minecraft.getWindow() == null) {
+            return;
+        }
+
+        double guiScale = Math.max(1.0D, minecraft.getWindow().getGuiScale());
+        int framebufferHeight = minecraft.getWindow().getHeight();
+        int x1 = (int) Math.floor(guiX1 * guiScale);
+        int x2 = (int) Math.ceil(guiX2 * guiScale);
+        int y1 = framebufferHeight - (int) Math.ceil(guiY2 * guiScale);
+        int y2 = framebufferHeight - (int) Math.floor(guiY1 * guiScale);
+        if (rect == TfcRect.ANVIL_VISUAL) {
+            tfcAnvilVisualRenderDepth++;
+            tfcAnvilVisualX1 = x1;
+            tfcAnvilVisualY1 = y1;
+            tfcAnvilVisualX2 = x2;
+            tfcAnvilVisualY2 = y2;
+        } else if (rect == TfcRect.ANVIL_FORGING_GRID) {
+            tfcAnvilForgingGridRenderDepth++;
+            tfcAnvilForgingGridX1 = x1;
+            tfcAnvilForgingGridY1 = y1;
+            tfcAnvilForgingGridX2 = x2;
+            tfcAnvilForgingGridY2 = y2;
+        } else {
+            tfcAnvilActionIconRenderDepth++;
+            tfcAnvilForgingGridX1 = x1;
+            tfcAnvilForgingGridY1 = y1;
+            tfcAnvilForgingGridX2 = x2;
+            tfcAnvilForgingGridY2 = y2;
+        }
+    }
+
+    private enum TfcRect {
+        ANVIL_VISUAL,
+        ANVIL_FORGING_GRID,
+        ANVIL_ACTION_ICON
+    }
+
     public static void setPneumaticColorWhitelist(int... rgbColors) {
         pneumaticColorWhitelistCount = Math.min(rgbColors.length, PNEUMATIC_COLOR_WHITELIST_SIZE);
         for (int i = 0; i < pneumaticColorWhitelist.length; i++) {
@@ -234,11 +770,11 @@ public final class BlxckoutFXRenderContext {
     }
 
     public static float getPneumaticColorWhitelistEnabled() {
-        return isRenderingPneumaticCraftScreen() && pneumaticColorWhitelistCount > 0 ? 1.0F : 0.0F;
+        return (isRenderingPneumaticCraftScreen() || isRenderingTfcScribingLogo()) && getPneumaticColorWhitelistCount() > 0 ? 1.0F : 0.0F;
     }
 
     public static float getPneumaticColorWhitelistCount() {
-        return pneumaticColorWhitelistCount;
+        return isRenderingTfcScribingLogo() ? TFC_SCRIBING_LOGO_COLOR_WHITELIST.length : pneumaticColorWhitelistCount;
     }
 
     public static float getPneumaticColorWhitelistR(int index) {
@@ -604,6 +1140,13 @@ public final class BlxckoutFXRenderContext {
     }
 
     private static float blxckoutfx$getPneumaticColorComponent(int index, int component) {
+        if (isRenderingTfcScribingLogo()) {
+            if (index < 0 || index >= TFC_SCRIBING_LOGO_COLOR_WHITELIST.length) {
+                return 0.0F;
+            }
+            return ((TFC_SCRIBING_LOGO_COLOR_WHITELIST[index] >> (16 - component * 8)) & 0xFF) / 255.0F;
+        }
+
         if (index < 0 || index >= pneumaticColorWhitelistCount) {
             return 0.0F;
         }

@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -29,7 +30,7 @@ public final class SidebarWidget {
     private final int y;
     private final int width;
     private final int height;
-    private final List<BlxckoutFXConfigScreen.Category> categories;
+    private List<BlxckoutFXConfigScreen.Category> categories;
     private final Consumer<BlxckoutFXConfigScreen.Category> onSelected;
     private final Consumer<String> onSearchChanged;
     private final Runnable onDiscordPressed;
@@ -60,7 +61,7 @@ public final class SidebarWidget {
         this.y = y;
         this.width = width;
         this.height = height;
-        this.categories = categories;
+        this.categories = new ArrayList<>(categories);
         this.selected = selected;
         this.onSelected = onSelected;
         this.onSearchChanged = onSearchChanged;
@@ -71,6 +72,14 @@ public final class SidebarWidget {
 
     public void setSelected(BlxckoutFXConfigScreen.Category selected) {
         this.selected = selected;
+    }
+
+    public void setCategories(List<BlxckoutFXConfigScreen.Category> categories) {
+        this.categories = new ArrayList<>(categories);
+        if (!this.categories.contains(this.selected)) {
+            this.selected = this.categories.isEmpty() ? null : this.categories.get(0);
+        }
+        this.scroll = 0;
     }
 
     public void render(GuiGraphics graphics, Font font, int mouseX, int mouseY) {

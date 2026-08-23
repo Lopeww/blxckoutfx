@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -21,6 +22,13 @@ import java.util.Optional;
 
 @Mixin(GuiGraphics.class)
 public class GuiGraphicsMixin {
+    private static final String BLXCKOUTFX_RECIPE_BOOK_TEXTURE = "textures/gui/recipe_book.png";
+    private static final String[] BLXCKOUTFX_RECIPE_BOOK_SEARCH_ICON_MASK = {
+            "......####..", ".....######.", "....########", "....########",
+            "....########", "....########", "...#########", "..#########.",
+            ".#########..", ".####.......", "####........", ".##........."
+    };
+
     @Inject(method = "innerBlit(Lnet/minecraft/resources/ResourceLocation;IIIIIFFFF)V", at = @At("HEAD"))
     private void blxckoutfx$enterAe2TextureRender(
             ResourceLocation atlasLocation,
@@ -61,6 +69,43 @@ public class GuiGraphicsMixin {
             BlxckoutFXRenderContext.exitAe2TextureRender();
         }
         if (isModsScreenLogo(atlasLocation)) {
+            BlxckoutFXRenderContext.allowTextureDarkening();
+        }
+    }
+
+    @Inject(method = "blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", at = @At("RETURN"), require = 0)
+    private void blxckoutfx$redrawInventoryRecipeBookSearchIcon(
+            ResourceLocation texture,
+            int x,
+            int y,
+            int sourceX,
+            int sourceY,
+            int width,
+            int height,
+            CallbackInfo ci
+    ) {
+        if (!blxckoutfx$isInventoryRecipeBookPanel(texture, sourceX, sourceY, width, height)) {
+            return;
+        }
+
+        GuiGraphics graphics = (GuiGraphics) (Object) this;
+        BlxckoutFXRenderContext.suppressTextureDarkening();
+        try {
+            for (int row = 0; row < BLXCKOUTFX_RECIPE_BOOK_SEARCH_ICON_MASK.length; row++) {
+                String maskRow = BLXCKOUTFX_RECIPE_BOOK_SEARCH_ICON_MASK[row];
+                int runStart = maskRow.indexOf('#');
+                while (runStart >= 0) {
+                    int runEnd = maskRow.indexOf('.', runStart);
+                    if (runEnd < 0) {
+                        runEnd = maskRow.length();
+                    }
+
+                    graphics.blit(texture, x + 10 + runStart, y + 14 + row,
+                            sourceX + 10 + runStart, sourceY + 14 + row, runEnd - runStart, 1);
+                    runStart = maskRow.indexOf('#', runEnd);
+                }
+            }
+        } finally {
             BlxckoutFXRenderContext.allowTextureDarkening();
         }
     }
@@ -125,6 +170,23 @@ public class GuiGraphicsMixin {
 
     private static boolean blxckoutfx$isAe2Texture(ResourceLocation atlasLocation) {
         return BlxckoutFXAe2Support.isAe2Texture(atlasLocation);
+    }
+
+    private static boolean blxckoutfx$isInventoryRecipeBookPanel(
+            ResourceLocation texture,
+            int sourceX,
+            int sourceY,
+            int width,
+            int height
+    ) {
+        return Minecraft.getInstance().screen instanceof InventoryScreen
+                && texture != null
+                && "minecraft".equals(texture.getNamespace())
+                && BLXCKOUTFX_RECIPE_BOOK_TEXTURE.equals(texture.getPath())
+                && sourceX == 1
+                && sourceY == 1
+                && width == 147
+                && height == 166;
     }
 
     private static boolean isModsScreenLogo(ResourceLocation atlasLocation) {

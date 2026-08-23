@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.lopew.blxckoutfx.mixin",
+  "refmap": "${mixin_refmap}",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "tfc.TfcGuiGraphicsMixin",
+    "tfc.TfcKnappingButtonMixin",
+    "tfc.TfcPlayerInventoryTabButtonMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

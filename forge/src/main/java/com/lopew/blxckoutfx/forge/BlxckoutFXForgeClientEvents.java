@@ -1,12 +1,16 @@
 package com.lopew.blxckoutfx.forge;
 
 import com.lopew.blxckoutfx.BlxckoutFX;
+import com.lopew.blxckoutfx.client.config.BlxckoutFXConfigScreen;
 import com.lopew.blxckoutfx.client.gui.BlxckoutFXGUIHandler;
+import com.lopew.blxckoutfx.client.reload.BlxckoutFXReloadService;
 import com.lopew.blxckoutfx.client.render.BlxckoutFXShaders;
+import net.minecraft.commands.Commands;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterShadersEvent;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -31,6 +35,47 @@ public final class BlxckoutFXForgeClientEvents {
 
     @Mod.EventBusSubscriber(modid = BlxckoutFX.MOD_ID, value = Dist.CLIENT)
     public static final class ForgeBusEvents {
+        @SubscribeEvent
+        public static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
+            event.getDispatcher().register(
+                    Commands.literal("blxckout")
+                            .executes(context -> openConfigScreen())
+                            .then(Commands.literal("reload")
+                                    .executes(context -> BlxckoutFXReloadService.reload() ? 1 : 0))
+                            .then(Commands.literal("reload-resources")
+                                    .executes(context -> BlxckoutFXReloadService.reloadResources() ? 1 : 0))
+                            .then(Commands.literal("reload-all")
+                                    .executes(context -> BlxckoutFXReloadService.reloadAll() ? 1 : 0))
+            );
+            event.getDispatcher().register(
+                    Commands.literal("blxckoutfx")
+                            .executes(context -> openConfigScreen())
+                            .then(Commands.literal("reload")
+                                    .executes(context -> BlxckoutFXReloadService.reload() ? 1 : 0))
+                            .then(Commands.literal("reload-resources")
+                                    .executes(context -> BlxckoutFXReloadService.reloadResources() ? 1 : 0))
+                            .then(Commands.literal("reload-all")
+                                    .executes(context -> BlxckoutFXReloadService.reloadAll() ? 1 : 0))
+            );
+            event.getDispatcher().register(
+                    Commands.literal("bfx")
+                            .executes(context -> openConfigScreen())
+                            .then(Commands.literal("reload")
+                                    .executes(context -> BlxckoutFXReloadService.reload() ? 1 : 0))
+                            .then(Commands.literal("reload-resources")
+                                    .executes(context -> BlxckoutFXReloadService.reloadResources() ? 1 : 0))
+                            .then(Commands.literal("reload-all")
+                                    .executes(context -> BlxckoutFXReloadService.reloadAll() ? 1 : 0))
+            );
+        }
+
+        private static int openConfigScreen() {
+            Minecraft minecraft = Minecraft.getInstance();
+            // Chat closes immediately after command execution, so open on the next client task.
+            minecraft.tell(() -> minecraft.setScreen(new BlxckoutFXConfigScreen(minecraft.screen)));
+            return 1;
+        }
+
         @SubscribeEvent
         public static void onClientTick(TickEvent.ClientTickEvent event) {
             if (event.phase == TickEvent.Phase.END) {

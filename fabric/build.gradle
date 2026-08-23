@@ -3,6 +3,12 @@ plugins {
     id 'fabric-loom'
 }
 
+sourceSets.main.java.exclude 'com/lopew/blxckoutfx/mixin/tfc/**'
+
+tasks.named('compileJava', JavaCompile) {
+    exclude 'com/lopew/blxckoutfx/mixin/tfc/**'
+}
+
 repositories {
     maven {
         name = "BlameJared Maven"
@@ -39,11 +45,24 @@ loom {
             ideConfigGenerated(true)
             runDir("run")
         }
+        clientHotSwap {
+            client()
+            setConfigName("Fabric Client HotSwap")
+            ideConfigGenerated(true)
+            runDir("runs/client-hotswap")
+        }
         server {
             server()
             setConfigName("Fabric Server")
             ideConfigGenerated(true)
             runDir("run")
         }
+    }
+}
+
+// Loom preserves an existing generated IDEA run config, including obsolete runDir values.
+tasks.named('ideaSyncTask') {
+    doFirst {
+        delete rootProject.file('.idea/runConfigurations/Fabric_Client_HotSwap___fabric__fabric.xml')
     }
 }

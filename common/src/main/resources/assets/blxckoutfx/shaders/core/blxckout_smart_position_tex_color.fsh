@@ -19,6 +19,26 @@ uniform vec4 Ae2MolecularAssemblerGridRect;
 uniform float VanillaIconButtonMode;
 uniform vec4 VanillaIconButtonRect;
 uniform float PneumaticColorWhitelistEnabled;
+uniform float TfcScribingLogoMode;
+uniform vec4 TfcScribingLogoRect;
+uniform float TfcSewingWorkspaceMode;
+uniform vec4 TfcSewingWorkspaceRect;
+uniform float TfcSewingControlScopeMode;
+uniform vec4 TfcSewingControlScopeRect;
+uniform float TfcFirepitTemperatureMode;
+uniform vec4 TfcFirepitTemperatureRect;
+uniform float TfcFirepitPotMode;
+uniform vec4 TfcFirepitPotRect;
+uniform float TfcFirepitGrillMode;
+uniform vec4 TfcFirepitGrillRect;
+uniform float TfcCrucibleTemperatureMode;
+uniform vec4 TfcCrucibleTemperatureRect;
+uniform float TfcCrucibleVesselMode;
+uniform vec4 TfcCrucibleVesselRect;
+uniform float TfcAnvilVisualMode;
+uniform vec4 TfcAnvilVisualRect;
+uniform float TfcAnvilForgingGridMode;
+uniform vec4 TfcAnvilForgingGridRect;
 uniform float PneumaticColorWhitelistCount;
 uniform vec3 PneumaticColorWhitelist0;
 uniform vec3 PneumaticColorWhitelist1;
@@ -252,6 +272,108 @@ bool matchesPneumaticWhitelistColor(vec3 rgb) {
     return false;
 }
 
+bool isInTfcScribingLogoRect() {
+    return TfcScribingLogoMode > 0.5
+            && TfcScribingLogoRect.z > TfcScribingLogoRect.x
+            && TfcScribingLogoRect.w > TfcScribingLogoRect.y
+            && gl_FragCoord.x >= TfcScribingLogoRect.x
+            && gl_FragCoord.x < TfcScribingLogoRect.z
+            && gl_FragCoord.y >= TfcScribingLogoRect.y
+            && gl_FragCoord.y < TfcScribingLogoRect.w;
+}
+
+bool isInTfcSewingWorkspaceRect() {
+    return TfcSewingWorkspaceMode > 0.5
+            && TfcSewingWorkspaceRect.z > TfcSewingWorkspaceRect.x
+            && TfcSewingWorkspaceRect.w > TfcSewingWorkspaceRect.y
+            && gl_FragCoord.x >= TfcSewingWorkspaceRect.x
+            && gl_FragCoord.x < TfcSewingWorkspaceRect.z
+            && gl_FragCoord.y >= TfcSewingWorkspaceRect.y
+            && gl_FragCoord.y < TfcSewingWorkspaceRect.w;
+}
+
+bool isInTfcSewingControlScopeRect() {
+    return TfcSewingControlScopeMode > 0.5
+            && TfcSewingControlScopeRect.z > TfcSewingControlScopeRect.x
+            && TfcSewingControlScopeRect.w > TfcSewingControlScopeRect.y
+            && gl_FragCoord.x >= TfcSewingControlScopeRect.x
+            && gl_FragCoord.x < TfcSewingControlScopeRect.z
+            && gl_FragCoord.y >= TfcSewingControlScopeRect.y
+            && gl_FragCoord.y < TfcSewingControlScopeRect.w;
+}
+
+bool isInTfcFirepitTemperatureRect() {
+    return TfcFirepitTemperatureMode > 0.5
+            && TfcFirepitTemperatureRect.z > TfcFirepitTemperatureRect.x
+            && TfcFirepitTemperatureRect.w > TfcFirepitTemperatureRect.y
+            && gl_FragCoord.x >= TfcFirepitTemperatureRect.x
+            && gl_FragCoord.x < TfcFirepitTemperatureRect.z
+            && gl_FragCoord.y >= TfcFirepitTemperatureRect.y
+            && gl_FragCoord.y < TfcFirepitTemperatureRect.w;
+}
+
+bool shouldPreserveTfcFirepitTemperatureColor(vec3 rgb) {
+    return isInTfcFirepitTemperatureRect()
+            && !matchesColorTol(rgb, vec3(0.776471, 0.776471, 0.776471), 0.004);
+}
+
+bool shouldPreserveTfcFirepitPotColor(vec3 rgb) {
+    return TfcFirepitPotMode > 0.5
+            && TfcFirepitPotRect.z > TfcFirepitPotRect.x
+            && TfcFirepitPotRect.w > TfcFirepitPotRect.y
+            && gl_FragCoord.x >= TfcFirepitPotRect.x
+            && gl_FragCoord.x < TfcFirepitPotRect.z
+            && gl_FragCoord.y >= TfcFirepitPotRect.y
+            && gl_FragCoord.y < TfcFirepitPotRect.w
+            && !matchesColorTol(rgb, vec3(0.776471, 0.776471, 0.776471), 0.004);
+}
+
+bool shouldPreserveTfcFirepitGrillColor(vec3 rgb) {
+    return TfcFirepitGrillMode > 0.5
+            && TfcFirepitGrillRect.z > TfcFirepitGrillRect.x
+            && TfcFirepitGrillRect.w > TfcFirepitGrillRect.y
+            && gl_FragCoord.x >= TfcFirepitGrillRect.x
+            && gl_FragCoord.x < TfcFirepitGrillRect.z
+            && gl_FragCoord.y >= TfcFirepitGrillRect.y
+            && gl_FragCoord.y < TfcFirepitGrillRect.w
+            && !matchesColorTol(rgb, vec3(0.776471, 0.776471, 0.776471), 0.004);
+}
+
+bool shouldPreserveTfcCrucibleTemperatureColor(vec3 rgb) {
+    return TfcCrucibleTemperatureMode > 0.5
+            && TfcCrucibleTemperatureRect.z > TfcCrucibleTemperatureRect.x
+            && TfcCrucibleTemperatureRect.w > TfcCrucibleTemperatureRect.y
+            && gl_FragCoord.x >= TfcCrucibleTemperatureRect.x
+            && gl_FragCoord.x < TfcCrucibleTemperatureRect.z
+            && gl_FragCoord.y >= TfcCrucibleTemperatureRect.y
+            && gl_FragCoord.y < TfcCrucibleTemperatureRect.w
+            && !matchesColorTol(rgb, vec3(0.776471, 0.776471, 0.776471), 0.004);
+}
+
+bool shouldPreserveTfcCrucibleVesselColor(vec3 rgb) {
+    return TfcCrucibleVesselMode > 0.5
+            && TfcCrucibleVesselRect.z > TfcCrucibleVesselRect.x
+            && TfcCrucibleVesselRect.w > TfcCrucibleVesselRect.y
+            && gl_FragCoord.x >= TfcCrucibleVesselRect.x
+            && gl_FragCoord.x < TfcCrucibleVesselRect.z
+            && gl_FragCoord.y >= TfcCrucibleVesselRect.y
+            && gl_FragCoord.y < TfcCrucibleVesselRect.w
+            && !matchesColorTol(rgb, vec3(0.776471, 0.776471, 0.776471), 0.004);
+}
+
+bool shouldPreserveTfcAnvilColor(float mode, vec4 rect, vec3 rgb) {
+    return mode > 0.5
+            && rect.z > rect.x
+            && rect.w > rect.y
+            && gl_FragCoord.x >= rect.x
+            && gl_FragCoord.x < rect.z
+            && gl_FragCoord.y >= rect.y
+            && gl_FragCoord.y < rect.w
+            && (mode > 1.5
+                    ? max(max(rgb.r, rgb.g), rgb.b) > 0.02 && abs(rgb.r - rgb.g) < 0.08 && abs(rgb.g - rgb.b) < 0.08
+                    : !matchesColorTol(rgb, vec3(0.776471, 0.776471, 0.776471), 0.004));
+}
+
 void main() {
     vec4 color = texture(Sampler0, texCoord0) * vertexColor;
 
@@ -259,7 +381,18 @@ void main() {
         discard;
     }
 
-    if (matchesPneumaticWhitelistColor(color.rgb)) {
+    if (isInTfcSewingWorkspaceRect() || isInTfcSewingControlScopeRect()
+            || shouldPreserveTfcFirepitTemperatureColor(color.rgb) || shouldPreserveTfcFirepitPotColor(color.rgb)
+            || shouldPreserveTfcFirepitGrillColor(color.rgb) || shouldPreserveTfcCrucibleTemperatureColor(color.rgb)
+            || shouldPreserveTfcCrucibleVesselColor(color.rgb)
+            || shouldPreserveTfcAnvilColor(TfcAnvilVisualMode, TfcAnvilVisualRect, color.rgb)
+            || shouldPreserveTfcAnvilColor(TfcAnvilForgingGridMode, TfcAnvilForgingGridRect, color.rgb)) {
+        fragColor = color * ColorModulator;
+        return;
+    }
+
+    if (matchesPneumaticWhitelistColor(color.rgb)
+            && (TfcScribingLogoMode < 0.5 || isInTfcScribingLogoRect())) {
         fragColor = color * ColorModulator;
         return;
     }

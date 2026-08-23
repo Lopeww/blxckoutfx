@@ -25,11 +25,8 @@ public class InventoryButton extends Button implements IInventoryButton {
     private static final int CLASSIC_TEXT_RIGHT_PADDING = 6;
     private static final int CLASSIC_HOVER_LOCK_RESERVE = 19;
     private static final ResourceLocation AE2_ICON = new ResourceLocation(BlxckoutFX.MOD_ID, "textures/gui/ae2.png");
-    private static final int AE2_ICON_SOURCE_SIZE = 1254;
+    private static final int AE2_ICON_TEXTURE_SIZE = 128;
     private static final int AE2_ICON_SIZE = 11;
-    private static final int AE2_ICON_CROP_X = 126;
-    private static final int AE2_ICON_CROP_Y = 45;
-    private static final int AE2_ICON_CROP_SIZE = 1128;
     private static final int LOCK_ICON_SIZE = 12;
 
     enum Ae2Variant {
@@ -180,6 +177,18 @@ public class InventoryButton extends Button implements IInventoryButton {
         }
     }
 
+    public void renderWithoutTooltip(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        if (!this.visible) {
+            return;
+        }
+
+        this.isHovered = mouseX >= this.getX()
+                && mouseY >= this.getY()
+                && mouseX < this.getX() + this.width
+                && mouseY < this.getY() + this.height;
+        renderWidget(graphics, mouseX, mouseY, partialTick);
+    }
+
     private void drawClassicLabelText(GuiGraphics graphics, int color, int width) {
         if (width <= 0) {
             return;
@@ -237,12 +246,8 @@ public class InventoryButton extends Button implements IInventoryButton {
         BlxckoutFXRenderContext.enterAe2IconRender();
         BlxckoutFXRenderContext.suppressTextureDarkening();
         try {
-            PoseStack pose = graphics.pose();
-            pose.pushPose();
-            pose.translate(x, y, 0);
-            pose.scale(AE2_ICON_SIZE / (float) AE2_ICON_CROP_SIZE, AE2_ICON_SIZE / (float) AE2_ICON_CROP_SIZE, 1f);
-            graphics.blit(AE2_ICON, 0, 0, AE2_ICON_CROP_X, AE2_ICON_CROP_Y, AE2_ICON_CROP_SIZE, AE2_ICON_CROP_SIZE, AE2_ICON_SOURCE_SIZE, AE2_ICON_SOURCE_SIZE);
-            pose.popPose();
+            graphics.blit(AE2_ICON, x, y, 0, 0, AE2_ICON_SIZE, AE2_ICON_SIZE,
+                    AE2_ICON_TEXTURE_SIZE, AE2_ICON_TEXTURE_SIZE);
         } finally {
             BlxckoutFXRenderContext.allowTextureDarkening();
             BlxckoutFXRenderContext.exitAe2IconRender();

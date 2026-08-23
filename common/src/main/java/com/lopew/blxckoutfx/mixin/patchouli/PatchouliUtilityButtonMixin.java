@@ -84,10 +84,8 @@ public class PatchouliUtilityButtonMixin {
 
         if (tooltip.get(0).getContents() instanceof TranslatableContents contents) {
             String key = contents.getKey();
-            return "patchouli.gui.lexicon.button.resize".equals(key)
-                    || "patchouli.gui.lexicon.button.history".equals(key)
-                    || "patchouli.gui.lexicon.button.advancements".equals(key)
-                    || "patchouli.gui.lexicon.button.editor".equals(key);
+            // All built-in book controls, including page arrows, use this translation-key namespace.
+            return key.startsWith("patchouli.gui.lexicon.button.");
         }
 
         return false;

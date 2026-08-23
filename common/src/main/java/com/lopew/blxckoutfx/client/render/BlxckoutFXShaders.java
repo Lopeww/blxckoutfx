@@ -157,6 +157,96 @@ public final class BlxckoutFXShaders {
                 BlxckoutFXRenderContext.getVanillaIconButtonY2()
         );
         setUniform(shader, "PneumaticColorWhitelistEnabled", BlxckoutFXRenderContext.getPneumaticColorWhitelistEnabled());
+        setUniform(shader, "TfcScribingLogoMode", BlxckoutFXRenderContext.getTfcScribingLogoMode());
+        setUniform(
+                shader,
+                "TfcScribingLogoRect",
+                BlxckoutFXRenderContext.getTfcScribingLogoX1(),
+                BlxckoutFXRenderContext.getTfcScribingLogoY1(),
+                BlxckoutFXRenderContext.getTfcScribingLogoX2(),
+                BlxckoutFXRenderContext.getTfcScribingLogoY2()
+        );
+        setUniform(shader, "TfcSewingWorkspaceMode", BlxckoutFXRenderContext.getTfcSewingWorkspaceMode());
+        setUniform(
+                shader,
+                "TfcSewingWorkspaceRect",
+                BlxckoutFXRenderContext.getTfcSewingWorkspaceX1(),
+                BlxckoutFXRenderContext.getTfcSewingWorkspaceY1(),
+                BlxckoutFXRenderContext.getTfcSewingWorkspaceX2(),
+                BlxckoutFXRenderContext.getTfcSewingWorkspaceY2()
+        );
+        setUniform(shader, "TfcSewingControlScopeMode", BlxckoutFXRenderContext.getTfcSewingControlScopeMode());
+        setUniform(
+                shader,
+                "TfcSewingControlScopeRect",
+                BlxckoutFXRenderContext.getTfcSewingControlScopeX1(),
+                BlxckoutFXRenderContext.getTfcSewingControlScopeY1(),
+                BlxckoutFXRenderContext.getTfcSewingControlScopeX2(),
+                BlxckoutFXRenderContext.getTfcSewingControlScopeY2()
+        );
+        setUniform(shader, "TfcFirepitTemperatureMode", BlxckoutFXRenderContext.getTfcFirepitTemperatureMode());
+        setUniform(
+                shader,
+                "TfcFirepitTemperatureRect",
+                BlxckoutFXRenderContext.getTfcFirepitTemperatureX1(),
+                BlxckoutFXRenderContext.getTfcFirepitTemperatureY1(),
+                BlxckoutFXRenderContext.getTfcFirepitTemperatureX2(),
+                BlxckoutFXRenderContext.getTfcFirepitTemperatureY2()
+        );
+        setUniform(shader, "TfcFirepitPotMode", BlxckoutFXRenderContext.getTfcFirepitPotMode());
+        setUniform(
+                shader,
+                "TfcFirepitPotRect",
+                BlxckoutFXRenderContext.getTfcFirepitPotX1(),
+                BlxckoutFXRenderContext.getTfcFirepitPotY1(),
+                BlxckoutFXRenderContext.getTfcFirepitPotX2(),
+                BlxckoutFXRenderContext.getTfcFirepitPotY2()
+        );
+        setUniform(shader, "TfcFirepitGrillMode", BlxckoutFXRenderContext.getTfcFirepitGrillMode());
+        setUniform(
+                shader,
+                "TfcFirepitGrillRect",
+                BlxckoutFXRenderContext.getTfcFirepitGrillX1(),
+                BlxckoutFXRenderContext.getTfcFirepitGrillY1(),
+                BlxckoutFXRenderContext.getTfcFirepitGrillX2(),
+                BlxckoutFXRenderContext.getTfcFirepitGrillY2()
+        );
+        setUniform(shader, "TfcCrucibleTemperatureMode", BlxckoutFXRenderContext.getTfcCrucibleTemperatureMode());
+        setUniform(
+                shader,
+                "TfcCrucibleTemperatureRect",
+                BlxckoutFXRenderContext.getTfcCrucibleTemperatureX1(),
+                BlxckoutFXRenderContext.getTfcCrucibleTemperatureY1(),
+                BlxckoutFXRenderContext.getTfcCrucibleTemperatureX2(),
+                BlxckoutFXRenderContext.getTfcCrucibleTemperatureY2()
+        );
+        setUniform(shader, "TfcCrucibleVesselMode", BlxckoutFXRenderContext.getTfcCrucibleVesselMode());
+        setUniform(
+                shader,
+                "TfcCrucibleVesselRect",
+                BlxckoutFXRenderContext.getTfcCrucibleVesselX1(),
+                BlxckoutFXRenderContext.getTfcCrucibleVesselY1(),
+                BlxckoutFXRenderContext.getTfcCrucibleVesselX2(),
+                BlxckoutFXRenderContext.getTfcCrucibleVesselY2()
+        );
+        setUniform(shader, "TfcAnvilVisualMode", BlxckoutFXRenderContext.getTfcAnvilVisualMode());
+        setUniform(
+                shader,
+                "TfcAnvilVisualRect",
+                BlxckoutFXRenderContext.getTfcAnvilVisualX1(),
+                BlxckoutFXRenderContext.getTfcAnvilVisualY1(),
+                BlxckoutFXRenderContext.getTfcAnvilVisualX2(),
+                BlxckoutFXRenderContext.getTfcAnvilVisualY2()
+        );
+        setUniform(shader, "TfcAnvilForgingGridMode", BlxckoutFXRenderContext.getTfcAnvilForgingGridMode());
+        setUniform(
+                shader,
+                "TfcAnvilForgingGridRect",
+                BlxckoutFXRenderContext.getTfcAnvilForgingGridX1(),
+                BlxckoutFXRenderContext.getTfcAnvilForgingGridY1(),
+                BlxckoutFXRenderContext.getTfcAnvilForgingGridX2(),
+                BlxckoutFXRenderContext.getTfcAnvilForgingGridY2()
+        );
         setUniform(shader, "PneumaticColorWhitelistCount", BlxckoutFXRenderContext.getPneumaticColorWhitelistCount());
         setUniform(shader, "PneumaticColorWhitelist0", getPneumaticWhitelistR(0), getPneumaticWhitelistG(0), getPneumaticWhitelistB(0));
         setUniform(shader, "PneumaticColorWhitelist1", getPneumaticWhitelistR(1), getPneumaticWhitelistG(1), getPneumaticWhitelistB(1));

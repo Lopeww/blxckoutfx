@@ -24,6 +24,7 @@ public final class BlxckoutFXClientConfig {
     private String lastConfigCategory = "OVERVIEW";
     private String ae2ThemeMode = Ae2ThemeMode.Blxckout.name();
     private boolean ae2ThemeEnabled = true;
+    private boolean developerMode;
 
     private boolean inventoryButtonEnabled = true;
     private boolean inventoryButtonLocked = false;
@@ -31,6 +32,7 @@ public final class BlxckoutFXClientConfig {
     private String inventoryButtonStyle = InventoryButtonStyle.Classic.name();
     private int inventoryButtonOffsetX = DEFAULT_INVENTORY_BUTTON_OFFSET_X;
     private int inventoryButtonOffsetY = DEFAULT_INVENTORY_BUTTON_OFFSET_Y;
+    private boolean inventoryButtonCustomPositionAbsolute;
 
     @SuppressWarnings("unused")
     private int inventoryButtonX = DEFAULT_INVENTORY_BUTTON_OFFSET_X;
@@ -137,6 +139,15 @@ public final class BlxckoutFXClientConfig {
         save();
     }
 
+    public boolean isDeveloperMode() {
+        return developerMode;
+    }
+
+    public void setDeveloperMode(boolean developerMode) {
+        this.developerMode = developerMode;
+        save();
+    }
+
     public boolean isInventoryButtonEnabled() {
         return inventoryButtonEnabled;
     }
@@ -173,6 +184,7 @@ public final class BlxckoutFXClientConfig {
         if (resolvedPreset != InventoryButtonPreset.Custom) {
             this.inventoryButtonOffsetX = DEFAULT_INVENTORY_BUTTON_OFFSET_X;
             this.inventoryButtonOffsetY = DEFAULT_INVENTORY_BUTTON_OFFSET_Y;
+            this.inventoryButtonCustomPositionAbsolute = false;
             syncLegacyInventoryButtonPosition();
         }
         save();
@@ -189,6 +201,9 @@ public final class BlxckoutFXClientConfig {
 
     public int getInventoryButtonScreenX(int screenWidth, int buttonWidth) {
         int maxX = Math.max(0, screenWidth - buttonWidth);
+        if (getInventoryButtonPreset() == InventoryButtonPreset.Custom && this.inventoryButtonCustomPositionAbsolute) {
+            return clamp(this.inventoryButtonOffsetX, 0, maxX);
+        }
         return switch (getInventoryButtonPreset()) {
             case BottomRight, TopRight -> clamp(maxX - this.inventoryButtonOffsetX, 0, maxX);
             default -> clamp(this.inventoryButtonOffsetX, 0, maxX);
@@ -197,6 +212,9 @@ public final class BlxckoutFXClientConfig {
 
     public int getInventoryButtonScreenY(int screenHeight, int buttonHeight) {
         int maxY = Math.max(0, screenHeight - buttonHeight);
+        if (getInventoryButtonPreset() == InventoryButtonPreset.Custom && this.inventoryButtonCustomPositionAbsolute) {
+            return clamp(this.inventoryButtonOffsetY, 0, maxY);
+        }
         return switch (getInventoryButtonPreset()) {
             case TopLeft, TopRight -> clamp(this.inventoryButtonOffsetY, 0, maxY);
             default -> clamp(maxY - this.inventoryButtonOffsetY, 0, maxY);
@@ -207,6 +225,7 @@ public final class BlxckoutFXClientConfig {
         this.inventoryButtonPreset = InventoryButtonPreset.Custom.name();
         this.inventoryButtonOffsetX = Math.max(0, offsetX);
         this.inventoryButtonOffsetY = Math.max(0, offsetY);
+        this.inventoryButtonCustomPositionAbsolute = false;
         syncLegacyInventoryButtonPosition();
         save();
     }
@@ -214,9 +233,26 @@ public final class BlxckoutFXClientConfig {
     public void setInventoryButtonScreenPosition(int x, int y, int screenWidth, int screenHeight, int buttonWidth, int buttonHeight) {
         int maxX = Math.max(0, screenWidth - buttonWidth);
         int maxY = Math.max(0, screenHeight - buttonHeight);
-        int clampedX = clamp(x, 0, maxX);
-        int clampedY = clamp(y, 0, maxY);
-        setInventoryButtonOffset(clampedX, maxY - clampedY);
+        this.inventoryButtonPreset = InventoryButtonPreset.Custom.name();
+        this.inventoryButtonOffsetX = clamp(x, 0, maxX);
+        this.inventoryButtonOffsetY = clamp(y, 0, maxY);
+        this.inventoryButtonCustomPositionAbsolute = true;
+        syncLegacyInventoryButtonPosition();
+        save();
+    }
+
+    public void migrateCustomInventoryButtonPosition(int screenWidth, int screenHeight, int buttonWidth, int buttonHeight) {
+        if (getInventoryButtonPreset() != InventoryButtonPreset.Custom || this.inventoryButtonCustomPositionAbsolute) {
+            return;
+        }
+
+        int x = getInventoryButtonScreenX(screenWidth, buttonWidth);
+        int y = getInventoryButtonScreenY(screenHeight, buttonHeight);
+        this.inventoryButtonOffsetX = x;
+        this.inventoryButtonOffsetY = y;
+        this.inventoryButtonCustomPositionAbsolute = true;
+        syncLegacyInventoryButtonPosition();
+        save();
     }
 
     private boolean migrateLegacyInventoryButtonPosition(String json) {

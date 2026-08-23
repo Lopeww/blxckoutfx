@@ -22,6 +22,16 @@ build
 eclipse
 run
 runs
+!fabric/runs/
+fabric/runs/*
+!fabric/runs/client-hotswap/
+fabric/runs/client-hotswap/*
+!fabric/runs/client-hotswap/.gitkeep
+!forge/runs/
+forge/runs/*
+!forge/runs/client-hotswap/
+forge/runs/client-hotswap/*
+!forge/runs/client-hotswap/.gitkeep
 tmp
 *.log
 *.log.gz

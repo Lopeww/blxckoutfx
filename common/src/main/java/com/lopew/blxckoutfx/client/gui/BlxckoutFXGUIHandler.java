@@ -23,6 +23,8 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 public final class BlxckoutFXGUIHandler {
+    private static final String PATCHOULI_BOOK_SCREEN_PREFIX = "vazkii.patchouli.client.book.gui.";
+    private static final String JEI_SCREEN_PREFIX = "mezz.jei.";
     private static BlxckoutFXClientConfig config = BlxckoutFXClientConfig.load();
     private static final Map<Screen, InventoryButton> inventoryButtons = new IdentityHashMap<>();
     private static Screen lastScreen;
@@ -39,6 +41,10 @@ public final class BlxckoutFXGUIHandler {
         syncCurrentScreenButtonState();
     }
 
+    public static void reloadForDevelopment() {
+        onConfigChanged(BlxckoutFXClientConfig.load());
+    }
+
     public static void onScreenInit(Screen screen, ButtonSink buttonSink) {
         inventoryButtons.remove(screen);
         lastScreen = screen;
@@ -48,7 +54,9 @@ public final class BlxckoutFXGUIHandler {
             return;
         }
 
-        BlxckoutFXClientConfig.InventoryButtonStyle style = config.getInventoryButtonStyle();
+        BlxckoutFXClientConfig.InventoryButtonStyle style = isCompactButtonScreen(screen)
+                ? BlxckoutFXClientConfig.InventoryButtonStyle.Short
+                : config.getInventoryButtonStyle();
         boolean ae2Screen = BlxckoutFXAe2Support.isAe2Screen(screen);
         InventoryButton.Ae2Variant ae2Variant = style == BlxckoutFXClientConfig.InventoryButtonStyle.Classic && ae2Screen
                 ? InventoryButton.Ae2Variant.CLASSIC_ICON_TEXT
@@ -57,8 +65,11 @@ public final class BlxckoutFXGUIHandler {
         removeExistingInventoryButtons(screen);
         int buttonWidth = InventoryButton.widthFor(style);
         int buttonHeight = InventoryButton.heightFor(style);
-        int x = config.getInventoryButtonScreenX(screen.width, buttonWidth);
-        int y = config.getInventoryButtonScreenY(screen.height, buttonHeight);
+        int screenWidth = getButtonScreenWidth(screen);
+        int screenHeight = getButtonScreenHeight(screen);
+        config.migrateCustomInventoryButtonPosition(screenWidth, screenHeight, buttonWidth, buttonHeight);
+        int x = config.getInventoryButtonScreenX(screenWidth, buttonWidth);
+        int y = config.getInventoryButtonScreenY(screenHeight, buttonHeight);
 
         InventoryButton button = new InventoryButton(
                 x,
@@ -74,17 +85,20 @@ public final class BlxckoutFXGUIHandler {
                 movedButton -> config.setInventoryButtonScreenPosition(
                         movedButton.getX(),
                         movedButton.getY(),
-                        screen.width,
-                        screen.height,
+                        getButtonScreenWidth(screen),
+                        getButtonScreenHeight(screen),
                         movedButton.getWidth(),
                         movedButton.getHeight()
                 ),
-                screen.width,
-                screen.height
+                screenWidth,
+                screenHeight
         );
 
         inventoryButtons.put(screen, button);
-        buttonSink.add(button);
+        // Patchouli and JEI recipe screens bypass the normal widget render pass.
+        if (!usesDetachedInventoryButtonRender(screen)) {
+            buttonSink.add(button);
+        }
         syncButtonState(screen, button);
     }
 
@@ -135,6 +149,52 @@ public final class BlxckoutFXGUIHandler {
         }
 
         syncButtonState(screen, inventoryButton);
+    }
+
+    public static void renderPatchouliInventoryButton(Screen screen, net.minecraft.client.gui.GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        renderDetachedInventoryButton(screen, graphics, mouseX, mouseY, partialTick, true);
+    }
+
+    public static void renderJeiInventoryButton(Screen screen, net.minecraft.client.gui.GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        renderDetachedInventoryButton(screen, graphics, mouseX, mouseY, partialTick, false);
+    }
+
+    private static void renderDetachedInventoryButton(
+            Screen screen,
+            net.minecraft.client.gui.GuiGraphics graphics,
+            int mouseX,
+            int mouseY,
+            float partialTick,
+            boolean patchouli
+    ) {
+        if (patchouli ? !isPatchouliBookScreen(screen) : !isJeiRecipeScreen(screen)) {
+            return;
+        }
+
+        InventoryButton inventoryButton = getButton(screen);
+        if (inventoryButton == null) {
+            return;
+        }
+
+        syncButtonState(screen, inventoryButton);
+        if (inventoryButton.visible) {
+            inventoryButton.renderWithoutTooltip(graphics, mouseX, mouseY, partialTick);
+            renderPatchouliInventoryButtonTooltip(inventoryButton, graphics, mouseX, mouseY);
+        }
+    }
+
+    private static void renderPatchouliInventoryButtonTooltip(
+            InventoryButton inventoryButton,
+            net.minecraft.client.gui.GuiGraphics graphics,
+            int mouseX,
+            int mouseY
+    ) {
+        Tooltip tooltip = inventoryButton.getTooltip();
+        if (tooltip == null || !inventoryButton.isMouseOver(mouseX, mouseY)) {
+            return;
+        }
+
+        graphics.renderTooltip(Minecraft.getInstance().font, tooltip.toCharSequence(Minecraft.getInstance()), mouseX, mouseY);
     }
 
     public static boolean onMouseClicked(double mouseX, double mouseY, int button) {
@@ -225,7 +285,9 @@ public final class BlxckoutFXGUIHandler {
             return;
         }
 
-        button.setScreenSize(screen.width, screen.height);
+        int screenWidth = getButtonScreenWidth(screen);
+        int screenHeight = getButtonScreenHeight(screen);
+        button.setScreenSize(screenWidth, screenHeight);
         button.visible = config.isInventoryButtonEnabled() && isSupportedScreen(screen);
         button.active = button.visible;
 
@@ -235,7 +297,7 @@ public final class BlxckoutFXGUIHandler {
         }
 
         updateCycleButtonPresentation(screen, button);
-        button.clampToScreen(screen.width, screen.height);
+        button.clampToScreen(screenWidth, screenHeight);
 
         if (screen instanceof AbstractContainerScreen<?> && !screen.children().contains(button)) {
             tryReattachButton(screen, button);
@@ -297,7 +359,43 @@ public final class BlxckoutFXGUIHandler {
             return true;
         }
 
-        return screen.getClass().getName().startsWith("mezz.jei");
+        return isCompactButtonScreen(screen);
+    }
+
+    private static boolean isCompactButtonScreen(Screen screen) {
+        if (screen == null) {
+            return false;
+        }
+
+        String className = screen.getClass().getName();
+        return isPatchouliBookScreen(screen)
+                || className.startsWith(JEI_SCREEN_PREFIX);
+    }
+
+    private static boolean usesDetachedInventoryButtonRender(Screen screen) {
+        return isPatchouliBookScreen(screen) || isJeiRecipeScreen(screen);
+    }
+
+    private static boolean isPatchouliBookScreen(Screen screen) {
+        return screen != null && screen.getClass().getName().startsWith(PATCHOULI_BOOK_SCREEN_PREFIX);
+    }
+
+    private static boolean isJeiRecipeScreen(Screen screen) {
+        return screen != null && "mezz.jei.gui.recipes.RecipesGui".equals(screen.getClass().getName());
+    }
+
+    private static int getButtonScreenWidth(Screen screen) {
+        if (isPatchouliBookScreen(screen)) {
+            return Minecraft.getInstance().getWindow().getGuiScaledWidth();
+        }
+        return screen.width;
+    }
+
+    private static int getButtonScreenHeight(Screen screen) {
+        if (isPatchouliBookScreen(screen)) {
+            return Minecraft.getInstance().getWindow().getGuiScaledHeight();
+        }
+        return screen.height;
     }
 
     private static Component createCycleButtonLabel(Screen screen) {

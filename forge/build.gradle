@@ -4,6 +4,7 @@ plugins {
 }
 
 def clientDevGameDir = file('build/dev-client-run')
+def clientHotSwapGameDir = file('runs/client-hotswap')
 
 repositories {
     mavenCentral()
@@ -39,6 +40,15 @@ legacyForge {
             client()
             gameDirectory = clientDevGameDir
             programArguments.addAll '--mixin', "${mod_id}.mixins.json"
+            programArguments.addAll '--mixin', "${mod_id}.forge.mixins.json"
+        }
+        clientHotSwap {
+            client()
+            ideName = 'Forge Client HotSwap'
+            // Keep HotSwap state outside build/ so clean cannot remove its working directory.
+            gameDirectory = clientHotSwapGameDir
+            programArguments.addAll '--mixin', "${mod_id}.mixins.json"
+            programArguments.addAll '--mixin', "${mod_id}.forge.mixins.json"
         }
         data {
             data()
@@ -59,6 +69,12 @@ legacyForge {
 sourceSets.main.resources.srcDir 'src/generated/resources'
 
 dependencies {
+    modImplementation "curse.maven:terrafirmacraft-302973:8242625"
+    modImplementation "curse.maven:firmalife-453394:8360236"
+    modImplementation "curse.maven:sacks-n-such-695822:8125848"
+    modImplementation "curse.maven:firmaciv-714158:5737719"
+    modImplementation "curse.maven:alekiships-1068445:5963449"
+    modImplementation "curse.maven:alekis-ridiculously-simple-roofs-1010046:5869457"
     compileOnly project(":common")
     compileOnly "io.github.llamalad7:mixinextras-common:0.3.5"
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
@@ -68,18 +84,19 @@ dependencies {
     modRuntimeOnly "io.github.llamalad7:mixinextras-forge:0.3.5"
 
     modRuntimeOnly "vazkii.patchouli:Patchouli:1.20.1-85-FORGE"
-    modRuntimeOnly "me.desht.pneumaticcraft:pneumaticcraft-repressurized:6.0.22+mc1.20.1"
-    modRuntimeOnly "appeng:appliedenergistics2-forge:15.4.10"
-    modRuntimeOnly "curse.maven:guideme-1173950:8204776"
+    // Disabled during TFC/FirmaLife compatibility work to keep the dev client startup lean.
+    // modRuntimeOnly "me.desht.pneumaticcraft:pneumaticcraft-repressurized:6.0.22+mc1.20.1"
+    // modRuntimeOnly "appeng:appliedenergistics2-forge:15.4.10"
+    // modRuntimeOnly "curse.maven:guideme-1173950:8204776"
     modRuntimeOnly "curse.maven:journeymap-32274:5789363"
     modRuntimeOnly "curse.maven:ftb-quests-forge-289412:8078538"
     modRuntimeOnly "curse.maven:architectury-api-419699:5137938"
     modRuntimeOnly "curse.maven:ftb-library-forge-404465:8226927"
     modRuntimeOnly "curse.maven:ftb-teams-forge-404468:7499810"
-    modRuntimeOnly "curse.maven:ex-pattern-provider-892005:8291632"
-    modRuntimeOnly "curse.maven:advancedae-1084104:7939754"
-    modRuntimeOnly "curse.maven:mega-cells-622112:6175008"
-    modRuntimeOnly "curse.maven:applied-energistics-2-wireless-terminals-459929:7251206"
+    // modRuntimeOnly "curse.maven:ex-pattern-provider-892005:8291632"
+    // modRuntimeOnly "curse.maven:advancedae-1084104:7939754"
+    // modRuntimeOnly "curse.maven:mega-cells-622112:6175008"
+    // modRuntimeOnly "curse.maven:applied-energistics-2-wireless-terminals-459929:7251206"
     modRuntimeOnly "curse.maven:jade-324717:6855440"
     modRuntimeOnly "curse.maven:glodium-957920:5226922"
     modRuntimeOnly "curse.maven:cloth-config-348521:5729105"

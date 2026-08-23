@@ -1,10 +1,12 @@
 package com.lopew.blxckoutfx.client.config;
 
 import com.lopew.blxckoutfx.client.render.BlxckoutFXShaders;
+import com.lopew.blxckoutfx.client.reload.BlxckoutFXReloadService;
 import com.lopew.blxckoutfx.client.config.widget.ButtonWidget;
 import com.lopew.blxckoutfx.client.config.widget.ConfigTextLayout;
 import com.lopew.blxckoutfx.client.config.widget.DropdownWidget;
 import com.lopew.blxckoutfx.client.config.widget.PresetPreviewWidget;
+import com.lopew.blxckoutfx.client.config.widget.ReloadStateButtonWidget;
 import com.lopew.blxckoutfx.client.config.widget.SettingRow;
 import com.lopew.blxckoutfx.client.config.widget.SettingsPanelWidget;
 import com.lopew.blxckoutfx.client.config.widget.SidebarWidget;
@@ -43,6 +45,7 @@ public class BlxckoutFXConfigScreen extends Screen {
     private boolean darkModeEnabled;
     private boolean inventoryButtonEnabled;
     private boolean inventoryButtonLocked;
+    private boolean developerMode;
     private int presetIndex;
     private BlxckoutFXClientConfig.Ae2ThemeMode ae2ThemeMode;
     private BlxckoutFXClientConfig.InventoryButtonPreset inventoryButtonPreset;
@@ -67,6 +70,7 @@ public class BlxckoutFXConfigScreen extends Screen {
         this.darkModeEnabled = this.config.isDarkModeEnabled();
         this.inventoryButtonEnabled = this.config.isInventoryButtonEnabled();
         this.inventoryButtonLocked = this.config.isInventoryButtonLocked();
+        this.developerMode = this.config.isDeveloperMode();
         this.presetIndex = clampPresetIndex(this.config.getPresetIndex());
         this.ae2ThemeMode = this.config.getAe2ThemeMode();
         this.inventoryButtonPreset = this.config.getInventoryButtonPreset();
@@ -89,7 +93,7 @@ public class BlxckoutFXConfigScreen extends Screen {
                 this.rootY,
                 this.sidebarW,
                 this.rootH,
-                List.of(Category.values()),
+                visibleCategories(),
                 this.selectedCategory,
                 category -> {
                     this.selectedCategory = category;
@@ -152,7 +156,7 @@ public class BlxckoutFXConfigScreen extends Screen {
         List<SettingRow> rows = new ArrayList<>();
         int matchCount = 0;
 
-        for (Category category : Category.values()) {
+        for (Category category : visibleCategories()) {
             List<RowSpec> specs = buildSpecsForCategory(category);
             boolean categoryMatches = contains(category.title().getString(), needle)
                     || contains(category.description().getString(), needle)
@@ -274,6 +278,7 @@ public class BlxckoutFXConfigScreen extends Screen {
         this.config.setInventoryButtonLocked(this.inventoryButtonLocked);
         this.config.setInventoryButtonPreset(this.inventoryButtonPreset);
         this.config.setInventoryButtonStyle(this.inventoryButtonStyle);
+        this.config.setDeveloperMode(this.developerMode);
     }
 
     public enum Category {
@@ -281,6 +286,7 @@ public class BlxckoutFXConfigScreen extends Screen {
         PRESETS("ui.blxckoutfx.config.group.blxckoutfx", "presets", "ui.blxckoutfx.config.category.presets.title", "ui.blxckoutfx.config.category.presets.description", "ui.blxckoutfx.config.section.presets"),
         INVENTORY_BUTTON("ui.blxckoutfx.config.group.blxckoutfx", "inventory_button", "ui.blxckoutfx.config.category.inventory_button.title", "ui.blxckoutfx.config.category.inventory_button.description", "ui.blxckoutfx.config.section.inventory_button"),
         AE2("ui.blxckoutfx.config.group.integrations", "ae2", "ui.blxckoutfx.config.category.ae2.title", "ui.blxckoutfx.config.category.ae2.description", "ui.blxckoutfx.config.section.ae2"),
+        DEVELOPER("ui.blxckoutfx.config.group.developer", "dev", "ui.blxckoutfx.config.category.developer.title", "ui.blxckoutfx.config.category.developer.description", "ui.blxckoutfx.config.section.developer"),
         ABOUT("ui.blxckoutfx.config.group.about", "about", "ui.blxckoutfx.config.category.about.title", "ui.blxckoutfx.config.category.about.description", "ui.blxckoutfx.config.section.about");
 
         private final String groupKey;
@@ -389,6 +395,16 @@ public class BlxckoutFXConfigScreen extends Screen {
         return rows;
     }
 
+    private List<Category> visibleCategories() {
+        List<Category> categories = new ArrayList<>();
+        for (Category category : Category.values()) {
+            if (category != Category.DEVELOPER || this.developerMode) {
+                categories.add(category);
+            }
+        }
+        return categories;
+    }
+
     private List<RowSpec> buildSpecsForCategory(Category category) {
         List<RowSpec> specs = new ArrayList<>();
         switch (category) {
@@ -405,6 +421,23 @@ public class BlxckoutFXConfigScreen extends Screen {
                             this.selectedCategory = Category.PRESETS;
                             this.sidebar.setSelected(this.selectedCategory);
                             this.config.setLastConfigCategory(this.selectedCategory.name());
+                            rebuildRows();
+                        })
+                ));
+                specs.add(new RowSpec(
+                        Component.translatable("ui.blxckoutfx.config.setting.enable_developer_mode.title"),
+                        Component.translatable("ui.blxckoutfx.config.setting.enable_developer_mode.description"),
+                        () -> new ToggleWidget(() -> this.developerMode, value -> {
+                            this.developerMode = value;
+                            this.config.setDeveloperMode(value);
+                            this.sidebar.setCategories(visibleCategories());
+                            if (value) {
+                                this.selectedCategory = Category.DEVELOPER;
+                                this.sidebar.setSelected(this.selectedCategory);
+                            } else if (this.selectedCategory == Category.DEVELOPER) {
+                                this.selectedCategory = Category.OVERVIEW;
+                                this.sidebar.setSelected(this.selectedCategory);
+                            }
                             rebuildRows();
                         })
                 ));
@@ -460,6 +493,23 @@ public class BlxckoutFXConfigScreen extends Screen {
                                 index -> this.ae2ThemeMode = BlxckoutFXClientConfig.Ae2ThemeMode.Blxckout,
                                 index -> index == 0
                         )
+                ));
+            }
+            case DEVELOPER -> {
+                specs.add(new RowSpec(
+                        Component.translatable("ui.blxckoutfx.config.setting.reload_client_state.title"),
+                        Component.translatable("ui.blxckoutfx.config.setting.reload_client_state.description"),
+                        () -> new ReloadStateButtonWidget(0, 0, 112, 16, Component.translatable("ui.blxckoutfx.config.action.reload"), BlxckoutFXReloadService::reload)
+                ));
+                specs.add(new RowSpec(
+                        Component.translatable("ui.blxckoutfx.config.setting.reload_resources.title"),
+                        Component.translatable("ui.blxckoutfx.config.setting.reload_resources.description"),
+                        () -> new ButtonWidget(0, 0, 112, 16, Component.translatable("ui.blxckoutfx.config.action.reload_resources"), BlxckoutFXReloadService::reloadResources)
+                ));
+                specs.add(new RowSpec(
+                        Component.translatable("ui.blxckoutfx.config.setting.reload_all.title"),
+                        Component.translatable("ui.blxckoutfx.config.setting.reload_all.description"),
+                        () -> new ButtonWidget(0, 0, 112, 16, Component.translatable("ui.blxckoutfx.config.action.reload_all"), BlxckoutFXReloadService::reloadAll)
                 ));
             }
             case ABOUT -> {
