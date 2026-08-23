@@ -3,6 +3,13 @@ plugins {
     id 'net.neoforged.moddev'
 }
 
+repositories {
+    maven {
+        name = 'CurseMaven'
+        url = 'https://www.cursemaven.com'
+    }
+}
+
 neoForge {
     version = neoforge_version
     def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
@@ -20,6 +27,12 @@ neoForge {
         }
         client {
             client()
+        }
+        clientHotSwap {
+            client()
+            // Keep HotSwap state outside build/ so clean cannot remove its working directory.
+            ideName = 'NeoForge Client HotSwap'
+            gameDirectory = file('runs/client-hotswap')
         }
         data {
             data()
@@ -39,3 +52,10 @@ neoForge {
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+dependencies {
+    implementation "curse.maven:terrafirmacraft-302973:8365958"
+    implementation "curse.maven:firmalife-453394:8364676"
+    implementation "curse.maven:jei-238222:8622758"
+    implementation "curse.maven:patchouli-306770:7730942"
+}

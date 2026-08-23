@@ -2,6 +2,7 @@ package com.lopew.blxckoutfx.neoforge;
 
 import com.lopew.blxckoutfx.BlxckoutFX;
 import com.lopew.blxckoutfx.client.gui.BlxckoutFXGUIHandler;
+import com.lopew.blxckoutfx.client.gui.InventoryButton;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -18,7 +19,17 @@ public final class BlxckoutFXNeoForgeClientEvents {
 
     @SubscribeEvent
     public static void onScreenInit(ScreenEvent.Init.Post event) {
-        BlxckoutFXGUIHandler.onScreenInit(event.getScreen(), event::addListener);
+        BlxckoutFXGUIHandler.onScreenInit(event.getScreen(), new BlxckoutFXGUIHandler.ButtonSink() {
+            @Override
+            public void add(InventoryButton button) {
+                event.addListener(button);
+            }
+
+            @Override
+            public void remove(InventoryButton button) {
+                event.removeListener(button);
+            }
+        });
     }
 
     @SubscribeEvent

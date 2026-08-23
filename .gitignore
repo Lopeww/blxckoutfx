@@ -22,6 +22,16 @@ build
 eclipse
 run
 runs
+!fabric/runs/
+fabric/runs/*
+!fabric/runs/client-hotswap/
+fabric/runs/client-hotswap/*
+!fabric/runs/client-hotswap/.gitkeep
+!neoforge/runs/
+neoforge/runs/*
+!neoforge/runs/client-hotswap/
+neoforge/runs/client-hotswap/*
+!neoforge/runs/client-hotswap/.gitkeep
 /.tmp/
 /tmp*
 /assets/ae2/

@@ -19,8 +19,7 @@ public class GuiGraphicsItemRenderMixin {
 
     @Inject(
             method = "renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;IIII)V",
-            at = @At("HEAD"),
-            require = 0
+            at = @At("HEAD")
     )
     private void blxckoutfx$capAe2ItemDarkening(
             LivingEntity entity,
@@ -42,8 +41,7 @@ public class GuiGraphicsItemRenderMixin {
 
     @Inject(
             method = "renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;IIII)V",
-            at = @At("RETURN"),
-            require = 0
+            at = @At("RETURN")
     )
     private void blxckoutfx$restoreAe2ItemDarkeningCap(
             LivingEntity entity,
@@ -63,4 +61,3 @@ public class GuiGraphicsItemRenderMixin {
         BlxckoutFXRenderContext.exitBalancedCappedDarkening();
     }
 }
-

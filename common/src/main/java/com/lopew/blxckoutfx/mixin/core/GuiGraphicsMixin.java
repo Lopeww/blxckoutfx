@@ -6,6 +6,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -25,6 +26,53 @@ public class GuiGraphicsMixin {
     private static final String AE2_PATTERN_MODES_BG_PATH = "guis/pattern_modes.png";
     private static final String MODMENU_CONFIGURE_BUTTON_PATH = "textures/gui/configure_button.png";
     private static final String MODMENU_FILTERS_BUTTON_PATH = "textures/gui/filters_button.png";
+    private static final String RECIPE_BOOK_BUTTON_SPRITE_PATH = "recipe_book/button";
+    private static final String RECIPE_BOOK_BUTTON_HIGHLIGHTED_SPRITE_PATH = "recipe_book/button_highlighted";
+    private static final String RECIPE_BOOK_FILTER_ENABLED_SPRITE_PATH = "recipe_book/filter_enabled";
+    private static final String RECIPE_BOOK_FILTER_ENABLED_HIGHLIGHTED_SPRITE_PATH = "recipe_book/filter_enabled_highlighted";
+    private static final String RECIPE_BOOK_FILTER_DISABLED_SPRITE_PATH = "recipe_book/filter_disabled";
+    private static final String RECIPE_BOOK_FILTER_DISABLED_HIGHLIGHTED_SPRITE_PATH = "recipe_book/filter_disabled_highlighted";
+    private static final String RECIPE_BOOK_PAGE_FORWARD_SPRITE_PATH = "recipe_book/page_forward";
+    private static final String RECIPE_BOOK_PAGE_FORWARD_HIGHLIGHTED_SPRITE_PATH = "recipe_book/page_forward_highlighted";
+    private static final String RECIPE_BOOK_PAGE_BACKWARD_SPRITE_PATH = "recipe_book/page_backward";
+    private static final String RECIPE_BOOK_PAGE_BACKWARD_HIGHLIGHTED_SPRITE_PATH = "recipe_book/page_backward_highlighted";
+    private static final String RECIPE_BOOK_TEXTURE_PATH = "textures/gui/recipe_book.png";
+    private static final int RECIPE_BOOK_SEARCH_ICON_OFFSET_X = 10;
+    private static final int RECIPE_BOOK_SEARCH_ICON_OFFSET_Y = 14;
+    private static final String[] RECIPE_BOOK_ICON_MASK = {
+            "....................", "....................", "..........###.......",
+            "........######......", "......#########.....", "....############....",
+            "..###############...", "..###############...", "..###############...",
+            "..###############...", "..###############...", "....############....",
+            ".....#########......", "......######........", ".......###..........",
+            "....................", "....................", "...................."
+    };
+    private static final String[] RECIPE_BOOK_FILTER_CHECK_MASK = {
+            "..........................", "..........................", "..........................",
+            "..........................", "..........................", ".........#................",
+            "........##................", "...#...##.................", "...##.##..................",
+            "....###...................", ".....#....................", "..........................",
+            "..........................", "..........................", "..........................", ".........................."
+    };
+    private static final String[] RECIPE_BOOK_SEARCH_ICON_MASK = {
+            "......####..", ".....######.", "....########", "....########",
+            "....########", "....########", "...#########", "..#########.",
+            ".#########..", ".####.......", "####........", ".##........."
+    };
+    private static final String[] RECIPE_BOOK_FILTER_X_MASK = {
+            "..........................", "..........................", "..........................",
+            "..........................", "..........................", "..##....##................",
+            "...##..##.................", "....####..................", ".....##...................",
+            "....####..................", "...##..##.................", "..##....##................",
+            "..........................", "..........................", "..........................", ".........................."
+    };
+    private static final String[] RECIPE_BOOK_FILTER_ITEM_MASK = {
+            "..........................", "..........................", ".................##.......",
+            "...............######.....", ".............##########...", ".............###########..",
+            ".............###########..", ".............###########..", ".............###########..",
+            ".............###########..", ".............###########..", ".............##########...",
+            "...............######.....", ".................##.......", "..........................", ".........................."
+    };
 
     @Inject(method = "innerBlit(Lnet/minecraft/resources/ResourceLocation;IIIIIFFFF)V", at = @At("HEAD"))
     private void blxckoutfx$enterAe2TextureRender(
@@ -170,6 +218,141 @@ public class GuiGraphicsMixin {
         }
     }
 
+    @Inject(method = "blitSprite(Lnet/minecraft/resources/ResourceLocation;IIIII)V", at = @At("HEAD"), require = 0)
+    private void blxckoutfx$preserveInventoryRecipeBookPageArrow(
+            ResourceLocation sprite,
+            int x,
+            int y,
+            int blitOffset,
+            int width,
+            int height,
+            CallbackInfo ci
+    ) {
+        if (blxckoutfx$isInventoryRecipeBookPageArrow(sprite, width, height)) {
+            BlxckoutFXRenderContext.suppressTextureDarkening();
+        }
+    }
+
+    @Inject(method = "blitSprite(Lnet/minecraft/resources/ResourceLocation;IIIII)V", at = @At("RETURN"), require = 0)
+    private void blxckoutfx$restoreInventoryRecipeBookPageArrow(
+            ResourceLocation sprite,
+            int x,
+            int y,
+            int blitOffset,
+            int width,
+            int height,
+            CallbackInfo ci
+    ) {
+        if (blxckoutfx$isInventoryRecipeBookPageArrow(sprite, width, height)) {
+            BlxckoutFXRenderContext.allowTextureDarkening();
+        }
+    }
+
+    @Inject(method = "blitSprite(Lnet/minecraft/resources/ResourceLocation;IIIII)V", at = @At("RETURN"), require = 0)
+    private void blxckoutfx$redrawInventoryRecipeBookIcon(
+            ResourceLocation sprite,
+            int x,
+            int y,
+            int blitOffset,
+            int width,
+            int height,
+            CallbackInfo ci
+    ) {
+        if (!blxckoutfx$isInventoryRecipeBookButton(sprite, width, height)) {
+            return;
+        }
+
+        GuiGraphics graphics = (GuiGraphics) (Object) this;
+        BlxckoutFXRenderContext.suppressTextureDarkening();
+        try {
+            for (int row = 0; row < RECIPE_BOOK_ICON_MASK.length; row++) {
+                String maskRow = RECIPE_BOOK_ICON_MASK[row];
+                int runStart = maskRow.indexOf('#');
+                while (runStart >= 0) {
+                    int runEnd = maskRow.indexOf('.', runStart);
+                    if (runEnd < 0) {
+                        runEnd = maskRow.length();
+                    }
+
+                    graphics.blitSprite(sprite, 20, 18, runStart, row, x + runStart, y + row, runEnd - runStart, 1);
+                    runStart = maskRow.indexOf('#', runEnd);
+                }
+            }
+        } finally {
+            BlxckoutFXRenderContext.allowTextureDarkening();
+        }
+    }
+
+    @Inject(method = "blitSprite(Lnet/minecraft/resources/ResourceLocation;IIIII)V", at = @At("RETURN"), require = 0)
+    private void blxckoutfx$redrawInventoryRecipeBookFilterIcon(
+            ResourceLocation sprite,
+            int x,
+            int y,
+            int blitOffset,
+            int width,
+            int height,
+            CallbackInfo ci
+    ) {
+        if (!blxckoutfx$isInventoryRecipeBookFilter(sprite, width, height)) {
+            return;
+        }
+
+        blxckoutfx$redrawMaskedSprite(
+                (GuiGraphics) (Object) this,
+                sprite,
+                x,
+                y,
+                26,
+                16,
+                blxckoutfx$isRecipeBookFilterEnabled(sprite) ? RECIPE_BOOK_FILTER_CHECK_MASK : RECIPE_BOOK_FILTER_X_MASK,
+                RECIPE_BOOK_FILTER_ITEM_MASK
+        );
+    }
+
+    @Inject(method = "blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", at = @At("RETURN"), require = 0)
+    private void blxckoutfx$redrawInventoryRecipeBookSearchIcon(
+            ResourceLocation texture,
+            int x,
+            int y,
+            int uOffset,
+            int vOffset,
+            int width,
+            int height,
+            CallbackInfo ci
+    ) {
+        if (!blxckoutfx$isInventoryRecipeBookPanel(texture, uOffset, vOffset, width, height)) {
+            return;
+        }
+
+        GuiGraphics graphics = (GuiGraphics) (Object) this;
+        BlxckoutFXRenderContext.suppressTextureDarkening();
+        try {
+            for (int row = 0; row < RECIPE_BOOK_SEARCH_ICON_MASK.length; row++) {
+                String maskRow = RECIPE_BOOK_SEARCH_ICON_MASK[row];
+                int runStart = maskRow.indexOf('#');
+                while (runStart >= 0) {
+                    int runEnd = maskRow.indexOf('.', runStart);
+                    if (runEnd < 0) {
+                        runEnd = maskRow.length();
+                    }
+
+                    graphics.blit(
+                            texture,
+                            x + RECIPE_BOOK_SEARCH_ICON_OFFSET_X + runStart,
+                            y + RECIPE_BOOK_SEARCH_ICON_OFFSET_Y + row,
+                            uOffset + RECIPE_BOOK_SEARCH_ICON_OFFSET_X + runStart,
+                            vOffset + RECIPE_BOOK_SEARCH_ICON_OFFSET_Y + row,
+                            runEnd - runStart,
+                            1
+                    );
+                    runStart = maskRow.indexOf('#', runEnd);
+                }
+            }
+        } finally {
+            BlxckoutFXRenderContext.allowTextureDarkening();
+        }
+    }
+
     @Inject(method = "innerBlit(Lnet/minecraft/resources/ResourceLocation;IIIIIFFFF)V", at = @At("HEAD"))
     private void blxckoutfx$enterAe2PatternModesBackground(
             ResourceLocation atlasLocation,
@@ -295,6 +478,98 @@ public class GuiGraphicsMixin {
 
         String path = atlasLocation.getPath();
         return MODMENU_CONFIGURE_BUTTON_PATH.equals(path) || MODMENU_FILTERS_BUTTON_PATH.equals(path);
+    }
+
+    private static boolean blxckoutfx$isInventoryRecipeBookButton(ResourceLocation sprite, int width, int height) {
+        Screen screen = Minecraft.getInstance().screen;
+        if (sprite == null || width != 20 || height != 18 || screen == null || screen.getClass() != InventoryScreen.class) {
+            return false;
+        }
+
+        if (!"minecraft".equals(sprite.getNamespace())) {
+            return false;
+        }
+
+        String path = sprite.getPath();
+        return RECIPE_BOOK_BUTTON_SPRITE_PATH.equals(path)
+                || RECIPE_BOOK_BUTTON_HIGHLIGHTED_SPRITE_PATH.equals(path);
+    }
+
+    private static boolean blxckoutfx$isInventoryRecipeBookPanel(
+            ResourceLocation texture,
+            int uOffset,
+            int vOffset,
+            int width,
+            int height
+    ) {
+        return blxckoutfx$isVanillaInventoryScreen(texture)
+                && RECIPE_BOOK_TEXTURE_PATH.equals(texture.getPath())
+                && uOffset == 1
+                && vOffset == 1
+                && width == 147
+                && height == 166;
+    }
+
+    private static boolean blxckoutfx$isInventoryRecipeBookFilter(ResourceLocation sprite, int width, int height) {
+        if (!blxckoutfx$isVanillaInventoryScreen(sprite) || width != 26 || height != 16) {
+            return false;
+        }
+
+        String path = sprite.getPath();
+        return RECIPE_BOOK_FILTER_ENABLED_SPRITE_PATH.equals(path)
+                || RECIPE_BOOK_FILTER_ENABLED_HIGHLIGHTED_SPRITE_PATH.equals(path)
+                || RECIPE_BOOK_FILTER_DISABLED_SPRITE_PATH.equals(path)
+                || RECIPE_BOOK_FILTER_DISABLED_HIGHLIGHTED_SPRITE_PATH.equals(path);
+    }
+
+    private static boolean blxckoutfx$isInventoryRecipeBookPageArrow(ResourceLocation sprite, int width, int height) {
+        if (!blxckoutfx$isVanillaInventoryScreen(sprite) || width != 12 || height != 17) {
+            return false;
+        }
+
+        String path = sprite.getPath();
+        return RECIPE_BOOK_PAGE_FORWARD_SPRITE_PATH.equals(path)
+                || RECIPE_BOOK_PAGE_FORWARD_HIGHLIGHTED_SPRITE_PATH.equals(path)
+                || RECIPE_BOOK_PAGE_BACKWARD_SPRITE_PATH.equals(path)
+                || RECIPE_BOOK_PAGE_BACKWARD_HIGHLIGHTED_SPRITE_PATH.equals(path);
+    }
+
+    private static boolean blxckoutfx$isRecipeBookFilterEnabled(ResourceLocation sprite) {
+        String path = sprite.getPath();
+        return RECIPE_BOOK_FILTER_ENABLED_SPRITE_PATH.equals(path)
+                || RECIPE_BOOK_FILTER_ENABLED_HIGHLIGHTED_SPRITE_PATH.equals(path);
+    }
+
+    private static boolean blxckoutfx$isVanillaInventoryScreen(ResourceLocation sprite) {
+        Screen screen = Minecraft.getInstance().screen;
+        return sprite != null
+                && "minecraft".equals(sprite.getNamespace())
+                && screen != null
+                && screen.getClass() == InventoryScreen.class;
+    }
+
+    private static void blxckoutfx$redrawMaskedSprite(GuiGraphics graphics, ResourceLocation sprite, int x, int y,
+                                                        int spriteWidth, int spriteHeight, String[]... masks) {
+        BlxckoutFXRenderContext.suppressTextureDarkening();
+        try {
+            for (String[] mask : masks) {
+                for (int row = 0; row < mask.length; row++) {
+                    String maskRow = mask[row];
+                    int runStart = maskRow.indexOf('#');
+                    while (runStart >= 0) {
+                        int runEnd = maskRow.indexOf('.', runStart);
+                        if (runEnd < 0) {
+                            runEnd = maskRow.length();
+                        }
+
+                        graphics.blitSprite(sprite, spriteWidth, spriteHeight, runStart, row, x + runStart, y + row, runEnd - runStart, 1);
+                        runStart = maskRow.indexOf('#', runEnd);
+                    }
+                }
+            }
+        } finally {
+            BlxckoutFXRenderContext.allowTextureDarkening();
+        }
     }
 
     private static boolean isNeoForgeModListScreen() {

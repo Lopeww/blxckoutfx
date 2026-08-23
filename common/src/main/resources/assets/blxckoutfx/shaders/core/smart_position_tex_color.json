@@ -28,6 +28,14 @@
     { "name": "Ae2ScrollTrackRect", "type": "float", "count": 4, "values": [ 0.0, 0.0, 0.0, 0.0 ] },
     { "name": "Ae2CraftingSectionRect", "type": "float", "count": 4, "values": [ 0.0, 0.0, 0.0, 0.0 ] },
     { "name": "Ae2ConfigArrowRect", "type": "float", "count": 4, "values": [ 0.0, 0.0, 0.0, 0.0 ] },
-    { "name": "Ae2MolecularAssemblerGridRect", "type": "float", "count": 4, "values": [ 0.0, 0.0, 0.0, 0.0 ] }
+    { "name": "Ae2MolecularAssemblerGridRect", "type": "float", "count": 4, "values": [ 0.0, 0.0, 0.0, 0.0 ] },
+    { "name": "TfcCrucibleTemperatureMode", "type": "float", "count": 1, "values": [ 0.0 ] },
+    { "name": "TfcCrucibleTemperatureRect", "type": "float", "count": 4, "values": [ 0.0, 0.0, 0.0, 0.0 ] },
+    { "name": "TfcCrucibleVesselMode", "type": "float", "count": 1, "values": [ 0.0 ] },
+    { "name": "TfcCrucibleVesselRect", "type": "float", "count": 4, "values": [ 0.0, 0.0, 0.0, 0.0 ] },
+    { "name": "TfcFirepitTemperatureMode", "type": "float", "count": 1, "values": [ 0.0 ] },
+    { "name": "TfcFirepitTemperatureRect", "type": "float", "count": 4, "values": [ 0.0, 0.0, 0.0, 0.0 ] },
+    { "name": "TfcFirepitPotMode", "type": "float", "count": 1, "values": [ 0.0 ] },
+    { "name": "TfcFirepitPotRect", "type": "float", "count": 4, "values": [ 0.0, 0.0, 0.0, 0.0 ] }
   ]
 }

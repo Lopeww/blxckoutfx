@@ -13,6 +13,14 @@ uniform vec4 Ae2ScrollTrackRect;
 uniform vec4 Ae2CraftingSectionRect;
 uniform vec4 Ae2ConfigArrowRect;
 uniform vec4 Ae2MolecularAssemblerGridRect;
+uniform float TfcCrucibleTemperatureMode;
+uniform vec4 TfcCrucibleTemperatureRect;
+uniform float TfcCrucibleVesselMode;
+uniform vec4 TfcCrucibleVesselRect;
+uniform float TfcFirepitTemperatureMode;
+uniform vec4 TfcFirepitTemperatureRect;
+uniform float TfcFirepitPotMode;
+uniform vec4 TfcFirepitPotRect;
 
 in vec2 texCoord0;
 
@@ -24,6 +32,28 @@ bool matchesColor(vec3 sampleColor, vec3 expectedColor) {
 
 bool matchesColorTol(vec3 sampleColor, vec3 expectedColor, float tolerance) {
     return all(lessThanEqual(abs(sampleColor - expectedColor), vec3(tolerance)));
+}
+
+bool isInRect(vec4 rect) {
+    return rect.z > rect.x && rect.w > rect.y
+            && gl_FragCoord.x >= rect.x && gl_FragCoord.x < rect.z
+            && gl_FragCoord.y >= rect.y && gl_FragCoord.y < rect.w;
+}
+
+bool shouldPreserveTfcCrucible(vec3 rgb) {
+    return (TfcCrucibleTemperatureMode > 0.5 && isInRect(TfcCrucibleTemperatureRect))
+            || (TfcCrucibleVesselMode > 0.5 && isInRect(TfcCrucibleVesselRect)
+                    && (TfcCrucibleVesselMode > 1.5
+                            || !matchesColorTol(rgb, vec3(0.776471), 0.004)));
+}
+
+bool shouldPreserveTfcFirepitTemperature() {
+    return TfcFirepitTemperatureMode > 0.5 && isInRect(TfcFirepitTemperatureRect);
+}
+
+bool shouldPreserveTfcFirepitPot(vec3 rgb) {
+    return TfcFirepitPotMode > 0.5 && isInRect(TfcFirepitPotRect)
+            && (TfcFirepitPotMode > 1.5 || !matchesColorTol(rgb, vec3(0.776471), 0.004));
 }
 
 bool isModMenuIconColor(vec3 sampleColor) {
@@ -124,6 +154,12 @@ void main() {
 
     if (color.a == 0.0) {
         discard;
+    }
+
+    if (shouldPreserveTfcCrucible(color.rgb) || shouldPreserveTfcFirepitTemperature()
+            || shouldPreserveTfcFirepitPot(color.rgb)) {
+        fragColor = color * ColorModulator;
+        return;
     }
 
     if (Ae2IconRenderMode > 0.5) {

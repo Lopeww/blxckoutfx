@@ -23,6 +23,7 @@ public final class BlxckoutFXClientConfig {
     private String lastConfigCategory = "OVERVIEW";
     private String ae2ThemeMode = Ae2ThemeMode.Blackout.name();
     private boolean ae2ThemeEnabled = true;
+    private boolean developerMode;
 
     private boolean inventoryButtonEnabled = true;
     private boolean inventoryButtonLocked = false;
@@ -220,6 +221,39 @@ public final class BlxckoutFXClientConfig {
         this.inventoryButtonPreset = InventoryButtonPreset.Custom.name();
         this.inventoryButtonCustomX = Math.max(0, x);
         this.inventoryButtonCustomY = Math.max(0, y);
+        this.inventoryButtonOffsetX = this.inventoryButtonCustomX;
+        syncLegacyInventoryButtonPosition();
+        save();
+    }
+
+    public boolean isDeveloperMode() {
+        return developerMode;
+    }
+
+    public void setDeveloperMode(boolean developerMode) {
+        this.developerMode = developerMode;
+        save();
+    }
+
+    public void setInventoryButtonScreenPosition(int x, int y, int screenWidth, int screenHeight, int buttonWidth, int buttonHeight) {
+        int maxX = Math.max(0, screenWidth - buttonWidth);
+        int maxY = Math.max(0, screenHeight - buttonHeight);
+        setInventoryButtonPosition(clamp(x, 0, maxX), clamp(y, 0, maxY));
+    }
+
+    public void migrateCustomInventoryButtonPosition(int screenWidth, int screenHeight, int buttonWidth, int buttonHeight) {
+        if (getInventoryButtonPreset() != InventoryButtonPreset.Custom
+                || (inventoryButtonCustomX >= 0 && inventoryButtonCustomY >= 0)) {
+            return;
+        }
+
+        // Older Custom values were offsets from a preset edge, not absolute screen coordinates.
+        int x = getInventoryButtonScreenX(screenWidth, buttonWidth);
+        int y = getInventoryButtonScreenY(screenHeight, buttonHeight);
+        int maxX = Math.max(0, screenWidth - buttonWidth);
+        int maxY = Math.max(0, screenHeight - buttonHeight);
+        this.inventoryButtonCustomX = clamp(x, 0, maxX);
+        this.inventoryButtonCustomY = clamp(y, 0, maxY);
         this.inventoryButtonOffsetX = this.inventoryButtonCustomX;
         syncLegacyInventoryButtonPosition();
         save();

@@ -122,6 +122,42 @@ public final class BlxckoutFXShaders {
                 BlxckoutFXRenderContext.getAe2MolecularAssemblerGridX2(),
                 BlxckoutFXRenderContext.getAe2MolecularAssemblerGridY2()
         );
+        setUniform(shader, "TfcCrucibleTemperatureMode", BlxckoutFXRenderContext.getTfcCrucibleTemperatureMode());
+        setUniform(
+                shader,
+                "TfcCrucibleTemperatureRect",
+                BlxckoutFXRenderContext.getTfcCrucibleTemperatureX1(),
+                BlxckoutFXRenderContext.getTfcCrucibleTemperatureY1(),
+                BlxckoutFXRenderContext.getTfcCrucibleTemperatureX2(),
+                BlxckoutFXRenderContext.getTfcCrucibleTemperatureY2()
+        );
+        setUniform(shader, "TfcCrucibleVesselMode", BlxckoutFXRenderContext.getTfcCrucibleVesselMode());
+        setUniform(
+                shader,
+                "TfcCrucibleVesselRect",
+                BlxckoutFXRenderContext.getTfcCrucibleVesselX1(),
+                BlxckoutFXRenderContext.getTfcCrucibleVesselY1(),
+                BlxckoutFXRenderContext.getTfcCrucibleVesselX2(),
+                BlxckoutFXRenderContext.getTfcCrucibleVesselY2()
+        );
+        setUniform(shader, "TfcFirepitTemperatureMode", BlxckoutFXRenderContext.getTfcFirepitTemperatureMode());
+        setUniform(
+                shader,
+                "TfcFirepitTemperatureRect",
+                BlxckoutFXRenderContext.getTfcFirepitTemperatureX1(),
+                BlxckoutFXRenderContext.getTfcFirepitTemperatureY1(),
+                BlxckoutFXRenderContext.getTfcFirepitTemperatureX2(),
+                BlxckoutFXRenderContext.getTfcFirepitTemperatureY2()
+        );
+        setUniform(shader, "TfcFirepitPotMode", BlxckoutFXRenderContext.getTfcFirepitPotMode());
+        setUniform(
+                shader,
+                "TfcFirepitPotRect",
+                BlxckoutFXRenderContext.getTfcFirepitPotX1(),
+                BlxckoutFXRenderContext.getTfcFirepitPotY1(),
+                BlxckoutFXRenderContext.getTfcFirepitPotX2(),
+                BlxckoutFXRenderContext.getTfcFirepitPotY2()
+        );
         setUniform(shader, "Ae2UpgradePanelBorderMode", getAe2UpgradePanelBorderMode());
     }
 

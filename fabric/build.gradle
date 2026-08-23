@@ -20,6 +20,12 @@ repositories {
     }
 }
 
+sourceSets.main.java.exclude 'com/lopew/blxckoutfx/mixin/tfc/**'
+
+tasks.named('compileJava', JavaCompile) {
+    exclude 'com/lopew/blxckoutfx/mixin/tfc/**'
+}
+
 loom {
     def aw = project(':common').file("src/main/resources/${mod_id}.accesswidener")
     if (aw.exists()) {
@@ -35,11 +41,24 @@ loom {
             ideConfigGenerated(true)
             runDir('runs/client')
         }
+        clientHotSwap {
+            client()
+            setConfigName('Fabric Client HotSwap')
+            ideConfigGenerated(true)
+            runDir('runs/client-hotswap')
+        }
         server {
             server()
             setConfigName('Fabric Server')
             ideConfigGenerated(true)
             runDir('runs/server')
         }
+    }
+}
+
+// Loom preserves an existing generated IDEA run config, including obsolete runDir values.
+tasks.named('ideaSyncTask') {
+    doFirst {
+        delete rootProject.file('.idea/runConfigurations/Fabric_Client_HotSwap___fabric__fabric.xml')
     }
 }

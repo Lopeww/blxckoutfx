@@ -69,7 +69,7 @@ BlxckoutFX is intentionally focused: it changes GUI rendering, not the world its
 |------------------|---------------------|-------------|-----------------|
 | 26.2             | NeoForge + Fabric   | 2.0.0       | Release         |
 | 26.1.2           | NeoForge + Fabric   | 2.0.0       | Main Release    |
-| 1.21.1           | NeoForge + Fabric   | 2.0.0       | Release         |
+| 1.21.1           | NeoForge + Fabric   | 2.1.0       | Release         |
 | 1.20.1           | Forge + Fabric      | 2.0.0       | Release         |
 | 1.12.2           | Forge               | 1.0.1       | Release         |
 

@@ -1,0 +1,230 @@
+import groovy.json.JsonSlurper
+
+import java.nio.charset.StandardCharsets
+import java.nio.file.AtomicMoveNotSupportedException
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import java.util.regex.Pattern
+
+tasks.register('syncTranslations') {
+    group = 'localization'
+    description = 'Synchronizes locale files with en_us.json without replacing translations.'
+
+    doLast {
+        File langDirectory = rootProject.file(
+                'common/src/main/resources/assets/blxckoutfx/lang')
+        File sourceFile = new File(langDirectory, 'en_us.json')
+
+        if (!sourceFile.isFile()) {
+            throw new GradleException("Translation source not found: ${sourceFile}")
+        }
+
+        List<File> localeFiles = (langDirectory.listFiles() ?: [] as File[])
+                .findAll { it.isFile() && it.name.endsWith('.json') && it.name != sourceFile.name }
+                .sort { it.name }
+
+        def parseJsonObject = { File file, String raw ->
+            Object parsed
+            try {
+                parsed = new JsonSlurper().parseText(raw)
+            } catch (Exception exception) {
+                throw new GradleException(
+                        "Invalid translation JSON in ${file}: ${exception.message}", exception)
+            }
+
+            if (!(parsed instanceof Map)) {
+                throw new GradleException("Translation file must contain a JSON object: ${file}")
+            }
+            parsed.each { key, value ->
+                if (!(key instanceof String) || !(value instanceof String)) {
+                    throw new GradleException(
+                            "Translation entries must be string-to-string in ${file}: ${key}")
+                }
+            }
+            return parsed as Map<String, String>
+        }
+
+        String sourceRaw = Files.readString(sourceFile.toPath(), StandardCharsets.UTF_8)
+        Map<String, String> sourceTranslations = parseJsonObject(sourceFile, sourceRaw)
+        String newline = sourceRaw.contains('\r\n') ? '\r\n' : '\n'
+        List<String> sourceLines = sourceRaw.split(/\r?\n/, -1) as List<String>
+
+        Pattern entryPattern = Pattern.compile(
+                '^(\\s*)("(?:\\\\.|[^"\\\\])*")(\\s*:\\s*)("(?:\\\\.|[^"\\\\])*")(\\s*)(,?)(\\s*)$')
+        List<Map<String, Object>> templateEntries = []
+        sourceLines.eachWithIndex { String line, int index ->
+            def matcher = entryPattern.matcher(line)
+            if (matcher.matches()) {
+                String key
+                try {
+                    key = new JsonSlurper().parseText(matcher.group(2)) as String
+                } catch (Exception exception) {
+                    throw new GradleException(
+                            "Cannot read translation key on line ${index + 1} of ${sourceFile}", exception)
+                }
+                templateEntries << [
+                        key       : key,
+                        lineIndex : index,
+                        prefix    : matcher.group(1) + matcher.group(2) + matcher.group(3),
+                        rawValue  : matcher.group(4),
+                        whitespace: matcher.group(5),
+                        comma     : matcher.group(6),
+                        trailing  : matcher.group(7)
+                ]
+            }
+        }
+
+        List<String> templateKeys = templateEntries.collect { it.key as String }
+        if (templateKeys.size() != sourceTranslations.size()
+                || templateKeys.toSet().size() != templateKeys.size()
+                || templateKeys.toSet() != sourceTranslations.keySet().toSet()) {
+            throw new GradleException(
+                    "${sourceFile.name} must use one string translation entry per line; " +
+                            'duplicate keys and non-string values are not supported.')
+        }
+
+        Pattern rawEntryPattern = Pattern.compile(
+                '("(?:\\\\.|[^"\\\\])*")\\s*:\\s*("(?:\\\\.|[^"\\\\])*")')
+        def extractRawEntries = { File file, String raw, Map<String, String> translations ->
+            Map<String, Map<String, String>> entries = new LinkedHashMap<>()
+            def matcher = rawEntryPattern.matcher(raw)
+            while (matcher.find()) {
+                String key
+                try {
+                    key = new JsonSlurper().parseText(matcher.group(1)) as String
+                } catch (Exception exception) {
+                    throw new GradleException("Cannot read a translation key in ${file}", exception)
+                }
+                if (entries.containsKey(key)) {
+                    throw new GradleException("Duplicate translation key in ${file}: ${key}")
+                }
+                entries[key] = [keyToken: matcher.group(1), valueToken: matcher.group(2)]
+            }
+            if (entries.size() != translations.size()
+                    || entries.keySet() != translations.keySet()) {
+                throw new GradleException(
+                        "Cannot safely preserve raw translation values in ${file}")
+            }
+            return entries
+        }
+
+        int closingBraceIndex = sourceLines.findLastIndexOf { it.trim() == '}' }
+        if (closingBraceIndex < 0 || sourceLines.drop(closingBraceIndex + 1).any { !it.isEmpty() }) {
+            throw new GradleException("Cannot locate the closing JSON object brace in ${sourceFile}")
+        }
+
+        // Build and validate every locale before writing any of them.
+        List<Map<String, Object>> plans = localeFiles.collect { File localeFile ->
+            String localeRaw = Files.readString(localeFile.toPath(), StandardCharsets.UTF_8)
+            Map<String, String> localeTranslations = parseJsonObject(localeFile, localeRaw)
+            Map<String, Map<String, String>> localeRawEntries =
+                    extractRawEntries(localeFile, localeRaw, localeTranslations)
+            List<String> missingKeys = templateKeys.findAll { !localeTranslations.containsKey(it) }
+            List<String> obsoleteKeys = localeTranslations.keySet().findAll {
+                !sourceTranslations.containsKey(it)
+            } as List<String>
+
+            Map<String, String> outputTranslations = new LinkedHashMap<>()
+            templateKeys.each { String key ->
+                outputTranslations[key] = localeTranslations.containsKey(key)
+                        ? localeTranslations[key]
+                        : sourceTranslations[key]
+            }
+            obsoleteKeys.each { String key -> outputTranslations[key] = localeTranslations[key] }
+
+            List<String> outputLines = new ArrayList<>(sourceLines)
+            templateEntries.each { Map<String, Object> entry ->
+                String key = entry.key as String
+                String rawValue = localeRawEntries.containsKey(key)
+                        ? localeRawEntries[key].valueToken
+                        : entry.rawValue as String
+                outputLines[entry.lineIndex as int] = (entry.prefix as String) +
+                        rawValue +
+                        (entry.whitespace as String) + (entry.comma as String) +
+                        (entry.trailing as String)
+            }
+
+            if (!obsoleteKeys.isEmpty()) {
+                Map<String, Object> lastEntry = templateEntries.last()
+                int lastLineIndex = lastEntry.lineIndex as int
+                String lastKey = lastEntry.key as String
+                String lastRawValue = localeRawEntries.containsKey(lastKey)
+                        ? localeRawEntries[lastKey].valueToken
+                        : lastEntry.rawValue as String
+                outputLines[lastLineIndex] = (lastEntry.prefix as String) +
+                        lastRawValue +
+                        (lastEntry.whitespace as String) + ',' + (lastEntry.trailing as String)
+
+                List<String> obsoleteLines = ['']
+                obsoleteKeys.eachWithIndex { String key, int index ->
+                    String comma = index + 1 < obsoleteKeys.size() ? ',' : ''
+                    obsoleteLines << "  ${localeRawEntries[key].keyToken}: " +
+                            localeRawEntries[key].valueToken + comma
+                }
+                outputLines.addAll(closingBraceIndex, obsoleteLines)
+            }
+
+            String outputRaw = outputLines.join(newline)
+            Map<String, String> verifiedOutput = parseJsonObject(localeFile, outputRaw)
+            localeTranslations.each { String key, String value ->
+                if (!verifiedOutput.containsKey(key) || verifiedOutput[key] != value) {
+                    throw new GradleException(
+                            "Safety check failed for ${localeFile.name}: translation changed for ${key}")
+                }
+            }
+            if (verifiedOutput.size() != sourceTranslations.size() + obsoleteKeys.size()) {
+                throw new GradleException(
+                        "Safety check failed for ${localeFile.name}: unexpected translation count")
+            }
+
+            return [
+                    file         : localeFile,
+                    output       : outputRaw,
+                    existingCount: sourceTranslations.size() - missingKeys.size(),
+                    missingKeys  : missingKeys,
+                    obsoleteKeys : obsoleteKeys,
+                    changed      : outputRaw != localeRaw
+            ]
+        }
+
+        plans.findAll { it.changed }.each { Map<String, Object> plan ->
+            File localeFile = plan.file as File
+            def target = localeFile.toPath()
+            def temporary = Files.createTempFile(target.parent, ".${localeFile.name}.", '.tmp')
+            try {
+                Files.writeString(temporary, plan.output as String, StandardCharsets.UTF_8)
+                try {
+                    Files.move(temporary, target, StandardCopyOption.ATOMIC_MOVE,
+                            StandardCopyOption.REPLACE_EXISTING)
+                } catch (AtomicMoveNotSupportedException ignored) {
+                    Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING)
+                }
+            } finally {
+                Files.deleteIfExists(temporary)
+            }
+        }
+
+        println 'BlxckoutFX translation sync'
+        println ''
+        println "Source: ${sourceFile.name}"
+        println "Locales: ${localeFiles.size()}"
+        plans.each { Map<String, Object> plan ->
+            List<String> missingKeys = plan.missingKeys as List<String>
+            List<String> obsoleteKeys = plan.obsoleteKeys as List<String>
+            println ''
+            println "${(plan.file as File).name}"
+            println "  = ${plan.existingCount} existing"
+            println "  + ${missingKeys.size()} added"
+            println "  ! ${obsoleteKeys.size()} obsolete"
+            obsoleteKeys.take(10).each { println "    ${it}" }
+            if (obsoleteKeys.size() > 10) {
+                println "    ... and ${obsoleteKeys.size() - 10} more"
+            }
+            if (!(plan.changed as boolean)) {
+                println '  up to date'
+            }
+        }
+        println ''
+        println 'Translation sync complete.'
+    }
+}
