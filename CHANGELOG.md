@@ -2,17 +2,17 @@
 
 ## 2.1.0
 
-### RELOAD:
+### Reload:
 
 - Added Developer Options with quick reload controls for BlxckoutFX.
 - Reload client state, resources, or both without restarting the game.
 - Makes testing changes during development faster and more convenient.
 
-### LANG:
+### Lang:
 
 - Added Turkish, Ukrainian, and Russian translations.
 
-### OPTIMIZATION:
+### Optimization:
 
 - Reduced the mod's file size by removing unnecessary overhead and optimizing assets.
 
@@ -24,19 +24,19 @@
 - Instead of continuing to add more and more mod-specific fixes, I'm working on a system that will make compatibility much easier for both developers and myself.
 - All other supported Minecraft versions will eventually be updated to use this new system.
 
-### PATCHOULI FIX:
+### Patchouli Fix:
 
 - Patchouli screens now force the inventory button to use the Short style.
 - Images inside books, including UI elements, are no longer incorrectly darkened.
 - Added fixes to prevent certain buttons and icons from being incorrectly darkened.
 - Fixed incorrect darkening of fluids.
 
-### JEI FIX:
+### JEI Fix:
 
 - JEI screens now force the inventory button to use the Short style.
 - Fixed incorrect darkening of fluids.
 
-### TERRAFIRMACRAFT FIX:
+### TerraFirmaCraft Fix:
 
 - Added extensive darkening fixes across general TerraFirmaCraft GUIs.
 - Extended compatibility to several TFC addons depending on the Minecraft version, including FirmaLife, Sacks 'N Such, and Firma: Civilization.
