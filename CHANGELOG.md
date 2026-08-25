@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.1
+
+- Fixed startup issues affecting Forge 1.20.1.
+- Fixed several Recipe Book compatibility issues.
+- Improved overall Forge stability.
+
 ## 2.1.0
 
 ### Reload:

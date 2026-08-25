@@ -1,5 +1,6 @@
 package com.lopew.blxckoutfx.mixin.core;
 
+import com.lopew.blxckoutfx.client.bridge.ImageButtonState;
 import com.lopew.blxckoutfx.client.render.BlxckoutFXRenderContext;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
@@ -12,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ImageButton.class)
-public class ImageButtonMixin {
+public class ImageButtonMixin implements ImageButtonState {
     @Unique
     private static final int BLXCKOUTFX_ICON_BUTTON_LANGUAGE = 1;
     @Unique
@@ -175,6 +176,42 @@ public class ImageButtonMixin {
         return this.blxckoutfx$resourceLocation != null
                 && namespace.equals(this.blxckoutfx$resourceLocation.getNamespace())
                 && path.equals(this.blxckoutfx$resourceLocation.getPath());
+    }
+
+    @Override
+    @Unique
+    public ResourceLocation blxckoutfx$getResourceLocation() {
+        return this.blxckoutfx$resourceLocation;
+    }
+
+    @Override
+    @Unique
+    public int blxckoutfx$getXTexStart() {
+        return this.blxckoutfx$xTexStart;
+    }
+
+    @Override
+    @Unique
+    public int blxckoutfx$getYTexStart() {
+        return this.blxckoutfx$yTexStart;
+    }
+
+    @Override
+    @Unique
+    public int blxckoutfx$getYDiffTex() {
+        return this.blxckoutfx$yDiffTex;
+    }
+
+    @Override
+    @Unique
+    public int blxckoutfx$getTextureWidth() {
+        return this.blxckoutfx$textureWidth;
+    }
+
+    @Override
+    @Unique
+    public int blxckoutfx$getTextureHeight() {
+        return this.blxckoutfx$textureHeight;
     }
 
     @Unique

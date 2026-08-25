@@ -1,3 +1,12 @@
+import groovy.json.JsonSlurper
+import java.util.jar.JarFile
+import org.objectweb.asm.AnnotationVisitor
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.FieldVisitor
+import org.objectweb.asm.MethodVisitor
+import org.objectweb.asm.Opcodes
+
 plugins {
     id 'multiloader-loader'
     id 'net.neoforged.moddev.legacyforge'
@@ -111,6 +120,214 @@ tasks.withType(JavaCompile).configureEach {
             "-AdefaultObfuscationEnv=searge",
             "-AmappingTypes=tsrg"
     ]
+}
+
+tasks.register('verifyReleaseArtifact') {
+    dependsOn tasks.named('reobfJar')
+
+    doLast {
+        def artifact = tasks.named('jar', Jar).get().archiveFile.get().asFile
+        def expectedRefmap = "${mod_id}-${project.name}-${minecraft_version}-refmap.json"
+        def imageButtonMixinEntry = 'com/lopew/blxckoutfx/mixin/core/ImageButtonMixin.class'
+        def recipeButtonMixinEntry = 'com/lopew/blxckoutfx/mixin/core/InventoryRecipeBookButtonMixin.class'
+        def recipeFilterMixinEntry = 'com/lopew/blxckoutfx/mixin/core/InventoryRecipeBookFilterMixin.class'
+        def imageButtonStateEntry = 'com/lopew/blxckoutfx/client/bridge/ImageButtonState.class'
+        def legacyImageButtonStateEntry = 'com/lopew/blxckoutfx/mixin/core/ImageButtonState.class'
+        def requiredEntries = [
+                'META-INF/mods.toml',
+                "${mod_id}.mixins.json",
+                "${mod_id}.forge.mixins.json",
+                expectedRefmap,
+                imageButtonMixinEntry,
+                recipeButtonMixinEntry,
+                recipeFilterMixinEntry,
+                imageButtonStateEntry
+        ]
+
+        if (!artifact.isFile()) {
+            throw new GradleException("Forge release artifact was not created: ${artifact}")
+        }
+
+        JarFile jarFile = new JarFile(artifact)
+        try {
+            def entryCounts = [:].withDefault { 0 }
+            def entries = jarFile.entries()
+            while (entries.hasMoreElements()) {
+                entryCounts[entries.nextElement().name]++
+            }
+            requiredEntries.each { entry ->
+                if (entryCounts[entry] != 1) {
+                    throw new GradleException("Forge release artifact must contain exactly one ${entry}, found ${entryCounts[entry]}")
+                }
+            }
+            if (entryCounts.containsKey(legacyImageButtonStateEntry)) {
+                throw new GradleException("Forge release artifact contains mixin-package runtime helper ${legacyImageButtonStateEntry}")
+            }
+
+            def readEntry = { String name ->
+                jarFile.getInputStream(jarFile.getJarEntry(name)).getText('UTF-8')
+            }
+            def inspectClass = { String entryName ->
+                def details = [
+                        interfaces  : [] as Set,
+                        fields      : [:],
+                        shadowFields: [] as Set,
+                        methods     : [] as Set,
+                        methodCalls : [],
+                        typeInstructions: [] as Set
+                ]
+                def classBytes = jarFile.getInputStream(jarFile.getJarEntry(entryName)).bytes
+                new ClassReader(classBytes).accept(new ClassVisitor(Opcodes.ASM9) {
+                    @Override
+                    void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+                        if (interfaces != null) {
+                            details.interfaces.addAll(interfaces)
+                        }
+                    }
+
+                    @Override
+                    FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
+                        details.fields[name] = descriptor
+                        return new FieldVisitor(Opcodes.ASM9) {
+                            @Override
+                            AnnotationVisitor visitAnnotation(String annotationDescriptor, boolean visible) {
+                                if (annotationDescriptor == 'Lorg/spongepowered/asm/mixin/Shadow;') {
+                                    details.shadowFields.add(name)
+                                }
+                                return null
+                            }
+                        }
+                    }
+
+                    @Override
+                    MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+                        details.methods.add(name)
+                        return new MethodVisitor(Opcodes.ASM9) {
+                            @Override
+                            void visitTypeInsn(int opcode, String type) {
+                                details.typeInstructions.add(type)
+                            }
+
+                            @Override
+                            void visitMethodInsn(int opcode, String owner, String methodName, String methodDescriptor, boolean isInterface) {
+                                details.methodCalls.add([owner: owner, name: methodName, descriptor: methodDescriptor])
+                            }
+                        }
+                    }
+                }, ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES)
+                return details
+            }
+
+            def imageButtonMixin = inspectClass(imageButtonMixinEntry)
+            def recipeButtonMixin = inspectClass(recipeButtonMixinEntry)
+            def recipeFilterMixin = inspectClass(recipeFilterMixinEntry)
+            def imageButtonStateName = 'com/lopew/blxckoutfx/client/bridge/ImageButtonState'
+            def legacyImageButtonFields = ['resourceLocation', 'xTexStart', 'yTexStart', 'yDiffTex', 'textureWidth', 'textureHeight'] as Set
+            def legacyFilterFields = ['resourceLocation', 'isStateTriggered', 'xTexStart', 'yTexStart', 'xDiffTex', 'yDiffTex'] as Set
+
+            if (!imageButtonMixin.shadowFields.isEmpty()) {
+                throw new GradleException("ImageButtonMixin release bytecode still contains @Shadow fields: ${imageButtonMixin.shadowFields}")
+            }
+            if (!imageButtonMixin.interfaces.contains(imageButtonStateName)) {
+                throw new GradleException('ImageButtonMixin release bytecode does not expose captured state through ImageButtonState')
+            }
+            ['blxckoutfx$resourceLocation', 'blxckoutfx$xTexStart', 'blxckoutfx$yTexStart', 'blxckoutfx$yDiffTex', 'blxckoutfx$textureWidth', 'blxckoutfx$textureHeight'].each { field ->
+                if (!imageButtonMixin.fields.containsKey(field)) {
+                    throw new GradleException("ImageButtonMixin release bytecode is missing captured field ${field}")
+                }
+            }
+            ['blxckoutfx$captureStateShort', 'blxckoutfx$captureStateDefaultTexture', 'blxckoutfx$captureStateSized', 'blxckoutfx$captureStateSizedWithNarration'].each { method ->
+                if (!imageButtonMixin.methods.contains(method)) {
+                    throw new GradleException("ImageButtonMixin release bytecode is missing ${method}")
+                }
+            }
+
+            def recipeButtonLegacyShadows = recipeButtonMixin.shadowFields.intersect(legacyImageButtonFields)
+            def recipeButtonLegacyFields = recipeButtonMixin.fields.keySet().intersect(legacyImageButtonFields)
+            if (!recipeButtonLegacyShadows.isEmpty() || !recipeButtonLegacyFields.isEmpty()) {
+                throw new GradleException("InventoryRecipeBookButtonMixin still depends on ImageButton fields: shadows=${recipeButtonLegacyShadows}, fields=${recipeButtonLegacyFields}")
+            }
+            ['blxckoutfx$getResourceLocation', 'blxckoutfx$getXTexStart', 'blxckoutfx$getYTexStart', 'blxckoutfx$getYDiffTex', 'blxckoutfx$getTextureWidth', 'blxckoutfx$getTextureHeight'].each { method ->
+                if (!recipeButtonMixin.methodCalls.any { call -> call.owner == imageButtonStateName && call.name == method }) {
+                    throw new GradleException("InventoryRecipeBookButtonMixin release bytecode does not use ImageButtonState.${method}")
+                }
+            }
+            if (!recipeButtonMixin.typeInstructions.contains(imageButtonStateName)) {
+                throw new GradleException('InventoryRecipeBookButtonMixin release bytecode does not cast to external ImageButtonState')
+            }
+
+            def recipeFilterLegacyShadows = recipeFilterMixin.shadowFields.intersect(legacyFilterFields)
+            def recipeFilterLegacyFields = recipeFilterMixin.fields.keySet().intersect(legacyFilterFields)
+            if (!recipeFilterLegacyShadows.isEmpty() || !recipeFilterLegacyFields.isEmpty()) {
+                throw new GradleException("InventoryRecipeBookFilterMixin still depends on StateSwitchingButton fields: shadows=${recipeFilterLegacyShadows}, fields=${recipeFilterLegacyFields}")
+            }
+            if (!recipeFilterMixin.methods.contains('blxckoutfx$captureTextureState')) {
+                throw new GradleException('InventoryRecipeBookFilterMixin release bytecode is missing texture state capture')
+            }
+
+            def mixinConfigs = []
+            ["${mod_id}.mixins.json", "${mod_id}.forge.mixins.json"].each { configName ->
+                def configText = readEntry(configName)
+                if (configText.contains('${')) {
+                    throw new GradleException("${configName} contains an unresolved placeholder")
+                }
+                def config = new JsonSlurper().parseText(configText)
+                if (config.refmap != expectedRefmap) {
+                    throw new GradleException("${configName} references ${config.refmap}, expected ${expectedRefmap}")
+                }
+                mixinConfigs.add(config)
+            }
+
+            def configuredMixinClasses = [] as Set
+            def mixinPackagePrefixes = [] as Set
+            mixinConfigs.each { config ->
+                def packagePrefix = config.package.replace('.', '/') + '/'
+                mixinPackagePrefixes.add(packagePrefix)
+                ['mixins', 'client', 'server'].each { section ->
+                    (config[section] ?: []).each { mixinName ->
+                        configuredMixinClasses.add(packagePrefix + mixinName.replace('.', '/') + '.class')
+                    }
+                }
+            }
+            def unexpectedMixinPackageClasses = entryCounts.keySet().findAll { entry ->
+                entry.endsWith('.class') && mixinPackagePrefixes.any { prefix -> entry.startsWith(prefix) }
+            }.findAll { entry ->
+                def outerClass = entry.contains('$') ? entry.substring(0, entry.indexOf('$')) + '.class' : entry
+                !configuredMixinClasses.contains(outerClass)
+            }
+            if (!unexpectedMixinPackageClasses.isEmpty()) {
+                throw new GradleException("Forge release artifact contains unconfigured classes in a defined mixin package: ${unexpectedMixinPackageClasses}")
+            }
+
+            def refmapText = readEntry(expectedRefmap)
+            if (refmapText.contains('${')) {
+                throw new GradleException("${expectedRefmap} contains an unresolved placeholder")
+            }
+            def refmap = new JsonSlurper().parseText(refmapText)
+            [
+                    'com/lopew/blxckoutfx/mixin/core/ImageButtonMixin'              : legacyImageButtonFields,
+                    'com/lopew/blxckoutfx/mixin/core/InventoryRecipeBookButtonMixin': legacyImageButtonFields,
+                    'com/lopew/blxckoutfx/mixin/core/InventoryRecipeBookFilterMixin': legacyFilterFields
+            ].each { mixinName, forbiddenFields ->
+                def mappings = refmap.mappings[mixinName]
+                if (mappings == null) {
+                    throw new GradleException("Forge refmap is missing ${mixinName}")
+                }
+                def staleFields = mappings.keySet().findAll { key ->
+                    forbiddenFields.any { field -> key == field || key.startsWith("${field}:") }
+                }
+                if (!staleFields.isEmpty()) {
+                    throw new GradleException("Forge refmap contains stale field mappings for ${mixinName}: ${staleFields}")
+                }
+            }
+        } finally {
+            jarFile.close()
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('verifyReleaseArtifact')
 }
 
 jar {

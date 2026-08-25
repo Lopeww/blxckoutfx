@@ -7,7 +7,6 @@ import net.minecraft.client.gui.components.StateSwitchingButton;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -42,12 +41,32 @@ public class InventoryRecipeBookFilterMixin {
             "...............######.....", ".................##.......", "..........................", ".........................."
     };
 
-    @Shadow protected ResourceLocation resourceLocation;
-    @Shadow protected boolean isStateTriggered;
-    @Shadow protected int xTexStart;
-    @Shadow protected int yTexStart;
-    @Shadow protected int xDiffTex;
-    @Shadow protected int yDiffTex;
+    @Unique
+    private ResourceLocation blxckoutfx$resourceLocation;
+    @Unique
+    private int blxckoutfx$xTexStart;
+    @Unique
+    private int blxckoutfx$yTexStart;
+    @Unique
+    private int blxckoutfx$xDiffTex;
+    @Unique
+    private int blxckoutfx$yDiffTex;
+
+    @Inject(method = "initTextureValues", at = @At("RETURN"))
+    private void blxckoutfx$captureTextureState(
+            int xTexStart,
+            int yTexStart,
+            int xDiffTex,
+            int yDiffTex,
+            ResourceLocation resourceLocation,
+            CallbackInfo ci
+    ) {
+        this.blxckoutfx$xTexStart = xTexStart;
+        this.blxckoutfx$yTexStart = yTexStart;
+        this.blxckoutfx$xDiffTex = xDiffTex;
+        this.blxckoutfx$yDiffTex = yDiffTex;
+        this.blxckoutfx$resourceLocation = resourceLocation;
+    }
 
     @Inject(method = "renderWidget", at = @At("RETURN"))
     private void blxckoutfx$redrawFilterIcons(
@@ -62,12 +81,13 @@ public class InventoryRecipeBookFilterMixin {
             return;
         }
 
-        int sourceX = this.xTexStart + (this.isStateTriggered ? this.xDiffTex : 0);
-        int sourceY = this.yTexStart + (button.isHoveredOrFocused() ? this.yDiffTex : 0);
+        boolean stateTriggered = button.isStateTriggered();
+        int sourceX = this.blxckoutfx$xTexStart + (stateTriggered ? this.blxckoutfx$xDiffTex : 0);
+        int sourceY = this.blxckoutfx$yTexStart + (button.isHoveredOrFocused() ? this.blxckoutfx$yDiffTex : 0);
         BlxckoutFXRenderContext.suppressTextureDarkening();
         try {
             blxckoutfx$redrawMask(graphics, button.getX(), button.getY(), sourceX, sourceY,
-                    this.isStateTriggered ? BLXCKOUTFX_FILTER_CHECK_MASK : BLXCKOUTFX_FILTER_X_MASK);
+                    stateTriggered ? BLXCKOUTFX_FILTER_CHECK_MASK : BLXCKOUTFX_FILTER_X_MASK);
             blxckoutfx$redrawMask(graphics, button.getX(), button.getY(), sourceX, sourceY, BLXCKOUTFX_FILTER_ITEM_MASK);
         } finally {
             BlxckoutFXRenderContext.allowTextureDarkening();
@@ -79,13 +99,13 @@ public class InventoryRecipeBookFilterMixin {
         return Minecraft.getInstance().screen instanceof InventoryScreen
                 && button.getWidth() == 26
                 && button.getHeight() == 16
-                && this.xTexStart == 152
-                && this.yTexStart == 41
-                && this.xDiffTex == 28
-                && this.yDiffTex == 18
-                && this.resourceLocation != null
-                && "minecraft".equals(this.resourceLocation.getNamespace())
-                && BLXCKOUTFX_RECIPE_BOOK_TEXTURE.equals(this.resourceLocation.getPath());
+                && this.blxckoutfx$xTexStart == 152
+                && this.blxckoutfx$yTexStart == 41
+                && this.blxckoutfx$xDiffTex == 28
+                && this.blxckoutfx$yDiffTex == 18
+                && this.blxckoutfx$resourceLocation != null
+                && "minecraft".equals(this.blxckoutfx$resourceLocation.getNamespace())
+                && BLXCKOUTFX_RECIPE_BOOK_TEXTURE.equals(this.blxckoutfx$resourceLocation.getPath());
     }
 
     @Unique
@@ -99,7 +119,7 @@ public class InventoryRecipeBookFilterMixin {
                     runEnd = maskRow.length();
                 }
 
-                graphics.blit(this.resourceLocation, x + runStart, y + row, sourceX + runStart, sourceY + row, runEnd - runStart, 1);
+                graphics.blit(this.blxckoutfx$resourceLocation, x + runStart, y + row, sourceX + runStart, sourceY + row, runEnd - runStart, 1);
                 runStart = maskRow.indexOf('#', runEnd);
             }
         }
