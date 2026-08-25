@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.1
+
+- Fixed startup issues affecting NeoForge 1.21.1.
+- Fixed several Mixin compatibility issues.
+- Improved NeoForge compatibility and release stability.
+
 ## 2.1.0
 
 ### Reload:

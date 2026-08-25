@@ -1,6 +1,7 @@
 package com.lopew.blxckoutfx.mixin.core;
 
 import net.minecraft.client.Minecraft;
+import com.lopew.blxckoutfx.client.access.ChatScreenInputAccess;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.CommandSuggestions;
@@ -35,7 +36,7 @@ public class CommandSuggestionsListMixin {
             return originalColor;
         }
 
-        String input = ((ChatScreenAccessor) chatScreen).blxckoutfx$getInput().getValue();
+        String input = ((ChatScreenInputAccess) chatScreen).blxckoutfx$getInput().getValue();
         if (!input.startsWith("/bfx ") && !input.startsWith("/blxckout ") && !input.startsWith("/blxckoutfx ")) {
             return originalColor;
         }

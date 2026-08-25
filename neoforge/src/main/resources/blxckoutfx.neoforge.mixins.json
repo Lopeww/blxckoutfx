@@ -5,7 +5,8 @@
   "refmap": "blxckoutfx.refmap.json",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "tfc.TfcGuiGraphicsMixin"
+    "tfc.TfcGuiGraphicsMixin",
+    "tfc.TfcGuiGraphicsVanillaMixin"
   ],
   "injectors": {
     "defaultRequire": 1

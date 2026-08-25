@@ -53,9 +53,365 @@ neoForge {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
+def neoformMappings = fileTree("${gradle.gradleUserHomeDir}/caches/neoformruntime/intermediate_results") {
+    include 'mergeMappings*_output.tsrg'
+}
+def mixinMappingFile = layout.buildDirectory.file("mappings/${mod_id}-official-to-runtime.tsrg")
+
+tasks.register('generateMixinMappings') {
+    dependsOn tasks.named('createMinecraftArtifacts')
+    inputs.files(neoformMappings)
+    outputs.file(mixinMappingFile)
+
+    doLast {
+        def sourceFile = neoformMappings.files.find { candidate ->
+            candidate.withReader('UTF-8') { reader ->
+                reader.any { it == 'fhz net/minecraft/client/gui/GuiGraphics' }
+            }
+        }
+        if (sourceFile == null) {
+            throw new GradleException('Unable to find the NeoForm 1.21.1 merged mappings required for Mixin refmaps.')
+        }
+
+        def sourceLines = sourceFile.readLines('UTF-8')
+        def obfToNamedClasses = [:]
+        sourceLines.findAll { !it.startsWith('\t') && !it.startsWith('tsrg2') && !it.trim().isEmpty() }.each { line ->
+            def names = line.trim().split('\\s+')
+            if (names.length >= 2) {
+                obfToNamedClasses[names[0]] = names[1]
+            }
+        }
+
+        def remapDescriptor = { descriptor ->
+            descriptor.replaceAll(/L([^;]+);/) { match, className -> "L${obfToNamedClasses[className] ?: className};" }
+        }
+        def outputLines = ['tsrg2 searge notch']
+        sourceLines.each { line ->
+            if (line.startsWith('tsrg2') || line.trim().isEmpty()) {
+                return
+            }
+            if (line.startsWith('\t\t')) {
+                outputLines << line
+                return
+            }
+
+            def names = line.trim().split('\\s+')
+            if (line.startsWith('\t')) {
+                if (names.length == 2) {
+                    outputLines << "\t${names[1]} ${names[1]}"
+                } else if (names.length >= 3) {
+                    outputLines << "\t${names[2]} ${remapDescriptor(names[1])} ${names[2]}"
+                }
+            } else if (names.length >= 2) {
+                outputLines << "${names[1]} ${names[1]}"
+            }
+        }
+
+        def outputFile = mixinMappingFile.get().asFile
+        outputFile.parentFile.mkdirs()
+        outputFile.setText(outputLines.join(System.lineSeparator()), 'UTF-8')
+    }
+}
+
 dependencies {
+    annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
+    annotationProcessor "io.github.llamalad7:mixinextras-common:0.3.5"
+
     implementation "curse.maven:terrafirmacraft-302973:8365958"
     implementation "curse.maven:firmalife-453394:8364676"
     implementation "curse.maven:jei-238222:8622758"
     implementation "curse.maven:patchouli-306770:7730942"
+}
+
+tasks.named('compileJava', JavaCompile) {
+    dependsOn tasks.named('generateMixinMappings')
+    options.compilerArgs.addAll([
+            "-AoutRefMapFile=${layout.buildDirectory.file("classes/java/main/${mod_id}.refmap.json").get().asFile}",
+            "-AreobfTsrgFile=${mixinMappingFile.get().asFile}",
+            '-AdefaultObfuscationEnv=searge',
+            '-AmappingTypes=tsrg'
+    ])
+}
+
+tasks.register('verifyMixinRefmapSemantics') {
+    dependsOn tasks.named('jar')
+
+    doLast {
+        def jarFile = tasks.named('jar', Jar).get().archiveFile.get().asFile
+        def zipFile = new java.util.zip.ZipFile(jarFile)
+        try {
+            def refmapEntry = zipFile.getEntry("${mod_id}.refmap.json")
+            if (refmapEntry == null) {
+                throw new GradleException("Missing ${mod_id}.refmap.json from ${jarFile.name}")
+            }
+            def refmap = new groovy.json.JsonSlurper().parse(zipFile.getInputStream(refmapEntry))
+            def registeredMixins = new LinkedHashSet<String>()
+
+            zipFile.entries().findAll { it.name.endsWith('.mixins.json') }.each { entry ->
+                def config = new groovy.json.JsonSlurper().parse(zipFile.getInputStream(entry))
+                ['mixins', 'client', 'server'].each { key ->
+                    (config[key] ?: []).each { mixin ->
+                        registeredMixins.add("${config.package.replace('.', '/')}/${mixin.replace('.', '/')}".toString())
+                    }
+                }
+            }
+
+            def injectorAnnotations = [
+                    'Lorg/spongepowered/asm/mixin/injection/Inject;',
+                    'Lorg/spongepowered/asm/mixin/injection/Redirect;',
+                    'Lorg/spongepowered/asm/mixin/injection/ModifyArg;',
+                    'Lorg/spongepowered/asm/mixin/injection/ModifyArgs;',
+                    'Lorg/spongepowered/asm/mixin/injection/ModifyConstant;',
+                    'Lorg/spongepowered/asm/mixin/injection/ModifyVariable;',
+                    'Lcom/llamalad7/mixinextras/injector/wrapoperation/WrapOperation;'
+            ] as Set
+            def failures = []
+
+            registeredMixins.each { mixinClass ->
+                def classEntry = zipFile.getEntry("${mixinClass}.class")
+                if (classEntry == null) {
+                    failures << "Registered mixin class is missing: ${mixinClass}"
+                    return
+                }
+
+                def targets = new LinkedHashSet<String>()
+                def injectorSelectors = new LinkedHashSet<String>()
+                def reader = new org.objectweb.asm.ClassReader(zipFile.getInputStream(classEntry))
+                reader.accept(new org.objectweb.asm.ClassVisitor(org.objectweb.asm.Opcodes.ASM9) {
+                    @Override
+                    org.objectweb.asm.AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+                        if (descriptor != 'Lorg/spongepowered/asm/mixin/Mixin;') {
+                            return super.visitAnnotation(descriptor, visible)
+                        }
+                        return new org.objectweb.asm.AnnotationVisitor(org.objectweb.asm.Opcodes.ASM9) {
+                            @Override
+                            void visit(String name, Object value) {
+                                if (name == 'targets') {
+                                    targets.add(value.toString().replace('.', '/'))
+                                } else if (name == 'value') {
+                                    def target = value instanceof org.objectweb.asm.Type ? value.internalName : value.toString()
+                                    if (target.startsWith('L') && target.endsWith(';')) {
+                                        target = target.substring(1, target.length() - 1)
+                                    }
+                                    if (target.contains('/')) {
+                                        targets.add(target)
+                                    }
+                                }
+                            }
+
+                            @Override
+                            org.objectweb.asm.AnnotationVisitor visitArray(String name) {
+                                if (name != 'value' && name != 'targets') {
+                                    return super.visitArray(name)
+                                }
+                                return new org.objectweb.asm.AnnotationVisitor(org.objectweb.asm.Opcodes.ASM9) {
+                                    @Override
+                                    void visit(String ignored, Object value) {
+                                        def target = value instanceof org.objectweb.asm.Type ? value.internalName : value.toString()
+                                        if (target.startsWith('L') && target.endsWith(';')) {
+                                            target = target.substring(1, target.length() - 1)
+                                        }
+                                        target = target.replace('.', '/')
+                                        if (target.contains('/')) {
+                                            targets.add(target)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    org.objectweb.asm.MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+                        return new org.objectweb.asm.MethodVisitor(org.objectweb.asm.Opcodes.ASM9) {
+                            @Override
+                            org.objectweb.asm.AnnotationVisitor visitAnnotation(String annotationDescriptor, boolean visible) {
+                                if (!injectorAnnotations.contains(annotationDescriptor)) {
+                                    return super.visitAnnotation(annotationDescriptor, visible)
+                                }
+                                return new org.objectweb.asm.AnnotationVisitor(org.objectweb.asm.Opcodes.ASM9) {
+                                    @Override
+                                    void visit(String elementName, Object value) {
+                                        if (elementName == 'method') {
+                                            injectorSelectors.add(value.toString())
+                                        }
+                                    }
+
+                                    @Override
+                                    org.objectweb.asm.AnnotationVisitor visitArray(String elementName) {
+                                        if (elementName != 'method') {
+                                            return super.visitArray(elementName)
+                                        }
+                                        return new org.objectweb.asm.AnnotationVisitor(org.objectweb.asm.Opcodes.ASM9) {
+                                            @Override
+                                            void visit(String ignored, Object value) {
+                                                injectorSelectors.add(value.toString())
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }, org.objectweb.asm.ClassReader.SKIP_CODE | org.objectweb.asm.ClassReader.SKIP_DEBUG | org.objectweb.asm.ClassReader.SKIP_FRAMES)
+
+                def mappings = refmap.mappings[mixinClass] ?: [:]
+                injectorSelectors.each { selector ->
+                    def mapped = mappings[selector]
+                    def ownerMatcher = mapped =~ /^L([^;]+);/
+                    if (ownerMatcher.find() && !targets.contains(ownerMatcher.group(1))) {
+                        failures << "${mixinClass} injector '${selector}' maps to owner '${ownerMatcher.group(1)}', not one of ${targets}"
+                    }
+                }
+
+                targets.each { target ->
+                    def mapped = mappings[target.replace('/', '.')]
+                    if (mapped != null && mapped != target) {
+                        failures << "${mixinClass} target '${target}' maps to '${mapped}', not its runtime official name"
+                    }
+                }
+            }
+
+            if (!failures.isEmpty()) {
+                throw new GradleException("Invalid Mixin refmap semantics:\n - ${failures.join('\n - ')}")
+            }
+        } finally {
+            zipFile.close()
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('verifyMixinRefmapSemantics')
+}
+
+tasks.register('verifyMixinStructure') {
+    dependsOn tasks.named('jar')
+
+    doLast {
+        def jarFile = tasks.named('jar', Jar).get().archiveFile.get().asFile
+        def zipFile = new java.util.zip.ZipFile(jarFile)
+        try {
+            def entries = zipFile.entries().toList()
+            def configEntries = entries.findAll { it.name.endsWith('.mixins.json') }
+            def refmapEntries = entries.findAll { it.name.endsWith('.refmap.json') }
+            def registeredMixins = new LinkedHashSet<String>()
+            def mixinRegistrations = [:]
+            def configuredRefmaps = new LinkedHashSet<String>()
+            def failures = []
+
+            if (configEntries.size() != configEntries*.name.toSet().size()) {
+                failures << 'Duplicate Mixin config entries'
+            }
+            if (refmapEntries.size() != 1) {
+                failures << "Expected exactly one refmap, found ${refmapEntries*.name}"
+            }
+
+            entries.findAll { it.name ==~ /.*\\.(json|toml|mcmeta)/ }.each { entry ->
+                def content = zipFile.getInputStream(entry).getText('UTF-8')
+                if (content =~ /\$\{[^}]+\}/) {
+                    failures << "Unresolved placeholder in ${entry.name}"
+                }
+            }
+
+            configEntries.each { entry ->
+                def config = new groovy.json.JsonSlurper().parse(zipFile.getInputStream(entry))
+                configuredRefmaps.add(config.refmap)
+                ['mixins', 'client', 'server'].each { key ->
+                    (config[key] ?: []).each { mixin ->
+                        def mixinClass = "${config.package.replace('.', '/')}/${mixin.replace('.', '/')}".toString()
+                        if (mixinRegistrations.containsKey(mixinClass)) {
+                            failures << "Duplicate configured mixin ${mixinClass} in ${mixinRegistrations[mixinClass]} and ${entry.name}"
+                        }
+                        mixinRegistrations[mixinClass] = entry.name
+                        registeredMixins.add(mixinClass)
+                    }
+                }
+            }
+            configuredRefmaps.each { refmap ->
+                if (zipFile.getEntry(refmap) == null) {
+                    failures << "Configured refmap is missing: ${refmap}"
+                }
+            }
+
+            def mixinClassEntries = entries.findAll { it.name.startsWith('com/lopew/blxckoutfx/mixin/') && it.name.endsWith('.class') }
+            def unregisteredMixinClasses = mixinClassEntries.collect { it.name[0..-7] }.findAll { !registeredMixins.contains(it) }
+            if (!unregisteredMixinClasses.isEmpty()) {
+                failures << "Unregistered class in the configured mixin package: ${unregisteredMixinClasses.sort()}"
+            }
+
+            def injectorAnnotations = [
+                    'Lorg/spongepowered/asm/mixin/injection/Inject;',
+                    'Lorg/spongepowered/asm/mixin/injection/Redirect;',
+                    'Lorg/spongepowered/asm/mixin/injection/ModifyArg;',
+                    'Lorg/spongepowered/asm/mixin/injection/ModifyArgs;',
+                    'Lorg/spongepowered/asm/mixin/injection/ModifyConstant;',
+                    'Lorg/spongepowered/asm/mixin/injection/ModifyVariable;',
+                    'Lcom/llamalad7/mixinextras/injector/wrapoperation/WrapOperation;'
+            ] as Set
+
+            registeredMixins.each { mixinClass ->
+                def classEntry = zipFile.getEntry("${mixinClass}.class")
+                if (classEntry == null) {
+                    failures << "Configured mixin class is missing: ${mixinClass}"
+                    return
+                }
+                new org.objectweb.asm.ClassReader(zipFile.getInputStream(classEntry)).accept(new org.objectweb.asm.ClassVisitor(org.objectweb.asm.Opcodes.ASM9) {
+                    @Override
+                    org.objectweb.asm.MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+                        def injector = [false]
+                        return new org.objectweb.asm.MethodVisitor(org.objectweb.asm.Opcodes.ASM9) {
+                            @Override
+                            org.objectweb.asm.AnnotationVisitor visitAnnotation(String annotationDescriptor, boolean visible) {
+                                if (injectorAnnotations.contains(annotationDescriptor)) {
+                                    injector[0] = true
+                                }
+                                return super.visitAnnotation(annotationDescriptor, visible)
+                            }
+
+                            @Override
+                            void visitMethodInsn(int opcode, String owner, String methodName, String methodDescriptor, boolean isInterface) {
+                                if (owner.startsWith('com/lopew/blxckoutfx/mixin/') && owner != mixinClass) {
+                                    failures << "${mixinClass}.${name}${descriptor} invokes configured mixin implementation ${owner}.${methodName}${methodDescriptor}"
+                                }
+                            }
+
+                            @Override
+                            void visitFieldInsn(int opcode, String owner, String fieldName, String fieldDescriptor) {
+                                if (owner.startsWith('com/lopew/blxckoutfx/mixin/') && owner != mixinClass) {
+                                    failures << "${mixinClass}.${name}${descriptor} accesses configured mixin implementation field ${owner}.${fieldName}"
+                                }
+                            }
+
+                            @Override
+                            void visitTypeInsn(int opcode, String type) {
+                                if (type.startsWith('com/lopew/blxckoutfx/mixin/') && type != mixinClass) {
+                                    failures << "${mixinClass}.${name}${descriptor} references configured mixin implementation type ${type}"
+                                }
+                            }
+
+                            @Override
+                            void visitEnd() {
+                                boolean isStatic = (access & org.objectweb.asm.Opcodes.ACC_STATIC) != 0
+                                boolean isPrivate = (access & org.objectweb.asm.Opcodes.ACC_PRIVATE) != 0
+                                if (isStatic && !isPrivate && name != '<clinit>' && !injector[0]) {
+                                    failures << "${mixinClass} contains non-private static normal method ${name}${descriptor}"
+                                }
+                            }
+                        }
+                    }
+                }, org.objectweb.asm.ClassReader.SKIP_DEBUG | org.objectweb.asm.ClassReader.SKIP_FRAMES)
+            }
+
+            if (!failures.isEmpty()) {
+                throw new GradleException("Invalid Mixin structure:\n - ${failures.unique().join('\n - ')}")
+            }
+        } finally {
+            zipFile.close()
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('verifyMixinStructure')
 }
