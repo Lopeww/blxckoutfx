@@ -8,9 +8,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class BlxckoutFXJourneyMapThemeSupport {
     private static final String PURIST_THEME_NAME = "Purist";
-    private static final String JOURNEYMAP_ABOUT_SCREEN = "journeymap.client.ui.dialog.AboutDialog";
+    private static final String[] JOURNEYMAP_ABOUT_SCREENS = {
+            "journeymap.client.ui.dialog.AboutDialog",
+            "journeymap.client.ui.dialog.about.AboutScreen"
+    };
     private static final String JOURNEYMAP_OPTION_SCREEN_PREFIX = "journeymap.client.ui.option.";
-    private static final String JOURNEYMAP_WAYPOINT_SCREEN_PREFIX = "journeymap.client.ui.waypoint.";
+    private static final String[] JOURNEYMAP_WAYPOINT_SCREEN_PREFIXES = {
+            "journeymap.client.ui.waypoint.",
+            "journeymap.client.ui.waypointmanager."
+    };
     private static final Map<Class<?>, Field> THEME_FIELDS = new ConcurrentHashMap<>();
     private static final Map<Class<?>, Field> NAME_FIELDS = new ConcurrentHashMap<>();
 
@@ -29,14 +35,14 @@ public final class BlxckoutFXJourneyMapThemeSupport {
         Minecraft minecraft = Minecraft.getInstance();
         return minecraft != null
                 && minecraft.screen != null
-                && hasClassName(minecraft.screen.getClass(), JOURNEYMAP_ABOUT_SCREEN);
+                && hasAnyClassName(minecraft.screen.getClass(), JOURNEYMAP_ABOUT_SCREENS);
     }
 
     private static boolean isWaypointScreen() {
         Minecraft minecraft = Minecraft.getInstance();
         return minecraft != null
                 && minecraft.screen != null
-                && hasClassPrefix(minecraft.screen.getClass(), JOURNEYMAP_WAYPOINT_SCREEN_PREFIX);
+                && hasAnyClassPrefix(minecraft.screen.getClass(), JOURNEYMAP_WAYPOINT_SCREEN_PREFIXES);
     }
 
     public static boolean isPuristTheme(Object button) {
@@ -104,6 +110,16 @@ public final class BlxckoutFXJourneyMapThemeSupport {
         return false;
     }
 
+    private static boolean hasAnyClassPrefix(Class<?> type, String[] prefixes) {
+        for (String prefix : prefixes) {
+            if (hasClassPrefix(type, prefix)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private static boolean hasClassName(Class<?> type, String className) {
         Class<?> current = type;
         while (current != null) {
@@ -111,6 +127,16 @@ public final class BlxckoutFXJourneyMapThemeSupport {
                 return true;
             }
             current = current.getSuperclass();
+        }
+
+        return false;
+    }
+
+    private static boolean hasAnyClassName(Class<?> type, String[] classNames) {
+        for (String className : classNames) {
+            if (hasClassName(type, className)) {
+                return true;
+            }
         }
 
         return false;

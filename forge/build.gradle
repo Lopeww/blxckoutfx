@@ -12,7 +12,7 @@ plugins {
     id 'net.neoforged.moddev.legacyforge'
 }
 
-def clientDevGameDir = file('build/dev-client-run')
+def clientDevGameDir = file('runs/client')
 def clientHotSwapGameDir = file('runs/client-hotswap')
 
 repositories {
@@ -77,6 +77,19 @@ legacyForge {
 
 sourceSets.main.resources.srcDir 'src/generated/resources'
 
+configurations {
+    journeyMapLegacyVerification {
+        canBeResolved = true
+        canBeConsumed = false
+        transitive = false
+    }
+    journeyMapCurrentVerification {
+        canBeResolved = true
+        canBeConsumed = false
+        transitive = false
+    }
+}
+
 dependencies {
     modImplementation "curse.maven:terrafirmacraft-302973:8242625"
     modImplementation "curse.maven:firmalife-453394:8360236"
@@ -97,7 +110,7 @@ dependencies {
     // modRuntimeOnly "me.desht.pneumaticcraft:pneumaticcraft-repressurized:6.0.22+mc1.20.1"
     // modRuntimeOnly "appeng:appliedenergistics2-forge:15.4.10"
     // modRuntimeOnly "curse.maven:guideme-1173950:8204776"
-    modRuntimeOnly "curse.maven:journeymap-32274:5789363"
+    modRuntimeOnly "curse.maven:journeymap-32274:8764299"
     modRuntimeOnly "curse.maven:ftb-quests-forge-289412:8078538"
     modRuntimeOnly "curse.maven:architectury-api-419699:5137938"
     modRuntimeOnly "curse.maven:ftb-library-forge-404465:8226927"
@@ -111,6 +124,19 @@ dependencies {
     modRuntimeOnly "curse.maven:cloth-config-348521:5729105"
     modRuntimeOnly "curse.maven:curios-309927:5680164"
     modRuntimeOnly "curse.maven:geckolib-388172:8285794"
+
+    journeyMapLegacyVerification "curse.maven:journeymap-32274:5789363"
+    journeyMapCurrentVerification "curse.maven:journeymap-32274:8764299"
+
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'com.google.code.gson:gson:2.10.1'
+    testImplementation 'org.spongepowered:mixin:0.8.5'
+    testImplementation 'org.ow2.asm:asm-tree:9.2'
+}
+
+tasks.named('test', Test) {
+    useJUnitPlatform()
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -122,12 +148,254 @@ tasks.withType(JavaCompile).configureEach {
     ]
 }
 
+tasks.register('verifyJourneyMapCompatibility') {
+    inputs.files(configurations.journeyMapLegacyVerification, configurations.journeyMapCurrentVerification)
+
+    doLast {
+        def inspectClass = { File archive, String entryName ->
+            JarFile jarFile = new JarFile(archive)
+            try {
+                def entry = jarFile.getJarEntry(entryName)
+                if (entry == null) {
+                    return null
+                }
+
+                def details = [methods: [:], fields: [:]]
+                def classBytes = jarFile.getInputStream(entry).bytes
+                new ClassReader(classBytes).accept(new ClassVisitor(Opcodes.ASM9) {
+                    @Override
+                    FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
+                        details.fields[name] = descriptor
+                        return null
+                    }
+
+                    @Override
+                    MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+                        def method = [access: access, calls: [], fieldInstructions: [], typeInstructions: [], stringConstants: [] as Set]
+                        details.methods[name + descriptor] = method
+                        return new MethodVisitor(Opcodes.ASM9) {
+                            @Override
+                            void visitFieldInsn(int opcode, String owner, String fieldName, String fieldDescriptor) {
+                                method.fieldInstructions.add([opcode: opcode, owner: owner, name: fieldName, descriptor: fieldDescriptor])
+                            }
+
+                            @Override
+                            void visitTypeInsn(int opcode, String type) {
+                                method.typeInstructions.add([opcode: opcode, type: type])
+                            }
+
+                            @Override
+                            void visitLdcInsn(Object value) {
+                                if (value instanceof String) {
+                                    method.stringConstants.add(value)
+                                }
+                            }
+
+                            @Override
+                            void visitMethodInsn(int opcode, String owner, String methodName, String methodDescriptor, boolean isInterface) {
+                                method.calls.add([opcode: opcode, owner: owner, name: methodName, descriptor: methodDescriptor])
+                            }
+                        }
+                    }
+                }, ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES)
+                return details
+            } finally {
+                jarFile.close()
+            }
+        }
+
+        def requireMethod = { Map methods, String owner, String name, String descriptor ->
+            if (methods == null || !methods.methods.containsKey(name + descriptor)) {
+                throw new GradleException("JourneyMap compatibility target is missing: ${owner}.${name}${descriptor}")
+            }
+            return methods.methods[name + descriptor]
+        }
+
+        def legacyJar = configurations.journeyMapLegacyVerification.singleFile
+        def currentJar = configurations.journeyMapCurrentVerification.singleFile
+        def themeOwner = 'journeymap/client/ui/theme/ThemeButton'
+        def legacyButtonOwner = 'journeymap/client/ui/component/Button'
+        def currentButtonOwner = 'journeymap/client/ui/component/buttons/Button'
+        def currentBasicImageButtonOwner = 'journeymap/client/ui/component/buttons/BasicImageButton'
+        def currentImagePopupButtonOwner = 'journeymap/client/ui/component/popupscreenbutton/ImagePopupButton'
+        def currentPopupButtonOwner = 'journeymap/client/ui/component/popupscreenbutton/PopupButton'
+        def currentWaypointManagerOwner = 'journeymap/client/ui/waypointmanager/WaypointManager'
+        def currentGroupSlotOwner = 'journeymap/client/ui/waypointmanager/group/GroupSlot'
+        def currentFullscreenOwner = 'journeymap/client/ui/fullscreen/Fullscreen'
+        def currentThemeButtonOwner = 'journeymap/client/ui/theme/ThemeButton'
+        def currentThemeToolbarOwner = 'journeymap/client/ui/theme/ThemeToolbar'
+        def legacyThemeDescriptor = '(Lcom/mojang/blaze3d/vertex/PoseStack;II)V'
+        def currentThemeDescriptor = '(Lnet/minecraft/client/gui/GuiGraphics;II)V'
+        def legacyButtonDescriptor = '(Lnet/minecraft/client/gui/GuiGraphics;IIF)V'
+        def currentButtonDescriptor = '(Lnet/minecraft/client/gui/GuiGraphics;IIF)V'
+        def drawUtilOwner = 'journeymap/client/render/draw/DrawUtil'
+        def guiUtilsOwner = 'journeymap/client/ui/GuiUtils'
+        def legacyRectangleDescriptor = '(Lcom/mojang/blaze3d/vertex/PoseStack;DDDDIF)V'
+        def currentRectangleDescriptor = '(Lnet/minecraft/client/gui/GuiGraphics;DDDDIF)V'
+        def imageButtonBackgroundDescriptor = '(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/resources/ResourceLocation;IIIIIIIIIIIIF)V'
+        def imageButtonIconDescriptor = '(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/renderer/texture/DynamicTexture;IFDDDDZD)V'
+
+        def legacyTheme = inspectClass(legacyJar, themeOwner + '.class')
+        def currentTheme = inspectClass(currentJar, themeOwner + '.class')
+        requireMethod(legacyTheme, themeOwner, 'drawNativeButton', legacyThemeDescriptor)
+        requireMethod(currentTheme, themeOwner, 'drawNativeButton', currentThemeDescriptor)
+
+        def legacyButton = inspectClass(legacyJar, legacyButtonOwner + '.class')
+        def currentButton = inspectClass(currentJar, currentButtonOwner + '.class')
+        def legacyRender = requireMethod(legacyButton, legacyButtonOwner, 'm_88315_', legacyButtonDescriptor)
+        def currentRender = requireMethod(currentButton, currentButtonOwner, 'm_87963_', currentButtonDescriptor)
+        def legacyRectangleCalls = legacyRender.calls.count { call ->
+            call.opcode == Opcodes.INVOKESTATIC
+                    && call.owner == drawUtilOwner
+                    && call.name == 'drawRectangle'
+                    && call.descriptor == legacyRectangleDescriptor
+        }
+        def currentRectangleCalls = currentRender.calls.count { call ->
+            call.opcode == Opcodes.INVOKESTATIC
+                    && call.owner == drawUtilOwner
+                    && call.name == 'drawRectangle'
+                    && call.descriptor == currentRectangleDescriptor
+        }
+
+        if (legacyRectangleCalls != 7) {
+            throw new GradleException("JourneyMap 5.10.3 Button expected 7 legacy drawRectangle calls, found ${legacyRectangleCalls}")
+        }
+        if (currentRectangleCalls != 7) {
+            throw new GradleException("JourneyMap 6.0.4 Button expected 7 GuiGraphics drawRectangle calls, found ${currentRectangleCalls}")
+        }
+        if (inspectClass(legacyJar, currentButtonOwner + '.class') != null
+                || inspectClass(currentJar, legacyButtonOwner + '.class') != null) {
+            throw new GradleException('JourneyMap Button owners are not isolated between the legacy and current verification artifacts')
+        }
+
+        def basicImageButton = inspectClass(currentJar, currentBasicImageButtonOwner + '.class')
+        def basicImageRender = requireMethod(basicImageButton, currentBasicImageButtonOwner, 'm_87963_', currentButtonDescriptor)
+        def basicImageBackgroundCalls = basicImageRender.calls.findAll { call ->
+            call.opcode == Opcodes.INVOKESTATIC
+                    && call.owner == guiUtilsOwner
+                    && call.name == 'drawContinuousTexturedBox'
+                    && call.descriptor == imageButtonBackgroundDescriptor
+        }
+        def basicImageIconCalls = basicImageRender.calls.findAll { call ->
+            call.opcode == Opcodes.INVOKESTATIC
+                    && call.owner == drawUtilOwner
+                    && call.name == 'drawQuad'
+                    && call.descriptor == imageButtonIconDescriptor
+        }
+        if (basicImageBackgroundCalls.size() != 1 || basicImageIconCalls.size() != 1) {
+            throw new GradleException("JourneyMap 6.0.4 BasicImageButton expected one background and one icon draw, found background=${basicImageBackgroundCalls.size()}, icon=${basicImageIconCalls.size()}")
+        }
+        if (basicImageRender.calls.indexOf(basicImageBackgroundCalls[0]) >= basicImageRender.calls.indexOf(basicImageIconCalls[0])) {
+            throw new GradleException('JourneyMap 6.0.4 BasicImageButton icon draw must remain structurally separate after its background draw')
+        }
+        if (inspectClass(legacyJar, currentBasicImageButtonOwner + '.class') != null) {
+            throw new GradleException('JourneyMap 6 BasicImageButton owner unexpectedly exists in the JourneyMap 5.10.3 verification artifact')
+        }
+
+        def waypointManager = inspectClass(currentJar, currentWaypointManagerOwner + '.class')
+        def waypointHeader = requireMethod(waypointManager, currentWaypointManagerOwner, 'buildWaypointHeader', '(Lnet/minecraft/client/gui/Font;)V')
+        def openOptionsConstructorCalls = waypointHeader.calls.count { call ->
+            call.opcode == Opcodes.INVOKESPECIAL
+                    && call.owner == currentBasicImageButtonOwner
+                    && call.name == '<init>'
+                    && call.descriptor == '(IILnet/minecraft/resources/ResourceLocation;Lnet/minecraft/client/gui/components/Button$OnPress;Lnet/minecraft/network/chat/Component;)V'
+        }
+        if (openOptionsConstructorCalls != 1 || !waypointHeader.stringConstants.contains('jm.waypoint.options.tooltip')) {
+            throw new GradleException('JourneyMap 6.0.4 Open Waypoint Options must use exactly one BasicImageButton with its expected tooltip key')
+        }
+
+        def groupSlot = inspectClass(currentJar, currentGroupSlotOwner + '.class')
+        def groupSlotInit = requireMethod(groupSlot, currentGroupSlotOwner, 'init', '()V')
+        def editGroupConstructorCalls = groupSlotInit.calls.count { call ->
+            call.opcode == Opcodes.INVOKESPECIAL
+                    && call.owner == currentImagePopupButtonOwner
+                    && call.name == '<init>'
+                    && call.descriptor == '(IILjourneymap/client/texture/WidgetSprites;Lnet/minecraft/network/chat/Component;Ljava/util/function/Supplier;Ljourneymap/client/ui/component/popupscreenbutton/PopupButtonScreen$OnClose;)V'
+        }
+        def groupPowerConstructorCalls = groupSlotInit.calls.count { call ->
+            call.opcode == Opcodes.INVOKESPECIAL
+                    && call.owner == currentBasicImageButtonOwner
+                    && call.name == '<init>'
+                    && call.descriptor == '(IILnet/minecraft/resources/ResourceLocation;Ljava/lang/Integer;Lnet/minecraft/client/gui/components/Button$OnPress;Lnet/minecraft/network/chat/Component;)V'
+        }
+        if (editGroupConstructorCalls != 1 || !groupSlotInit.stringConstants.contains('jm.waypoint.group.edit.label')) {
+            throw new GradleException('JourneyMap 6.0.4 Edit Group must use exactly one ImagePopupButton with its expected label key')
+        }
+        if (groupPowerConstructorCalls != 1) {
+            throw new GradleException("JourneyMap 6.0.4 group enable/disable control expected one colored BasicImageButton, found ${groupPowerConstructorCalls}")
+        }
+        def groupEnabledComponent = requireMethod(groupSlot, currentGroupSlotOwner, 'getEnabledComponent', '(Z)Lnet/minecraft/network/chat/Component;')
+        if (!groupEnabledComponent.stringConstants.containsAll(['jm.waypoint.disable_group', 'jm.waypoint.enable_group'])) {
+            throw new GradleException('JourneyMap 6.0.4 group power control is missing its enable/disable state keys')
+        }
+
+        def imagePopupButton = inspectClass(currentJar, currentImagePopupButtonOwner + '.class')
+        def imagePopupRender = requireMethod(imagePopupButton, currentImagePopupButtonOwner, 'm_87963_', currentButtonDescriptor)
+        def popupBackgroundCall = imagePopupRender.calls.find { call ->
+            call.opcode == Opcodes.INVOKESPECIAL
+                    && call.owner == currentPopupButtonOwner
+                    && call.name == 'm_87963_'
+                    && call.descriptor == currentButtonDescriptor
+        }
+        def popupIconCall = imagePopupRender.calls.find { call ->
+            call.opcode == Opcodes.INVOKESTATIC
+                    && call.owner == drawUtilOwner
+                    && call.name == 'drawQuad'
+                    && call.descriptor == imageButtonIconDescriptor
+        }
+        if (popupBackgroundCall == null || popupIconCall == null
+                || imagePopupRender.calls.indexOf(popupBackgroundCall) >= imagePopupRender.calls.indexOf(popupIconCall)) {
+            throw new GradleException('JourneyMap 6.0.4 ImagePopupButton must render its inherited Button background before its separate icon draw')
+        }
+
+        def fullscreen = inspectClass(currentJar, currentFullscreenOwner + '.class')
+        def fullscreenInitButtons = requireMethod(fullscreen, currentFullscreenOwner, 'initButtons', '()V')
+        def fullscreenLayoutButtons = requireMethod(fullscreen, currentFullscreenOwner, 'layoutButtons', '(Lnet/minecraft/client/gui/GuiGraphics;)V')
+        ['buttonZoomIn', 'buttonZoomOut'].each { field ->
+            if (fullscreen.fields[field] != "L${currentThemeButtonOwner};") {
+                throw new GradleException("JourneyMap 6.0.4 Fullscreen ${field} must remain a ThemeButton, found ${fullscreen.fields[field]}")
+            }
+            if (!fullscreenInitButtons.fieldInstructions.any { access ->
+                access.opcode == Opcodes.PUTFIELD
+                        && access.owner == currentFullscreenOwner
+                        && access.name == field
+                        && access.descriptor == "L${currentThemeButtonOwner};"
+            }) {
+                throw new GradleException("JourneyMap 6.0.4 Fullscreen initButtons no longer constructs ${field}")
+            }
+        }
+        if (!fullscreenInitButtons.stringConstants.containsAll(['jm.fullscreen.zoom_in', 'jm.fullscreen.zoom_out'])) {
+            throw new GradleException('JourneyMap 6.0.4 Fullscreen initButtons is missing the Zoom In/Out controls')
+        }
+        if (!fullscreenLayoutButtons.calls.any { call ->
+            call.owner == currentThemeToolbarOwner && call.name == 'layoutCenteredVertical'
+        }) {
+            throw new GradleException('JourneyMap 6.0.4 Fullscreen layoutButtons no longer lays out the vertical zoom toolbar')
+        }
+        if (!fullscreenLayoutButtons.fieldInstructions.any { access ->
+            access.owner == currentFullscreenOwner
+                    && access.name == 'buttonZoomOut'
+                    && access.descriptor == "L${currentThemeButtonOwner};"
+        }) {
+            throw new GradleException('JourneyMap 6.0.4 Fullscreen layoutButtons no longer references buttonZoomOut')
+        }
+    }
+}
+
 tasks.register('verifyReleaseArtifact') {
     dependsOn tasks.named('reobfJar')
 
     doLast {
         def artifact = tasks.named('jar', Jar).get().archiveFile.get().asFile
         def expectedRefmap = "${mod_id}-${project.name}-${minecraft_version}-refmap.json"
+        def journeyMapThemeMixinEntry = 'com/lopew/blxckoutfx/mixin/journeymap/JourneyMapThemeButtonMixin.class'
+        def journeyMapLegacyButtonMixinEntry = 'com/lopew/blxckoutfx/mixin/journeymap/JourneyMapButtonBackgroundMixin.class'
+        def journeyMap6BasicImageButtonMixinEntry = 'com/lopew/blxckoutfx/mixin/journeymap/JourneyMap6BasicImageButtonBackgroundMixin.class'
+        def journeyMap6ButtonMixinEntry = 'com/lopew/blxckoutfx/mixin/journeymap/JourneyMap6ButtonBackgroundMixin.class'
+        def journeyMap6FullscreenShortcutMixinEntry = 'com/lopew/blxckoutfx/mixin/journeymap/JourneyMap6FullscreenShortcutMixin.class'
+        def journeyMapFullscreenShortcutHelperEntry = 'com/lopew/blxckoutfx/client/integration/journeymap/BlxckoutFXJourneyMapFullscreenShortcut.class'
+        def journeyMapButtonPluginEntry = 'com/lopew/blxckoutfx/mixinplugin/JourneyMapButtonMixinPlugin.class'
+        def journeyMapButtonPluginClass = 'com.lopew.blxckoutfx.mixinplugin.JourneyMapButtonMixinPlugin'
         def imageButtonMixinEntry = 'com/lopew/blxckoutfx/mixin/core/ImageButtonMixin.class'
         def recipeButtonMixinEntry = 'com/lopew/blxckoutfx/mixin/core/InventoryRecipeBookButtonMixin.class'
         def recipeFilterMixinEntry = 'com/lopew/blxckoutfx/mixin/core/InventoryRecipeBookFilterMixin.class'
@@ -138,6 +406,13 @@ tasks.register('verifyReleaseArtifact') {
                 "${mod_id}.mixins.json",
                 "${mod_id}.forge.mixins.json",
                 expectedRefmap,
+                journeyMapThemeMixinEntry,
+                journeyMapLegacyButtonMixinEntry,
+                journeyMap6BasicImageButtonMixinEntry,
+                journeyMap6ButtonMixinEntry,
+                journeyMap6FullscreenShortcutMixinEntry,
+                journeyMapFullscreenShortcutHelperEntry,
+                journeyMapButtonPluginEntry,
                 imageButtonMixinEntry,
                 recipeButtonMixinEntry,
                 recipeFilterMixinEntry,
@@ -173,8 +448,10 @@ tasks.register('verifyReleaseArtifact') {
                         fields      : [:],
                         shadowFields: [] as Set,
                         methods     : [] as Set,
+                        methodDescriptors: [:].withDefault { [] as Set },
                         methodCalls : [],
-                        typeInstructions: [] as Set
+                        typeInstructions: [] as Set,
+                        stringConstants: [] as Set
                 ]
                 def classBytes = jarFile.getInputStream(jarFile.getJarEntry(entryName)).bytes
                 new ClassReader(classBytes).accept(new ClassVisitor(Opcodes.ASM9) {
@@ -202,10 +479,18 @@ tasks.register('verifyReleaseArtifact') {
                     @Override
                     MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
                         details.methods.add(name)
+                        details.methodDescriptors[name].add(descriptor)
                         return new MethodVisitor(Opcodes.ASM9) {
                             @Override
                             void visitTypeInsn(int opcode, String type) {
                                 details.typeInstructions.add(type)
+                            }
+
+                            @Override
+                            void visitLdcInsn(Object value) {
+                                if (value instanceof String) {
+                                    details.stringConstants.add(value)
+                                }
                             }
 
                             @Override
@@ -221,6 +506,11 @@ tasks.register('verifyReleaseArtifact') {
             def imageButtonMixin = inspectClass(imageButtonMixinEntry)
             def recipeButtonMixin = inspectClass(recipeButtonMixinEntry)
             def recipeFilterMixin = inspectClass(recipeFilterMixinEntry)
+            def journeyMapThemeMixin = inspectClass(journeyMapThemeMixinEntry)
+            def journeyMap6BasicImageButtonMixin = inspectClass(journeyMap6BasicImageButtonMixinEntry)
+            def journeyMap6FullscreenShortcutMixin = inspectClass(journeyMap6FullscreenShortcutMixinEntry)
+            def journeyMapButtonPlugin = inspectClass(journeyMapButtonPluginEntry)
+            def callbackDescriptor = '(Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfo;)V'
             def imageButtonStateName = 'com/lopew/blxckoutfx/client/bridge/ImageButtonState'
             def legacyImageButtonFields = ['resourceLocation', 'xTexStart', 'yTexStart', 'yDiffTex', 'textureWidth', 'textureHeight'] as Set
             def legacyFilterFields = ['resourceLocation', 'isStateTriggered', 'xTexStart', 'yTexStart', 'xDiffTex', 'yDiffTex'] as Set
@@ -264,6 +554,38 @@ tasks.register('verifyReleaseArtifact') {
             if (!recipeFilterMixin.methods.contains('blxckoutfx$captureTextureState')) {
                 throw new GradleException('InventoryRecipeBookFilterMixin release bytecode is missing texture state capture')
             }
+            ['blxckoutfx$enterPuristBackgroundDarkening', 'blxckoutfx$exitPuristBackgroundDarkening'].each { method ->
+                if (journeyMapThemeMixin.methodDescriptors[method] != ([callbackDescriptor] as Set)) {
+                    throw new GradleException("JourneyMap ThemeButton handler ${method} must use only CallbackInfo, found ${journeyMapThemeMixin.methodDescriptors[method]}")
+                }
+            }
+            ['blxckoutfx$enterBackgroundDarkening', 'blxckoutfx$exitBackgroundDarkening'].each { method ->
+                if (journeyMap6BasicImageButtonMixin.methodDescriptors[method] != ([callbackDescriptor] as Set)) {
+                    throw new GradleException("JourneyMap 6 BasicImageButton handler ${method} must use only CallbackInfo, found ${journeyMap6BasicImageButtonMixin.methodDescriptors[method]}")
+                }
+            }
+            if (journeyMap6FullscreenShortcutMixin.methodDescriptors['blxckoutfx$layoutFullscreenShortcut'] != ([callbackDescriptor] as Set)) {
+                throw new GradleException("JourneyMap 6 Fullscreen shortcut handler must use only CallbackInfo, found ${journeyMap6FullscreenShortcutMixin.methodDescriptors['blxckoutfx$layoutFullscreenShortcut']}")
+            }
+            if (!journeyMap6FullscreenShortcutMixin.methodCalls.any { call ->
+                call.owner == 'com/lopew/blxckoutfx/client/integration/journeymap/BlxckoutFXJourneyMapFullscreenShortcut'
+                        && call.name == 'layoutShortcut'
+            }) {
+                throw new GradleException('JourneyMap 6 Fullscreen shortcut mixin does not call its compatibility helper')
+            }
+            if (!journeyMapButtonPlugin.interfaces.contains('org/spongepowered/asm/mixin/extensibility/IMixinConfigPlugin')) {
+                throw new GradleException('JourneyMap Button routing plugin does not implement IMixinConfigPlugin')
+            }
+            [
+                    'com.lopew.blxckoutfx.mixin.journeymap.JourneyMapButtonBackgroundMixin',
+                    'com.lopew.blxckoutfx.mixin.journeymap.JourneyMap6ButtonBackgroundMixin',
+                    'com.lopew.blxckoutfx.mixin.journeymap.JourneyMap6BasicImageButtonBackgroundMixin',
+                    'com.lopew.blxckoutfx.mixin.journeymap.JourneyMap6FullscreenShortcutMixin'
+            ].each { mixinClass ->
+                if (!journeyMapButtonPlugin.stringConstants.contains(mixinClass)) {
+                    throw new GradleException("JourneyMap Button routing plugin does not explicitly route ${mixinClass}")
+                }
+            }
 
             def mixinConfigs = []
             ["${mod_id}.mixins.json", "${mod_id}.forge.mixins.json"].each { configName ->
@@ -275,9 +597,13 @@ tasks.register('verifyReleaseArtifact') {
                 if (config.refmap != expectedRefmap) {
                     throw new GradleException("${configName} references ${config.refmap}, expected ${expectedRefmap}")
                 }
+                if (configName == "${mod_id}.mixins.json" && config.plugin != journeyMapButtonPluginClass) {
+                    throw new GradleException("${configName} must use ${journeyMapButtonPluginClass} for JourneyMap Button routing")
+                }
                 mixinConfigs.add(config)
             }
 
+            def configuredMixinClassList = []
             def configuredMixinClasses = [] as Set
             def mixinPackagePrefixes = [] as Set
             mixinConfigs.each { config ->
@@ -285,9 +611,21 @@ tasks.register('verifyReleaseArtifact') {
                 mixinPackagePrefixes.add(packagePrefix)
                 ['mixins', 'client', 'server'].each { section ->
                     (config[section] ?: []).each { mixinName ->
-                        configuredMixinClasses.add(packagePrefix + mixinName.replace('.', '/') + '.class')
+                        def mixinClass = packagePrefix + mixinName.replace('.', '/') + '.class'
+                        configuredMixinClassList.add(mixinClass)
+                        configuredMixinClasses.add(mixinClass)
                     }
                 }
+            }
+            [journeyMapThemeMixinEntry, journeyMapLegacyButtonMixinEntry, journeyMap6ButtonMixinEntry, journeyMap6BasicImageButtonMixinEntry, journeyMap6FullscreenShortcutMixinEntry].each { entry ->
+                def registrations = configuredMixinClassList.count { configured -> configured == entry }
+                if (registrations != 1) {
+                    throw new GradleException("JourneyMap mixin ${entry} must be registered exactly once, found ${registrations}")
+                }
+            }
+            def duplicateMixins = configuredMixinClassList.countBy { it }.findAll { mixinClass, registrations -> registrations != 1 }
+            if (!duplicateMixins.isEmpty()) {
+                throw new GradleException("Mixin configs contain duplicate registrations: ${duplicateMixins}")
             }
             def unexpectedMixinPackageClasses = entryCounts.keySet().findAll { entry ->
                 entry.endsWith('.class') && mixinPackagePrefixes.any { prefix -> entry.startsWith(prefix) }
@@ -327,6 +665,7 @@ tasks.register('verifyReleaseArtifact') {
 }
 
 tasks.named('check') {
+    dependsOn tasks.named('verifyJourneyMapCompatibility')
     dependsOn tasks.named('verifyReleaseArtifact')
 }
 

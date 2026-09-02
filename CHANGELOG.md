@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.1.2
+
+### JM6 FIX
+- Added JourneyMap 6 compatibility while keeping JourneyMap 5 support.
+- Fixed JourneyMap 6 startup and UI darkening issues.
+- Added Waypoint Manager support and a draggable fullscreen BlxckoutFX shortcut.
+
 ## 2.1.1
 
 - Fixed startup issues affecting Forge 1.20.1.

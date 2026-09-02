@@ -3,10 +3,12 @@ package com.lopew.blxckoutfx.client.gui;
 import com.lopew.blxckoutfx.client.config.BlxckoutFXClientConfig;
 import com.lopew.blxckoutfx.client.config.BlxckoutFXConfigScreen;
 import com.lopew.blxckoutfx.client.integration.ae2.BlxckoutFXAe2Support;
+import com.lopew.blxckoutfx.client.integration.journeymap.BlxckoutFXJourneyMapFullscreenShortcut;
 import com.lopew.blxckoutfx.client.render.BlxckoutFXShaders;
 import com.lopew.blxckoutfx.client.screen.BlxckoutFXScreenExclusions;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -25,8 +27,10 @@ import java.util.Map;
 public final class BlxckoutFXGUIHandler {
     private static final String PATCHOULI_BOOK_SCREEN_PREFIX = "vazkii.patchouli.client.book.gui.";
     private static final String JEI_SCREEN_PREFIX = "mezz.jei.";
+    private static final String JOURNEYMAP_FULLSCREEN_CLASS = "journeymap.client.ui.fullscreen.Fullscreen";
     private static BlxckoutFXClientConfig config = BlxckoutFXClientConfig.load();
     private static final Map<Screen, InventoryButton> inventoryButtons = new IdentityHashMap<>();
+    private static final Map<Screen, Boolean> journeyMapFullscreenToolbarVisibility = new IdentityHashMap<>();
     private static Screen lastScreen;
 
     private static void reloadConfig() {
@@ -47,10 +51,11 @@ public final class BlxckoutFXGUIHandler {
 
     public static void onScreenInit(Screen screen, ButtonSink buttonSink) {
         inventoryButtons.remove(screen);
+        journeyMapFullscreenToolbarVisibility.remove(screen);
         lastScreen = screen;
         reloadConfig();
 
-        if (!config.isInventoryButtonEnabled() || !isSupportedScreen(screen)) {
+        if (!config.isInventoryButtonEnabled() || !isSupportedScreen(screen) || isJourneyMapFullscreenScreen(screen)) {
             return;
         }
 
@@ -104,6 +109,7 @@ public final class BlxckoutFXGUIHandler {
 
     public static void onScreenClose(Screen screen) {
         inventoryButtons.remove(screen);
+        journeyMapFullscreenToolbarVisibility.remove(screen);
         if (screen == lastScreen) {
             lastScreen = null;
         }
@@ -149,6 +155,57 @@ public final class BlxckoutFXGUIHandler {
         }
 
         syncButtonState(screen, inventoryButton);
+    }
+
+    public static void layoutJourneyMapFullscreenShortcut(Screen screen, AbstractWidget zoomIn, AbstractWidget zoomOut) {
+        if (!isJourneyMapFullscreenScreen(screen) || zoomIn == null || zoomOut == null) {
+            return;
+        }
+
+        boolean toolbarVisible = zoomOut.visible;
+        journeyMapFullscreenToolbarVisibility.put(screen, toolbarVisible);
+
+        InventoryButton button = getButton(screen);
+        if (button == null) {
+            if (!config.isInventoryButtonEnabled()) {
+                return;
+            }
+
+            button = createJourneyMapFullscreenButton(screen);
+            inventoryButtons.put(screen, button);
+        }
+
+        attachButton(screen, button);
+        int screenWidth = getButtonScreenWidth(screen);
+        int screenHeight = getButtonScreenHeight(screen);
+        button.setScreenSize(screenWidth, screenHeight);
+        button.visible = config.isInventoryButtonEnabled() && toolbarVisible;
+        button.active = button.visible;
+        if (!button.visible) {
+            button.cancelDrag();
+            return;
+        }
+
+        updateCycleButtonPresentation(screen, button);
+        if (!button.isDraggingButton()) {
+            if (config.hasJourneyMapFullscreenButtonCustomPosition()) {
+                button.setX(config.getJourneyMapFullscreenButtonX(screenWidth, button.getWidth()));
+                button.setY(config.getJourneyMapFullscreenButtonY(screenHeight, button.getHeight()));
+            } else {
+                BlxckoutFXJourneyMapFullscreenShortcut.Position position = BlxckoutFXJourneyMapFullscreenShortcut.defaultPosition(
+                        zoomIn.getY(),
+                        zoomIn.getHeight(),
+                        zoomOut.getX(),
+                        zoomOut.getY(),
+                        zoomOut.getWidth(),
+                        zoomOut.getHeight(),
+                        button.getWidth()
+                );
+                button.setX(position.x());
+                button.setY(position.y());
+            }
+        }
+        button.clampToScreen(screenWidth, screenHeight);
     }
 
     public static void renderPatchouliInventoryButton(Screen screen, net.minecraft.client.gui.GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
@@ -288,7 +345,9 @@ public final class BlxckoutFXGUIHandler {
         int screenWidth = getButtonScreenWidth(screen);
         int screenHeight = getButtonScreenHeight(screen);
         button.setScreenSize(screenWidth, screenHeight);
-        button.visible = config.isInventoryButtonEnabled() && isSupportedScreen(screen);
+        button.visible = config.isInventoryButtonEnabled()
+                && isSupportedScreen(screen)
+                && (!isJourneyMapFullscreenScreen(screen) || Boolean.TRUE.equals(journeyMapFullscreenToolbarVisibility.get(screen)));
         button.active = button.visible;
 
         if (!button.visible) {
@@ -300,7 +359,7 @@ public final class BlxckoutFXGUIHandler {
         button.clampToScreen(screenWidth, screenHeight);
 
         if (screen instanceof AbstractContainerScreen<?> && !screen.children().contains(button)) {
-            tryReattachButton(screen, button);
+            attachButton(screen, button);
         }
     }
 
@@ -324,7 +383,38 @@ public final class BlxckoutFXGUIHandler {
         return null;
     }
 
-    private static void tryReattachButton(Screen screen, InventoryButton button) {
+    private static InventoryButton createJourneyMapFullscreenButton(Screen screen) {
+        int screenWidth = getButtonScreenWidth(screen);
+        int screenHeight = getButtonScreenHeight(screen);
+        return new InventoryButton(
+                0,
+                0,
+                BlxckoutFXClientConfig.InventoryButtonStyle.Short,
+                InventoryButton.Ae2Variant.NONE,
+                createCycleButtonLabel(screen),
+                btn -> {
+                    BlxckoutFXShaders.cyclePreset();
+                    updateCycleButtonPresentation(screen, btn);
+                    notifyPresetChanged(screen);
+                },
+                movedButton -> config.setJourneyMapFullscreenButtonPosition(
+                        movedButton.getX(),
+                        movedButton.getY(),
+                        getButtonScreenWidth(screen),
+                        getButtonScreenHeight(screen),
+                        movedButton.getWidth(),
+                        movedButton.getHeight()
+                ),
+                screenWidth,
+                screenHeight
+        );
+    }
+
+    private static void attachButton(Screen screen, InventoryButton button) {
+        if (screen.children().contains(button)) {
+            return;
+        }
+
         Class<?> current = screen.getClass();
         while (current != null) {
             try {
@@ -359,7 +449,7 @@ public final class BlxckoutFXGUIHandler {
             return true;
         }
 
-        return isCompactButtonScreen(screen);
+        return isCompactButtonScreen(screen) || isJourneyMapFullscreenScreen(screen);
     }
 
     private static boolean isCompactButtonScreen(Screen screen) {
@@ -382,6 +472,10 @@ public final class BlxckoutFXGUIHandler {
 
     private static boolean isJeiRecipeScreen(Screen screen) {
         return screen != null && "mezz.jei.gui.recipes.RecipesGui".equals(screen.getClass().getName());
+    }
+
+    private static boolean isJourneyMapFullscreenScreen(Screen screen) {
+        return screen != null && JOURNEYMAP_FULLSCREEN_CLASS.equals(screen.getClass().getName());
     }
 
     private static int getButtonScreenWidth(Screen screen) {

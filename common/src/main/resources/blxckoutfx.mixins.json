@@ -2,6 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "com.lopew.blxckoutfx.mixin",
+  "plugin": "com.lopew.blxckoutfx.mixinplugin.JourneyMapButtonMixinPlugin",
   "refmap": "${mixin_refmap}",
   "compatibilityLevel": "JAVA_17",
   "client": [
@@ -31,6 +32,9 @@
     "jei.JeiRecipeCategoryTabMixin",
     "jei.JeiTextFieldFilterMixin",
     "journeymap.JourneyMapButtonBackgroundMixin",
+    "journeymap.JourneyMap6BasicImageButtonBackgroundMixin",
+    "journeymap.JourneyMap6ButtonBackgroundMixin",
+    "journeymap.JourneyMap6FullscreenShortcutMixin",
     "journeymap.JourneyMapThemeButtonMixin",
     "patchouli.PatchouliBookScreenMixin",
     "patchouli.PatchouliBookIconMixin",

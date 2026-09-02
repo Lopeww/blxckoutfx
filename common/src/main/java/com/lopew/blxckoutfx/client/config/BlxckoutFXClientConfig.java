@@ -33,6 +33,9 @@ public final class BlxckoutFXClientConfig {
     private int inventoryButtonOffsetX = DEFAULT_INVENTORY_BUTTON_OFFSET_X;
     private int inventoryButtonOffsetY = DEFAULT_INVENTORY_BUTTON_OFFSET_Y;
     private boolean inventoryButtonCustomPositionAbsolute;
+    private boolean journeyMapFullscreenButtonCustomPosition;
+    private int journeyMapFullscreenButtonX;
+    private int journeyMapFullscreenButtonY;
 
     @SuppressWarnings("unused")
     private int inventoryButtonX = DEFAULT_INVENTORY_BUTTON_OFFSET_X;
@@ -241,6 +244,25 @@ public final class BlxckoutFXClientConfig {
         save();
     }
 
+    public boolean hasJourneyMapFullscreenButtonCustomPosition() {
+        return journeyMapFullscreenButtonCustomPosition;
+    }
+
+    public int getJourneyMapFullscreenButtonX(int screenWidth, int buttonWidth) {
+        return clamp(this.journeyMapFullscreenButtonX, 0, Math.max(0, screenWidth - buttonWidth));
+    }
+
+    public int getJourneyMapFullscreenButtonY(int screenHeight, int buttonHeight) {
+        return clamp(this.journeyMapFullscreenButtonY, 0, Math.max(0, screenHeight - buttonHeight));
+    }
+
+    public void setJourneyMapFullscreenButtonPosition(int x, int y, int screenWidth, int screenHeight, int buttonWidth, int buttonHeight) {
+        this.journeyMapFullscreenButtonX = clamp(x, 0, Math.max(0, screenWidth - buttonWidth));
+        this.journeyMapFullscreenButtonY = clamp(y, 0, Math.max(0, screenHeight - buttonHeight));
+        this.journeyMapFullscreenButtonCustomPosition = true;
+        save();
+    }
+
     public void migrateCustomInventoryButtonPosition(int screenWidth, int screenHeight, int buttonWidth, int buttonHeight) {
         if (getInventoryButtonPreset() != InventoryButtonPreset.Custom || this.inventoryButtonCustomPositionAbsolute) {
             return;
@@ -283,6 +305,8 @@ public final class BlxckoutFXClientConfig {
         boolean changed = false;
         this.inventoryButtonOffsetX = Math.max(0, this.inventoryButtonOffsetX);
         this.inventoryButtonOffsetY = Math.max(0, this.inventoryButtonOffsetY);
+        this.journeyMapFullscreenButtonX = Math.max(0, this.journeyMapFullscreenButtonX);
+        this.journeyMapFullscreenButtonY = Math.max(0, this.journeyMapFullscreenButtonY);
         this.inventoryButtonPreset = InventoryButtonPreset.fromName(this.inventoryButtonPreset).name();
         this.inventoryButtonStyle = InventoryButtonStyle.fromName(this.inventoryButtonStyle).name();
         this.presetIndex = clamp(this.presetIndex, 0, 4);
