@@ -351,6 +351,7 @@ tasks.register('verifyJourneyMapCompatibility') {
         def fullscreen = inspectClass(currentJar, currentFullscreenOwner + '.class')
         def fullscreenInitButtons = requireMethod(fullscreen, currentFullscreenOwner, 'initButtons', '()V')
         def fullscreenLayoutButtons = requireMethod(fullscreen, currentFullscreenOwner, 'layoutButtons', '(Lnet/minecraft/client/gui/GuiGraphics;)V')
+        def fullscreenRender = requireMethod(fullscreen, currentFullscreenOwner, 'm_88315_', currentButtonDescriptor)
         ['buttonZoomIn', 'buttonZoomOut'].each { field ->
             if (fullscreen.fields[field] != "L${currentThemeButtonOwner};") {
                 throw new GradleException("JourneyMap 6.0.4 Fullscreen ${field} must remain a ThemeButton, found ${fullscreen.fields[field]}")
@@ -378,6 +379,26 @@ tasks.register('verifyJourneyMapCompatibility') {
                     && access.descriptor == "L${currentThemeButtonOwner};"
         }) {
             throw new GradleException('JourneyMap 6.0.4 Fullscreen layoutButtons no longer references buttonZoomOut')
+        }
+        def fullscreenLayoutCall = fullscreenRender.calls.findIndexOf { call ->
+            call.owner == currentFullscreenOwner
+                    && call.name == 'layoutButtons'
+                    && call.descriptor == '(Lnet/minecraft/client/gui/GuiGraphics;)V'
+        }
+        def fullscreenRenderablesCall = fullscreenRender.calls.findIndexOf { call ->
+            call.owner == currentFullscreenOwner
+                    && call.name == 'getRenderables'
+                    && call.descriptor == '()Ljava/util/List;'
+        }
+        def fullscreenWidgetRenderCall = fullscreenRender.calls.findIndexOf { call ->
+            call.owner == 'net/minecraft/client/gui/components/Button'
+                    && call.name == 'm_88315_'
+                    && call.descriptor == currentButtonDescriptor
+        }
+        if (fullscreenLayoutCall < 0
+                || fullscreenRenderablesCall <= fullscreenLayoutCall
+                || fullscreenWidgetRenderCall <= fullscreenRenderablesCall) {
+            throw new GradleException('JourneyMap 6.0.4 Fullscreen must lay out controls before rendering its Screen renderables')
         }
     }
 }

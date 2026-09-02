@@ -55,7 +55,15 @@ public final class BlxckoutFXGUIHandler {
         lastScreen = screen;
         reloadConfig();
 
-        if (!config.isInventoryButtonEnabled() || !isSupportedScreen(screen) || isJourneyMapFullscreenScreen(screen)) {
+        if (!config.isInventoryButtonEnabled() || !isSupportedScreen(screen)) {
+            return;
+        }
+
+        if (isJourneyMapFullscreenScreen(screen)) {
+            InventoryButton button = createJourneyMapFullscreenButton(screen);
+            inventoryButtons.put(screen, button);
+            journeyMapFullscreenToolbarVisibility.put(screen, false);
+            buttonSink.add(button);
             return;
         }
 
@@ -167,15 +175,9 @@ public final class BlxckoutFXGUIHandler {
 
         InventoryButton button = getButton(screen);
         if (button == null) {
-            if (!config.isInventoryButtonEnabled()) {
-                return;
-            }
-
-            button = createJourneyMapFullscreenButton(screen);
-            inventoryButtons.put(screen, button);
+            return;
         }
 
-        attachButton(screen, button);
         int screenWidth = getButtonScreenWidth(screen);
         int screenHeight = getButtonScreenHeight(screen);
         button.setScreenSize(screenWidth, screenHeight);
