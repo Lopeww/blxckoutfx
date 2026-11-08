@@ -50,16 +50,17 @@ public final class BlxckoutFXGUIHandler {
     }
 
     public static void onScreenInit(Screen screen, ButtonSink buttonSink) {
-        inventoryButtons.remove(screen);
-        journeyMapFullscreenToolbarVisibility.remove(screen);
         lastScreen = screen;
         reloadConfig();
+        // Config refresh can rediscover the previous screen while it is still Minecraft's current screen.
+        ScreenStateCleanup.onScreenInit(inventoryButtons, journeyMapFullscreenToolbarVisibility);
 
         if (!config.isInventoryButtonEnabled() || !isSupportedScreen(screen)) {
             return;
         }
 
         if (isJourneyMapFullscreenScreen(screen)) {
+            removeExistingInventoryButtons(screen);
             InventoryButton button = createJourneyMapFullscreenButton(screen);
             inventoryButtons.put(screen, button);
             journeyMapFullscreenToolbarVisibility.put(screen, false);
@@ -116,20 +117,24 @@ public final class BlxckoutFXGUIHandler {
     }
 
     public static void onScreenClose(Screen screen) {
-        inventoryButtons.remove(screen);
-        journeyMapFullscreenToolbarVisibility.remove(screen);
-        if (screen == lastScreen) {
-            lastScreen = null;
+        try {
+            ScreenStateCleanup.onScreenClose(
+                    inventoryButtons,
+                    journeyMapFullscreenToolbarVisibility,
+                    screen,
+                    BlxckoutFXGUIHandler::reloadConfig
+            );
+        } finally {
+            if (screen == lastScreen) {
+                lastScreen = null;
+            }
         }
-        reloadConfig();
     }
 
     public static void handleClientTick(Minecraft minecraft) {
         Screen screen = minecraft == null ? null : minecraft.screen;
         if (screen != lastScreen) {
-            if (lastScreen != null) {
-                inventoryButtons.remove(lastScreen);
-            }
+            ScreenStateCleanup.retainOnlyCurrentScreen(inventoryButtons, journeyMapFullscreenToolbarVisibility, screen);
             lastScreen = screen;
         }
 

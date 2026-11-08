@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.3
+
+- Fixed a GUI screen lifecycle memory leak that could retain previously closed screens and cause excessive memory usage, particularly with certain modded interfaces.
+
 ## 2.1.2
 
 ### JM6 FIX

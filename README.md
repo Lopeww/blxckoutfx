@@ -70,7 +70,7 @@ BlxckoutFX is intentionally focused: it changes GUI rendering, not the world its
 | 26.2             | NeoForge + Fabric   | 2.0.0       | Release         |
 | 26.1.2           | NeoForge + Fabric   | 2.0.0       | Main Release    |
 | 1.21.1           | NeoForge + Fabric   | 2.1.1       | Release         |
-| 1.20.1           | Forge + Fabric      | 2.1.2       | Release         |
+| 1.20.1           | Forge + Fabric      | 2.1.3       | Release         |
 | 1.12.2           | Forge               | 1.0.1       | Release         |
 
 ---
@@ -106,7 +106,7 @@ BlxckoutFX is intentionally focused: it changes GUI rendering, not the world its
 
 > ⚠️ **Note for 1.20.1:** This specific version has no active support. Issues may be fixed in bulk batches or left as-is depending on necessity.
 
-For Minecraft 1.20.1 on Forge, BlxckoutFX 2.1.2 supports JourneyMap 5.10.3 and JourneyMap 6.0.4.
+For Minecraft 1.20.1 on Forge, BlxckoutFX 2.1.3 supports JourneyMap 5.10.3 and JourneyMap 6.0.4.
 
 If you encounter bugs, issues, or have suggestions, you can report them through either of the following channels:
 
